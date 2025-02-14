@@ -1,0 +1,120 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Material {
+  id               String  @id @default(uuid())
+  idTipeMaterial   Int
+  namaMaterial     String
+  satuanMaterial   String
+  beratMaterial    Int
+  hargaMaterial    Int
+  pasangRab        Int
+  bongkar          Int
+  jenisMaterial    String
+  kategoriMaterial String
+  createdAt        DateTime
+  updatedAt        DateTime
+  deletedAt        DateTime?
+
+  konstruksiMaterials KonstruksiMaterial[]
+  surveyDetailsTiang  SurveyDetail[] @relation("SurveyDetailTiang")
+  surveyDetailsKonduktor SurveyDetail[] @relation("SurveyDetailKonduktor")
+  loggings           Logging[]
+}
+
+model SurveyHeader {
+  id          String  @id @default(uuid())
+  namaSurvey  String
+  lokasi      String
+  statusSurvey SurveyStatus
+  userId      String
+  surveyDetails SurveyDetail[]
+}
+
+enum SurveyStatus {
+  Disetujui
+  BelumDisetujui
+}
+
+model SurveyDetail {
+  id                String  @id @default(uuid())
+  idMaterialTiang   String
+  idMaterialKonduktor String
+  idKonstruksi      String
+  idHeader          String
+  namaPekerjaan     String
+  penyulang         String
+  panjangJaringan   BigInt
+  long              String
+  lat               String
+  foto              String
+  keterangan        String
+  petugasSurvey     String
+
+  materialTiang      Material @relation("SurveyDetailTiang", fields: [idMaterialTiang], references: [id])
+  materialKonduktor  Material @relation("SurveyDetailKonduktor", fields: [idMaterialKonduktor], references: [id])
+  konstruksi         Konstruksi @relation(fields: [idKonstruksi], references: [id])
+  surveyHeader       SurveyHeader @relation(fields: [idHeader], references: [id])
+}
+
+model Konstruksi {
+  id              String  @id @default(uuid())
+  namaKonstruksi  String
+  createdAt       DateTime
+  updatedAt       DateTime
+  deletedAt       DateTime?
+
+  konstruksiMaterials KonstruksiMaterial[]
+  surveyDetails       SurveyDetail[]
+}
+
+model KonstruksiMaterial {
+  id                String  @id @default(uuid())
+  idMaterial        String
+  idKonstruksi      String
+  kategoriMaterial  KategoriMaterial
+  kuantitas        Int
+  createdAt       DateTime
+  updatedAt       DateTime
+  deletedAt       DateTime?
+
+  material     Material @relation(fields: [idMaterial], references: [id])
+  konstruksi   Konstruksi @relation(fields: [idKonstruksi], references: [id])
+}
+
+enum KategoriMaterial {
+  PekerjaanUtama
+  Accesories
+}
+
+model Logging {
+  id              String  @id @default(uuid())
+  tipeLog         LogType
+  idMaterial      String
+  idTipeMaterial  Int
+  namaMaterial    String
+  satuanMaterial  String
+  beratMaterial   Int
+  hargaMaterial   Int
+  pasangRab       Int
+  bongkar         Int
+  jenisMaterial   String
+  kategoriMaterial String
+  createdAt       DateTime
+  updatedAt       DateTime?
+  deletedAt       BigInt?
+
+  material        Material @relation(fields: [idMaterial], references: [id])
+}
+
+enum LogType {
+  Create
+  Update
+  Delete
+}

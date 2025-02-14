@@ -1,0 +1,33 @@
+### POST
+// Login user
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+    "email": "hai@gmail.com",
+    "password": "string"
+}
+
+### POST
+// Register user
+POST http://localhost:3000/auth/register
+Content-Type: application/json
+
+{
+    "email": "lagi@gmail.com",
+    "password": "string",
+    "name": "string",
+    "category": "COLLEGE",
+    "education_level": "S1",
+    "institution": "string",
+    "no_telp": "00008888"
+}
+
+### POST
+// Send verification email
+POST http://localhost:3000/mailer/verify-email
+Content-Type: application/json
+
+{
+    "email": "mnynoname14@gmail.com"
+}

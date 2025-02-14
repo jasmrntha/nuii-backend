@@ -1,0 +1,36 @@
+# name: Deploy Backend Development
+
+# on:
+#   push:
+#     branches:
+#       - main
+
+# jobs:
+#   deploy:
+#     runs-on: ubuntu-latest
+
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v2
+
+#       - name: Logged and Run Deploy
+#         id: deploy
+#         uses: appleboy/ssh-action@master
+#         with:
+#           host: ${{ secrets.VPS_HOST }}
+#           username: ${{ secrets.VPS_USERNAME }}
+#           password: ${{ secrets.VPS_PASSWORD }}
+#           # key: ${{ secrets.SSH_PRIVATE_KEY }}
+#           port: ${{ secrets.VPS_SSH_PORT }}
+#           script: |
+#             cd /var/www/dev-backend-futurest2024
+#             git stash
+#             git pull origin main
+#             export NVM_DIR=~/.nvm
+#             source ~/.nvm/nvm.sh
+#             yarn install
+#             pm2 restart dev-futurest2024-backend
+
+#       - name: Notify Success
+#         if: success()
+#         run: echo "🚀 Deployment was successful"

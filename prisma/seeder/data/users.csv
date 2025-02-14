@@ -1,0 +1,4 @@
+name,email,password,role,is_email_verified
+admin,admin@gmail.com,Password123!,ADMIN,true
+user,user@gmail.com,Password123!,USER,true
+user,user2@gmail.com,Password123!,USER,true
