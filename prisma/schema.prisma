@@ -8,109 +8,109 @@ datasource db {
 }
 
 model Material {
-  id               String  @id @default(uuid())
-  idTipeMaterial   Int
-  namaMaterial     String
-  satuanMaterial   String
-  beratMaterial    Int
-  hargaMaterial    Int
-  pasangRab        Int
-  bongkar          Int
-  jenisMaterial    String
-  kategoriMaterial String
-  createdAt        DateTime
-  updatedAt        DateTime
-  deletedAt        DateTime?
+  id                 String  @id @default(uuid())
+  id_tipe_material   Int
+  nama_material      String
+  satuan_material    String
+  berat_material     Int
+  harga_material     Int
+  pasang_rab         Int
+  bongkar            Int
+  jenis_material     String
+  kategori_material  String
+  created_at         DateTime
+  updated_at         DateTime
+  deleted_at         DateTime?
 
-  konstruksiMaterials KonstruksiMaterial[]
-  surveyDetailsTiang  SurveyDetail[] @relation("SurveyDetailTiang")
-  surveyDetailsKonduktor SurveyDetail[] @relation("SurveyDetailKonduktor")
-  loggings           Logging[]
+  konstruksi_materials KonstruksiMaterial[]
+  survey_details_tiang SurveyDetail[] @relation("SurveyDetailTiang")
+  survey_details_konduktor SurveyDetail[] @relation("SurveyDetailKonduktor")
+  loggings            Logging[]
 }
 
 model SurveyHeader {
-  id          String  @id @default(uuid())
-  namaSurvey  String
-  lokasi      String
-  statusSurvey SurveyStatus
-  userId      String
-  surveyDetails SurveyDetail[]
+  id             String  @id @default(uuid())
+  nama_survey    String
+  lokasi         String
+  status_survey  SurveyStatus
+  user_id        String
+  survey_details SurveyDetail[]
 }
 
 enum SurveyStatus {
   Disetujui
-  BelumDisetujui
+  Belum_Disetujui
 }
 
 model SurveyDetail {
-  id                String  @id @default(uuid())
-  idMaterialTiang   String
-  idMaterialKonduktor String
-  idKonstruksi      String
-  idHeader          String
-  namaPekerjaan     String
-  penyulang         String
-  panjangJaringan   BigInt
-  long              String
-  lat               String
-  foto              String
-  keterangan        String
-  petugasSurvey     String
+  id                   String  @id @default(uuid())
+  id_material_tiang    String
+  id_material_konduktor String
+  id_konstruksi        String
+  id_header            String
+  nama_pekerjaan       String
+  penyulang            String
+  panjang_jaringan     BigInt
+  long                 String
+  lat                  String
+  foto                 String
+  keterangan           String
+  petugas_survey       String
 
-  materialTiang      Material @relation("SurveyDetailTiang", fields: [idMaterialTiang], references: [id])
-  materialKonduktor  Material @relation("SurveyDetailKonduktor", fields: [idMaterialKonduktor], references: [id])
-  konstruksi         Konstruksi @relation(fields: [idKonstruksi], references: [id])
-  surveyHeader       SurveyHeader @relation(fields: [idHeader], references: [id])
+  material_tiang       Material @relation("SurveyDetailTiang", fields: [id_material_tiang], references: [id])
+  material_konduktor   Material @relation("SurveyDetailKonduktor", fields: [id_material_konduktor], references: [id])
+  konstruksi           Konstruksi @relation(fields: [id_konstruksi], references: [id])
+  survey_header        SurveyHeader @relation(fields: [id_header], references: [id])
 }
 
 model Konstruksi {
-  id              String  @id @default(uuid())
-  namaKonstruksi  String
-  createdAt       DateTime
-  updatedAt       DateTime
-  deletedAt       DateTime?
+  id                   String  @id @default(uuid())
+  nama_konstruksi      String
+  created_at           DateTime
+  updated_at           DateTime
+  deleted_at           DateTime?
 
-  konstruksiMaterials KonstruksiMaterial[]
-  surveyDetails       SurveyDetail[]
+  konstruksi_materials KonstruksiMaterial[]
+  survey_details       SurveyDetail[]
 }
 
 model KonstruksiMaterial {
-  id                String  @id @default(uuid())
-  idMaterial        String
-  idKonstruksi      String
-  kategoriMaterial  KategoriMaterial
-  kuantitas        Int
-  createdAt       DateTime
-  updatedAt       DateTime
-  deletedAt       DateTime?
+  id                  String  @id @default(uuid())
+  id_material         String
+  id_konstruksi       String
+  kategori_material   KategoriMaterial
+  kuantitas           Int
+  created_at          DateTime
+  updated_at          DateTime
+  deleted_at          DateTime?
 
-  material     Material @relation(fields: [idMaterial], references: [id])
-  konstruksi   Konstruksi @relation(fields: [idKonstruksi], references: [id])
+  material            Material @relation(fields: [id_material], references: [id])
+  konstruksi          Konstruksi @relation(fields: [id_konstruksi], references: [id])
 }
 
 enum KategoriMaterial {
-  PekerjaanUtama
+  Pekerjaan_Utama
   Accesories
 }
 
 model Logging {
-  id              String  @id @default(uuid())
-  tipeLog         LogType
-  idMaterial      String
-  idTipeMaterial  Int
-  namaMaterial    String
-  satuanMaterial  String
-  beratMaterial   Int
-  hargaMaterial   Int
-  pasangRab       Int
-  bongkar         Int
-  jenisMaterial   String
-  kategoriMaterial String
-  createdAt       DateTime
-  updatedAt       DateTime?
-  deletedAt       BigInt?
+  id                  String  @id @default(uuid())
+  tipe_log            LogType
+  id_material         String
+  id_tipe_material    Int
+  nama_material       String
+  satuan_material     String
+  berat_material      Int
+  harga_material      Int
+  pasang_rab          Int
+  bongkar            Int
+  jenis_material      String
+  kategori_material   String
+  created_at          DateTime
+  updated_at          DateTime?
+  deleted_at          BigInt?
 
-  material        Material @relation(fields: [idMaterial], references: [id])
+  material            Material @relation(fields: [id_material], references: [id])
 }
 
 enum LogType {
