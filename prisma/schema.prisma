@@ -10,6 +10,7 @@ datasource db {
 model Material {
   id                 String  @id @default(uuid())
   id_tipe_material   Int
+  nomor_material     Int
   nama_material      String
   satuan_material    String
   berat_material     Int
@@ -66,6 +67,7 @@ model SurveyDetail {
 model Konstruksi {
   id                   String  @id @default(uuid())
   nama_konstruksi      String
+  nomor_konstruksi     Int
   created_at           DateTime
   updated_at           DateTime
   deleted_at           DateTime?
