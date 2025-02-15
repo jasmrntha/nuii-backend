@@ -65,4 +65,12 @@ export const SurveyHeader = {
       },
     });
   },
+  async findSurveyById(id: string) {
+    return await prisma.surveyHeader.findUnique({
+      where: { id },
+      include: {
+        survey_details: true,
+      },
+    });
+  },
 };

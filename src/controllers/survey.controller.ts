@@ -87,4 +87,21 @@ export const SurveyController = {
       next(error);
     }
   },
+  async exportSurvey(request: Request, response: Response, next: NextFunction) {
+    try {
+      const { id } = request.params;
+
+      const result = await SurveyService.exportSurvey(id);
+
+      const resp = new CustomResponse(
+        StatusCodes.OK,
+        'Survey exported',
+        result,
+      );
+
+      return response.json(resp.toJSON());
+    } catch (error: any) {
+      next(error);
+    }
+  },
 };

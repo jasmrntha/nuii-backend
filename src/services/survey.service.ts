@@ -13,6 +13,7 @@ import {
   SurveyDetail,
   Material,
   Konstruksi,
+  KonstruksiMaterial,
 } from '../repositories';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -221,6 +222,128 @@ export const SurveyService = {
       });
 
       return result;
+    } catch (error) {
+      throw error;
+    }
+  },
+  async exportSurvey(id: string) {
+    try {
+      // Step 1: Get the survey header and its details
+      const survey = await SurveyHeader.findSurveyById(id);
+
+      if (!survey) {
+        throw new CustomError(StatusCodes.NOT_FOUND, 'Survey Not Found');
+      }
+
+      const details = survey.survey_details;
+
+      // Step 2: Count the amount of each unique id_konstruksi and id_material_tiang
+      const konstruksiCount: Record<string, number> = {};
+      const tiangCount: Record<string, number> = {};
+
+      for (const detail of details) {
+        if (!konstruksiCount[detail.id_konstruksi]) {
+          konstruksiCount[detail.id_konstruksi] = 0;
+        }
+
+        konstruksiCount[detail.id_konstruksi]++;
+
+        if (!tiangCount[detail.id_material_tiang]) {
+          tiangCount[detail.id_material_tiang] = 0;
+        }
+
+        tiangCount[detail.id_material_tiang]++;
+      }
+
+      // Step 3: Get all materials required and the amount for each unique konstruksi and tiang
+      const konstruksiMaterials = await Promise.all(
+        Object.keys(konstruksiCount).map(async id_konstruksi => {
+          const materials =
+            await KonstruksiMaterial.findMaterialForKonstruksiById(
+              id_konstruksi,
+            );
+
+          return { id_konstruksi, materials };
+        }),
+      );
+
+      const tiangMaterials = await Promise.all(
+        Object.keys(tiangCount).map(async id_material_tiang => {
+          const materials = await Material.findMaterialById(id_material_tiang);
+
+          return { id_material_tiang, materials };
+        }),
+      );
+
+      // Step 4: Calculate the total price of each material for each unique konstruksi
+      const totalPrices = await Promise.all(
+        konstruksiMaterials.map(async ({ id_konstruksi, materials }) => {
+          const materialPrices = await Promise.all(
+            materials.map(async material => {
+              const materialData = await Material.findMaterialById(
+                material.id_material,
+              );
+              const totalHargaMaterial =
+                materialData.harga_material *
+                material.kuantitas *
+                konstruksiCount[id_konstruksi];
+
+              const totalPasang =
+                materialData.pasang_rab *
+                material.kuantitas *
+                konstruksiCount[id_konstruksi];
+
+              const totalBongkar =
+                materialData.bongkar *
+                material.kuantitas *
+                konstruksiCount[id_konstruksi];
+
+              return {
+                ...materialData,
+                kategori_material: material.kategori_material,
+                kuantitas: material.kuantitas,
+                total_harga_material: totalHargaMaterial,
+                total_pasang: totalPasang,
+                total_bongkar: totalBongkar,
+              };
+            }),
+          );
+
+          return {
+            id_konstruksi,
+            materials: materialPrices,
+          };
+        }),
+      );
+
+      // Step 5: Calculate the total price of each tiang material
+      const tiangPrices = await Promise.all(
+        tiangMaterials.map(({ id_material_tiang, materials }) => {
+          const materialData = materials;
+          const totalHargaMaterial =
+            materialData.harga_material * tiangCount[id_material_tiang];
+
+          const totalPasang =
+            materialData.pasang_rab * tiangCount[id_material_tiang];
+
+          const totalBongkar =
+            materialData.bongkar * tiangCount[id_material_tiang];
+
+          return {
+            ...materialData,
+            kuantitas: tiangCount[id_material_tiang],
+            total_harga_material: totalHargaMaterial,
+            total_pasang: totalPasang,
+            total_bongkar: totalBongkar,
+          };
+        }),
+      );
+
+      return {
+        data_survey: survey,
+        detail_tiang: tiangPrices,
+        detail_konstruksi: totalPrices,
+      };
     } catch (error) {
       throw error;
     }
