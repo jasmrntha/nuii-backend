@@ -5,7 +5,7 @@
   "license": "MIT",
   "scripts": {
     "start": "dotenv -e .env.production -- node ./dist/src/index.js",
-    "start:dev": "dotenv -e .env.development -- nodemon ./src/index.ts",
+    "start:dev": "dotenv -e .env.development -- nodemon --files ./src/index.ts",
     "build": "npx prisma generate && tsc -p .",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --max-warnings=0",
     "setup:dev": "dotenv -e .env.development -- docker compose up -d",

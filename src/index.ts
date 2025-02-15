@@ -17,7 +17,7 @@ app.use(
     preflightContinue: false,
     optionsSuccessStatus: 204,
   }),
-  clerkMiddleware({ authorizedParties: ['http://localhost:4000'] }),
+  clerkMiddleware(),
 );
 dotenv.config();
 app.use(express.json({ limit: '12mb' }));
