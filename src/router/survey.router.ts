@@ -9,5 +9,7 @@ const router = express.Router();
 
 router.post('/create', SurveyController.createSurvey);
 router.post('/create-new', SurveyController.createNewSurvey);
+router.put('/update-header', SurveyController.updateSurveyHeader);
+router.put('/update-detail', SurveyController.updateSurveyDetail);
 
 export default router;

@@ -18,8 +18,6 @@ export const MaterialController = {
     next: NextFunction,
   ) {
     try {
-      console.log(request);
-
       const requestBody = request.body as CreateMaterialRequest;
 
       const result = await MaterialService.createMaterial(requestBody);
@@ -42,8 +40,6 @@ export const MaterialController = {
     next: NextFunction,
   ) {
     try {
-      console.log(request);
-
       const requestBody = request.body as UpdateMaterialRequest;
       const { id } = request.params;
 
@@ -67,8 +63,6 @@ export const MaterialController = {
     next: NextFunction,
   ) {
     try {
-      console.log(request);
-
       const { id } = request.params;
 
       const result = await MaterialService.deleteMaterial(id);

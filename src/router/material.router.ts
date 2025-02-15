@@ -8,6 +8,7 @@ import { MaterialController } from '../controllers';
 const router = express.Router();
 
 router.post('/create', MaterialController.createMaterial);
+router.put('/update/:id', MaterialController.updateMaterial);
 router.delete('/delete/:id', MaterialController.deleteMaterial);
 
 export default router;

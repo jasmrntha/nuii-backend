@@ -5,6 +5,8 @@ import { CustomError } from '../middleware';
 import {
   type CreateNewSurveyRequest,
   type CreateSurveyRequest,
+  type UpdateSurveyHeaderRequest,
+  type UpdateSurveyDetailRequest,
 } from '../models';
 import {
   SurveyHeader,
@@ -133,6 +135,90 @@ export const SurveyService = {
         header: header,
         detail: detail,
       };
+
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  },
+  async updateSurveyHeader(request: UpdateSurveyHeaderRequest) {
+    try {
+      const header = await SurveyHeader.findHeaderById(request.id_header);
+
+      if (!header) {
+        throw new CustomError(StatusCodes.NOT_FOUND, 'Survey Header Not Found');
+      }
+
+      const { result } = await prisma.$transaction(async prisma => {
+        const result = await SurveyHeader.updateHeader(
+          request.id_header,
+          {
+            nama_survey: request.header.nama_survey,
+            lokasi: request.header.lokasi,
+            user_id: request.header.user_id,
+            status_survey: request.header.status_survey,
+          },
+          prisma,
+        );
+
+        return { result };
+      });
+
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  },
+  async updateSurveyDetail(request: UpdateSurveyDetailRequest) {
+    try {
+      const detail = await SurveyDetail.findDetailById(request.id_detail);
+
+      if (!detail) {
+        throw new CustomError(StatusCodes.NOT_FOUND, 'Survey Detail Not Found');
+      }
+
+      const konstruksi = await Konstruksi.findKonstruksiById(
+        request.detail.id_konstruksi,
+      );
+
+      if (!konstruksi) {
+        throw new CustomError(StatusCodes.NOT_FOUND, 'Konstruksi Not Found');
+      }
+
+      const tiang = await Material.findMaterialById(
+        request.detail.id_material_tiang,
+      );
+
+      const konduktor = await Material.findMaterialById(
+        request.detail.id_material_konduktor,
+      );
+
+      if (!tiang || !konduktor) {
+        throw new CustomError(StatusCodes.NOT_FOUND, 'Material Not Found');
+      }
+
+      const { result } = await prisma.$transaction(async prisma => {
+        const result = await SurveyDetail.updateDetail(
+          request.id_detail,
+          {
+            id_material_tiang: request.detail.id_material_tiang,
+            id_material_konduktor: request.detail.id_material_konduktor,
+            id_konstruksi: request.detail.id_konstruksi,
+            id_header: request.detail.id_header,
+            nama_pekerjaan: request.detail.nama_pekerjaan,
+            penyulang: request.detail.penyulang,
+            panjang_jaringan: request.detail.panjang_jaringan,
+            long: request.detail.long,
+            lat: request.detail.lat,
+            foto: request.detail.foto,
+            keterangan: request.detail.keterangan,
+            petugas_survey: request.detail.petugas_survey,
+          },
+          prisma,
+        );
+
+        return { result };
+      });
 
       return result;
     } catch (error) {

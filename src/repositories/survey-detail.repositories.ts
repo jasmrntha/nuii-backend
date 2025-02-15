@@ -70,4 +70,11 @@ export const SurveyDetail = {
       },
     });
   },
+  async findDetailById(id: string) {
+    return await prisma.surveyDetail.findUnique({
+      where: {
+        id,
+      },
+    });
+  },
 };
