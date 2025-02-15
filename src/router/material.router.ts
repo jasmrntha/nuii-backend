@@ -7,6 +7,7 @@ import { MaterialController } from '../controllers';
 
 const router = express.Router();
 
-router.get('/post', MaterialController.postMaterial);
+router.post('/post', MaterialController.createMaterial);
+router.delete('/delete/:id', MaterialController.deleteMaterial);
 
 export default router;

@@ -7,6 +7,11 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model TipeMaterial {
+  id                 Int      @id @default(autoincrement())
+  tipe_material      String
+}
+
 model Material {
   id                 String  @id @default(uuid())
   id_tipe_material   Int
@@ -105,7 +110,7 @@ model Logging {
   berat_material      Int
   harga_material      Int
   pasang_rab          Int
-  bongkar            Int
+  bongkar             Int
   jenis_material      String
   kategori_material   String
   created_at          DateTime
