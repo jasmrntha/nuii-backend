@@ -7,34 +7,46 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Material {
-  id                 String  @id @default(uuid())
-  id_tipe_material   Int
-  nomor_material     Int
-  nama_material      String
-  satuan_material    String
-  berat_material     Int
-  harga_material     Int
-  pasang_rab         Int
-  bongkar            Int
-  jenis_material     String
-  kategori_material  String
-  created_at         DateTime
-  updated_at         DateTime
-  deleted_at         DateTime?
+model TipeMaterial {
+  id            Int        @id @default(autoincrement())
+  tipe_material String
 
-  konstruksi_materials KonstruksiMaterial[]
-  survey_details_tiang SurveyDetail[] @relation("SurveyDetailTiang")
-  survey_details_konduktor SurveyDetail[] @relation("SurveyDetailKonduktor")
-  loggings            Logging[]
+  materials     Material[] 
+  loggings      Logging[]
+}
+
+model Material {
+  id                        Int      @id @default(autoincrement())
+  id_tipe_material          Int
+  nomor_material            Int
+  nama_material             String
+  satuan_material           String
+  berat_material            Decimal
+  harga_material            Int
+  pasang_rab                Int
+  bongkar                   Int
+  jenis_material            String
+  kategori_material         String
+  created_at                DateTime @default(now())
+  updated_at                DateTime @default(now())
+  deleted_at                DateTime?
+
+  tipe_material             TipeMaterial @relation(fields: [id_tipe_material], references: [id]) 
+  konstruksi_materials      KonstruksiMaterial[]
+  survey_details_tiang      SurveyDetail[] @relation("SurveyDetailTiang")
+  survey_details_konduktor  SurveyDetail[] @relation("SurveyDetailKonduktor")
+  loggings                  Logging[]
 }
 
 model SurveyHeader {
-  id             String  @id @default(uuid())
+  id             Int            @id @default(autoincrement())
   nama_survey    String
   lokasi         String
   status_survey  SurveyStatus
   user_id        String
+  created_at     DateTime       @default(now())
+  updated_at     DateTime       @default(now())
+
   survey_details SurveyDetail[]
 }
 
@@ -44,32 +56,34 @@ enum SurveyStatus {
 }
 
 model SurveyDetail {
-  id                   String  @id @default(uuid())
-  id_material_tiang    String
-  id_material_konduktor String
-  id_konstruksi        String
-  id_header            String
-  nama_pekerjaan       String
-  penyulang            String
-  panjang_jaringan     BigInt
-  long                 String
-  lat                  String
-  foto                 String
-  keterangan           String
-  petugas_survey       String
+  id                    Int         @id @default(autoincrement())
+  id_material_tiang     Int
+  id_material_konduktor Int
+  id_konstruksi         Int
+  id_header             Int
+  nama_pekerjaan        String
+  penyulang             String
+  panjang_jaringan      Int
+  long                  String
+  lat                   String
+  foto                  String
+  keterangan            String
+  petugas_survey        String
+  created_at            DateTime    @default(now())
+  updated_at            DateTime    @default(now())
 
-  material_tiang       Material @relation("SurveyDetailTiang", fields: [id_material_tiang], references: [id])
-  material_konduktor   Material @relation("SurveyDetailKonduktor", fields: [id_material_konduktor], references: [id])
-  konstruksi           Konstruksi @relation(fields: [id_konstruksi], references: [id])
-  survey_header        SurveyHeader @relation(fields: [id_header], references: [id])
+  material_tiang        Material    @relation("SurveyDetailTiang", fields: [id_material_tiang], references: [id])
+  material_konduktor    Material    @relation("SurveyDetailKonduktor", fields: [id_material_konduktor], references: [id])
+  konstruksi            Konstruksi  @relation(fields: [id_konstruksi], references: [id])
+  survey_header         SurveyHeader @relation(fields: [id_header], references: [id])
 }
 
 model Konstruksi {
-  id                   String  @id @default(uuid())
+  id                   Int       @id @default(autoincrement())
   nama_konstruksi      String
   nomor_konstruksi     Int
-  created_at           DateTime
-  updated_at           DateTime
+  created_at           DateTime  @default(now())
+  updated_at           DateTime  @default(now())
   deleted_at           DateTime?
 
   konstruksi_materials KonstruksiMaterial[]
@@ -77,42 +91,44 @@ model Konstruksi {
 }
 
 model KonstruksiMaterial {
-  id                  String  @id @default(uuid())
-  id_material         String
-  id_konstruksi       String
+  id                  Int             @id @default(autoincrement())
+  id_material         Int
+  id_konstruksi       Int
   kategori_material   KategoriMaterial
   kuantitas           Int
-  created_at          DateTime
-  updated_at          DateTime
+  created_at          DateTime        @default(now())
+  updated_at          DateTime        @default(now())
   deleted_at          DateTime?
 
-  material            Material @relation(fields: [id_material], references: [id])
-  konstruksi          Konstruksi @relation(fields: [id_konstruksi], references: [id])
+  material            Material        @relation(fields: [id_material], references: [id])
+  konstruksi          Konstruksi      @relation(fields: [id_konstruksi], references: [id])
 }
 
 enum KategoriMaterial {
+  Umum
   Pekerjaan_Utama
   Accesories
 }
 
 model Logging {
-  id                  String  @id @default(uuid())
+  id                  Int       @id @default(autoincrement())
   tipe_log            LogType
-  id_material         String
+  id_material         Int
   id_tipe_material    Int
   nama_material       String
   satuan_material     String
-  berat_material      Int
+  berat_material      Decimal
   harga_material      Int
   pasang_rab          Int
-  bongkar            Int
+  bongkar             Int
   jenis_material      String
   kategori_material   String
-  created_at          DateTime
-  updated_at          DateTime?
-  deleted_at          BigInt?
+  created_at          DateTime  @default(now())
+  updated_at          DateTime  @default(now())
+  deleted_at          DateTime?
 
-  material            Material @relation(fields: [id_material], references: [id])
+  material            Material  @relation(fields: [id_material], references: [id])
+  tipe_material       TipeMaterial @relation(fields: [id_tipe_material], references: [id])
 }
 
 enum LogType {

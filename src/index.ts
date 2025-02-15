@@ -1,9 +1,8 @@
+import { clerkMiddleware } from '@clerk/express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import express from 'express';
-
-import { clerkMiddleware } from '@clerk/express'
 
 import { ErrorHandler } from './middleware';
 import routes from './router';
@@ -18,7 +17,7 @@ app.use(
     preflightContinue: false,
     optionsSuccessStatus: 204,
   }),
-  clerkMiddleware()
+  clerkMiddleware(),
 );
 dotenv.config();
 app.use(express.json({ limit: '12mb' }));

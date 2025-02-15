@@ -4,3 +4,4 @@ dist
 **.md
 docker
 uploads
+prisma

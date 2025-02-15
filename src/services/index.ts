@@ -1,3 +1,3 @@
-export * from './auth.service';
-export * from './mailer.service';
 export * from './send-storage.service';
+export * from './material.service';
+export * from './survey.service';
