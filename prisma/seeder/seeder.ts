@@ -14,53 +14,53 @@ async function users() {
       password: bcryptjs.hashSync(user.password, salt),
       role: user.role,
       name: user.name,
-      is_email_verified: user.is_email_verified == 'true' ? true : false
+      is_email_verified: user.is_email_verified == 'true' ? true : false,
     };
   });
 
-  for (const user of users) {
-    if (user.role == 'ADMIN') {
-      await prisma.accounts.upsert({
-        where: {
-          email: user.email,
-        },
-        update: {
-          email: user.email,
-          is_email_verified: user.is_email_verified,
-          password: user.password,
-          role: user.role,
-          name: user.name,
-        },
-        create: {
-          email: user.email,
-          is_email_verified: user.is_email_verified,
-          password: user.password,
-          role: user.role,
-          name: user.name,
-        },
-      });
-    } else {
-      await prisma.accounts.upsert({
-        where: {
-          email: user.email,
-        },
-        update: {
-          email: user.email,
-          is_email_verified: user.is_email_verified,
-          password: user.password,
-          role: user.role,
-          name: user.name
-        },
-        create: {
-          email: user.email,
-          is_email_verified: user.is_email_verified,
-          password: user.password,
-          role: user.role,
-          name: user.name,
-        },
-      });
-    }
-  }
+  // for (const user of users) {
+  //   if (user.role == 'ADMIN') {
+  //     await prisma.accounts.upsert({
+  //       where: {
+  //         email: user.email,
+  //       },
+  //       update: {
+  //         email: user.email,
+  //         is_email_verified: user.is_email_verified,
+  //         password: user.password,
+  //         role: user.role,
+  //         name: user.name,
+  //       },
+  //       create: {
+  //         email: user.email,
+  //         is_email_verified: user.is_email_verified,
+  //         password: user.password,
+  //         role: user.role,
+  //         name: user.name,
+  //       },
+  //     });
+  //   } else {
+  //     await prisma.accounts.upsert({
+  //       where: {
+  //         email: user.email,
+  //       },
+  //       update: {
+  //         email: user.email,
+  //         is_email_verified: user.is_email_verified,
+  //         password: user.password,
+  //         role: user.role,
+  //         name: user.name
+  //       },
+  //       create: {
+  //         email: user.email,
+  //         is_email_verified: user.is_email_verified,
+  //         password: user.password,
+  //         role: user.role,
+  //         name: user.name,
+  //       },
+  //     });
+  //   }
+  // }
 }
 
 const main = async () => {
