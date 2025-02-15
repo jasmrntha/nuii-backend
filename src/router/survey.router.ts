@@ -3,11 +3,11 @@
 /* eslint-disable import/no-default-export */
 import express from 'express';
 
-import { MaterialController } from '../controllers';
+import { SurveyController } from '../controllers';
 
 const router = express.Router();
 
-router.post('/create', MaterialController.createMaterial);
-router.delete('/delete/:id', MaterialController.deleteMaterial);
+router.post('/create', SurveyController.createSurvey);
+router.post('/create-new', SurveyController.createNewSurvey);
 
 export default router;
