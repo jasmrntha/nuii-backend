@@ -437,4 +437,39 @@ export const SurveyService = {
       throw error;
     }
   },
+  async getAllReport() {
+    try {
+      const getReport = await SurveyHeader.getAllReport();
+
+      if (getReport.length === 0) {
+        throw new CustomError(StatusCodes.NOT_FOUND, 'Report Not Found');
+      }
+
+      return getReport;
+    } catch (error) {
+      throw error;
+    }
+  },
+  async getReportDetail(id: number) {
+    try {
+      const getHeader = await SurveyHeader.getReportById(id);
+
+      if (!getHeader) {
+        throw new CustomError(StatusCodes.NOT_FOUND, 'Report Not Found');
+      }
+
+      const getDetail = await SurveyDetail.detailByHeaderId(id);
+
+      if (getDetail.length === 0) {
+        throw new CustomError(StatusCodes.NOT_FOUND, 'Report Detail Not Found');
+      }
+
+      return {
+        header: getHeader,
+        detail: getDetail,
+      };
+    } catch (error) {
+      throw error;
+    }
+  },
 };

@@ -196,4 +196,39 @@ export const SurveyController = {
       next(error);
     }
   },
+  async getAllReport(request: Request, response: Response, next: NextFunction) {
+    try {
+      const result = await SurveyService.getAllReport();
+
+      const resp = new CustomResponse(
+        StatusCodes.OK,
+        'Report Header List',
+        result,
+      );
+
+      return response.json(resp.toJSON());
+    } catch (error: any) {
+      next(error);
+    }
+  },
+  async getReportDetail(
+    request: Request,
+    response: Response,
+    next: NextFunction,
+  ) {
+    try {
+      const id = request.params.id;
+      const result = await SurveyService.getReportDetail(Number(id));
+
+      const resp = new CustomResponse(
+        StatusCodes.OK,
+        'Report Detail Fetched',
+        result,
+      );
+
+      return response.json(resp.toJSON());
+    } catch (error: any) {
+      next(error);
+    }
+  },
 };

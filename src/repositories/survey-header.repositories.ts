@@ -1,9 +1,5 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-import {
-  type Prisma,
-  type PrismaClient,
-  type SurveyStatus,
-} from '@prisma/client';
+import { SurveyStatus, type Prisma, type PrismaClient } from '@prisma/client';
 import { type DefaultArgs } from '@prisma/client/runtime/library';
 
 import prisma from '../config/prisma';
@@ -112,6 +108,29 @@ export const SurveyHeader = {
       },
       include: {
         survey_details: true,
+      },
+    });
+  },
+
+  async getAllReport() {
+    return await prisma.surveyHeader.findMany({
+      where: {
+        survey_details: {
+          some: { deleted_at: null },
+        },
+        status_survey: SurveyStatus.Disetujui,
+      },
+    });
+  },
+
+  async getReportById(id: number) {
+    return await prisma.surveyHeader.findUnique({
+      where: {
+        id,
+        survey_details: {
+          some: { deleted_at: null },
+        },
+        status_survey: SurveyStatus.Disetujui,
       },
     });
   },

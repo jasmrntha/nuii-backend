@@ -40,5 +40,7 @@ router.delete('/delete/:id', SurveyController.deleteSurvey);
 router.get('/name-list', SurveyController.getSurveyNameList);
 router.get('/', SurveyController.getHeaderOnly);
 router.get('/detail/:id', SurveyController.getSurveyDetail);
+router.get('/report', SurveyController.getAllReport);
+router.get('/report/detail/:id', SurveyController.getReportDetail);
 
 export default router;
