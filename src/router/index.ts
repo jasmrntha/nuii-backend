@@ -16,7 +16,6 @@ router.use('/upload-file', UploadFileRoutes);
 router.use('/upload-image', UploadImageRoutes);
 router.use('/image', SendImageRoutes);
 router.use('/file', SendFileRoutes);
-router.use('/survey', SurveyRoutes);
 
 router.use('/material', MaterialRoutes);
 router.use('/survey', SurveyRoutes);
