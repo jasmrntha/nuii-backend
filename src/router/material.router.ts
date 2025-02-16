@@ -10,5 +10,7 @@ const router = express.Router();
 router.post('/create', MaterialController.createMaterial);
 router.put('/update/:id', MaterialController.updateMaterial);
 router.delete('/delete/:id', MaterialController.deleteMaterial);
+router.get('/list/tiang', MaterialController.getTiang);
+router.get('/list/konduktor', MaterialController.getKonduktor);
 
 export default router;

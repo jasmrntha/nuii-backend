@@ -81,4 +81,36 @@ export const MaterialController = {
       next(error);
     }
   },
+
+  async getTiang(request: Request, response: Response, next: NextFunction) {
+    try {
+      const result = await MaterialService.getSelectedMaterial(2);
+
+      const resp = new CustomResponse(
+        StatusCodes.OK,
+        'Material listed as Tiang found.',
+        result,
+      );
+
+      return response.json(resp.toJSON());
+    } catch (error: any) {
+      next(error);
+    }
+  },
+
+  async getKonduktor(request: Request, response: Response, next: NextFunction) {
+    try {
+      const result = await MaterialService.getSelectedMaterial(3);
+
+      const resp = new CustomResponse(
+        StatusCodes.OK,
+        'Material listed as Konduktor found.',
+        result,
+      );
+
+      return response.json(resp.toJSON());
+    } catch (error: any) {
+      next(error);
+    }
+  },
 };
