@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, SurveyStatus } from '@prisma/client';
 import csv from 'csvtojson';
 import * as bcryptjs from 'bcryptjs';
 
@@ -174,12 +174,130 @@ async function material_konstruksi() {
   }
 }
 
+async function survey() {
+  const data = {
+    surveyHeaders: [
+      {
+        id: 1,
+        nama_survey: 'Survey Tiang Listrik Area A',
+        lokasi: 'Jakarta Selatan',
+        status_survey: SurveyStatus.Belum_Disetujui,
+        user_id: 'asasa123',
+      },
+      {
+        id: 2,
+        nama_survey: 'Survey Jaringan Area B',
+        lokasi: 'Bandung',
+        status_survey: SurveyStatus.Belum_Disetujui,
+        user_id: 'asasa123',
+      },
+    ],
+    surveyDetails: [
+      {
+        id_material_tiang: 236,
+        id_material_konduktor: 2,
+        id_konstruksi: 2,
+        id_header: 1,
+        nama_pekerjaan: 'Pemasangan Tiang Beton',
+        penyulang: 'Feeder A',
+        panjang_jaringan: 500,
+        long: '106.816666',
+        lat: '-6.200000',
+        foto: 'tiang1.jpg',
+        keterangan: 'Tiang sudah lapuk',
+        petugas_survey: 'Budi Santoso',
+      },
+      {
+        id_material_tiang: 237,
+        id_material_konduktor: 3,
+        id_konstruksi: 3,
+        id_header: 1,
+        nama_pekerjaan: 'Penarikan Kabel',
+        penyulang: 'Feeder A',
+        panjang_jaringan: 300,
+        long: '106.818888',
+        lat: '-6.201111',
+        foto: 'kabel1.jpg',
+        keterangan: 'Tiang sudah lapuk',
+        petugas_survey: 'Dewi Lestari',
+      },
+      {
+        id_material_tiang: 238,
+        id_material_konduktor: 2,
+        id_konstruksi: 2,
+        id_header: 2,
+        nama_pekerjaan: 'Perbaikan Konstruksi',
+        penyulang: 'Feeder B',
+        panjang_jaringan: 450,
+        long: '107.616667',
+        lat: '-6.900000',
+        foto: 'konstruksi1.jpg',
+        keterangan: 'Tiang sudah lapuk',
+        petugas_survey: 'Ahmad Rijal',
+      },
+      {
+        id_material_tiang: 239,
+        id_material_konduktor: 3,
+        id_konstruksi: 3,
+        id_header: 2,
+        nama_pekerjaan: 'Pengecekan Tiang',
+        penyulang: 'Feeder B',
+        panjang_jaringan: 350,
+        long: '107.618888',
+        lat: '-6.901111',
+        foto: 'tiang2.jpg',
+        keterangan: 'Tiang sudah lapuk',
+        petugas_survey: 'Siti Aminah',
+      },
+    ],
+  };
+
+  try {
+    console.log('Seeding database...');
+
+    // Insert survey headers
+    const insertedHeaders = [];
+    for (const header of data.surveyHeaders) {
+      const newHeader = await prisma.surveyHeader.create({ data: header });
+      insertedHeaders.push(newHeader);
+    }
+
+    for (let i = 0; i < data.surveyDetails.length; i++) {
+      await prisma.surveyDetail.create({
+        data: {
+          nama_pekerjaan: data.surveyDetails[i].nama_pekerjaan,
+          penyulang: data.surveyDetails[i].penyulang,
+          panjang_jaringan: data.surveyDetails[i].panjang_jaringan,
+          long: data.surveyDetails[i].long,
+          lat: data.surveyDetails[i].lat,
+          foto: data.surveyDetails[i].foto,
+          petugas_survey: data.surveyDetails[i].petugas_survey,
+          keterangan: data.surveyDetails[i].keterangan,
+          material_tiang: {
+            connect: { id: data.surveyDetails[i].id_material_tiang },
+          },
+          material_konduktor: {
+            connect: { id: data.surveyDetails[i].id_material_konduktor },
+          },
+          konstruksi: { connect: { id: data.surveyDetails[i].id_konstruksi } },
+          survey_header: { connect: { id: data.surveyDetails[i].id_header } },
+        },
+      });
+    }
+
+    console.log('Database seeded successfully!');
+  } catch (error) {
+    console.error('❌ Seeding failed:', error);
+  }
+}
+
 const main = async () => {
   // await users();
   await tipe_material();
   await konstruksi();
   await material();
   await material_konstruksi();
+  // await survey();
 };
 
 main()

@@ -73,4 +73,18 @@ export const SurveyDetail = {
       },
     });
   },
+  async deleteDetail(id: number) {
+    return await prisma.surveyDetail.update({
+      where: { id },
+      data: { deleted_at: new Date() },
+    });
+  },
+  async detailByHeaderId(id: number) {
+    return await prisma.surveyDetail.findMany({
+      where: {
+        id_header: id,
+        deleted_at: null,
+      },
+    });
+  },
 };
