@@ -12,4 +12,13 @@ export const Konstruksi = {
       },
     });
   },
+
+  async getAllKonstruksi() {
+    return await prisma.konstruksi.findMany({
+      select: {
+        id: true,
+        nama_konstruksi: true,
+      },
+    });
+  },
 };
