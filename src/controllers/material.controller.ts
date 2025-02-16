@@ -43,7 +43,10 @@ export const MaterialController = {
       const requestBody = request.body as UpdateMaterialRequest;
       const { id } = request.params;
 
-      const result = await MaterialService.updateMaterial(id, requestBody);
+      const result = await MaterialService.updateMaterial(
+        Number(id),
+        requestBody,
+      );
 
       const resp = new CustomResponse(
         StatusCodes.OK,
@@ -65,7 +68,7 @@ export const MaterialController = {
     try {
       const { id } = request.params;
 
-      const result = await MaterialService.deleteMaterial(id);
+      const result = await MaterialService.deleteMaterial(Number(id));
 
       const resp = new CustomResponse(
         StatusCodes.OK,

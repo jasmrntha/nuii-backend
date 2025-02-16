@@ -5,7 +5,7 @@
 import prisma from '../config/prisma';
 
 export const Konstruksi = {
-  async findKonstruksiById(id: string) {
+  async findKonstruksiById(id: number) {
     return await prisma.konstruksi.findUnique({
       where: {
         id,

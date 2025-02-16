@@ -46,7 +46,7 @@ export const MaterialService = {
             nomor_material: result.nomor_material,
             nama_material: result.nama_material,
             satuan_material: result.satuan_material,
-            berat_material: result.berat_material,
+            berat_material: Number(result.berat_material),
             harga_material: result.harga_material,
             pasang_rab: result.pasang_rab,
             bongkar: result.bongkar,
@@ -64,7 +64,7 @@ export const MaterialService = {
       throw error;
     }
   },
-  async updateMaterial(id: string, request: UpdateMaterialRequest) {
+  async updateMaterial(id: number, request: UpdateMaterialRequest) {
     try {
       const tipeMaterial = await TipeMaterial.findTipeMaterialById(
         request.id_tipe_material,
@@ -106,7 +106,7 @@ export const MaterialService = {
             nomor_material: updatedMaterial.nomor_material,
             nama_material: updatedMaterial.nama_material,
             satuan_material: updatedMaterial.satuan_material,
-            berat_material: updatedMaterial.berat_material,
+            berat_material: Number(updatedMaterial.berat_material),
             harga_material: updatedMaterial.harga_material,
             pasang_rab: updatedMaterial.pasang_rab,
             bongkar: updatedMaterial.bongkar,
@@ -124,7 +124,7 @@ export const MaterialService = {
       throw error;
     }
   },
-  async deleteMaterial(id: string) {
+  async deleteMaterial(id: number) {
     try {
       const material = await Material.findMaterialById(id);
 
@@ -143,7 +143,7 @@ export const MaterialService = {
             nomor_material: deletedMaterial.nomor_material,
             nama_material: deletedMaterial.nama_material,
             satuan_material: deletedMaterial.satuan_material,
-            berat_material: deletedMaterial.berat_material,
+            berat_material: Number(deletedMaterial.berat_material),
             harga_material: deletedMaterial.harga_material,
             pasang_rab: deletedMaterial.pasang_rab,
             bongkar: deletedMaterial.bongkar,

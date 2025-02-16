@@ -7,13 +7,13 @@ import prisma from '../config/prisma';
 export const SurveyDetail = {
   async createDetail(
     data: {
-      id_material_tiang: string;
-      id_material_konduktor: string;
-      id_konstruksi: string;
-      id_header: string;
+      id_material_tiang: number;
+      id_material_konduktor: number;
+      id_konstruksi: number;
+      id_header: number;
       nama_pekerjaan: string;
       penyulang: string;
-      panjang_jaringan: bigint;
+      panjang_jaringan: number;
       long: string;
       lat: string;
       foto: string;
@@ -37,15 +37,15 @@ export const SurveyDetail = {
   },
 
   async updateDetail(
-    id: string,
+    id: number,
     data: {
-      id_material_tiang: string;
-      id_material_konduktor: string;
-      id_konstruksi: string;
-      id_header: string;
+      id_material_tiang: number;
+      id_material_konduktor: number;
+      id_konstruksi: number;
+      id_header: number;
       nama_pekerjaan: string;
       penyulang: string;
-      panjang_jaringan: bigint;
+      panjang_jaringan: number;
       long: string;
       lat: string;
       foto: string;
@@ -70,7 +70,7 @@ export const SurveyDetail = {
       },
     });
   },
-  async findDetailById(id: string) {
+  async findDetailById(id: number) {
     return await prisma.surveyDetail.findUnique({
       where: {
         id,

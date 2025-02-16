@@ -37,7 +37,7 @@ export const Material = {
   },
 
   async updateMaterial(
-    id: string,
+    id: number,
     data: {
       id_tipe_material: number;
       nomor_material: number;
@@ -70,7 +70,7 @@ export const Material = {
   },
 
   async deleteMaterial(
-    id: string,
+    id: number,
     tx?: Omit<
       PrismaClient<Prisma.PrismaClientOptions, never, DefaultArgs>,
       '$connect' | '$on' | '$disconnect' | '$use' | '$transaction' | '$extends'
@@ -88,7 +88,7 @@ export const Material = {
     });
   },
 
-  async findMaterialById(id: string) {
+  async findMaterialById(id: number) {
     return await prisma.material.findUnique({
       where: {
         id,
