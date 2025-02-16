@@ -9,13 +9,13 @@ interface SurveyHeader {
 }
 
 interface SurveyDetail {
-  id_material_tiang: string;
-  id_material_konduktor: string;
-  id_konstruksi: string;
-  id_header: string;
+  id_material_tiang: number;
+  id_material_konduktor: number;
+  id_konstruksi: number;
+  id_header: number;
   nama_pekerjaan: string;
   penyulang: string;
-  panjang_jaringan: bigint;
+  panjang_jaringan: number;
   long: string;
   lat: string;
   foto: string;
@@ -24,11 +24,11 @@ interface SurveyDetail {
 }
 
 export interface UpdateSurveyHeaderRequest {
-  id_header: string;
+  id_header: number;
   header: SurveyHeader;
 }
 
 export interface UpdateSurveyDetailRequest {
-  id_detail: string;
+  id_detail: number;
   detail: SurveyDetail;
 }

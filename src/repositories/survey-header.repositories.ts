@@ -33,7 +33,7 @@ export const SurveyHeader = {
   },
 
   async updateHeader(
-    id: string,
+    id: number,
     data: {
       nama_survey: string;
       lokasi: string;
@@ -58,14 +58,14 @@ export const SurveyHeader = {
       },
     });
   },
-  async findHeaderById(id: string) {
+  async findHeaderById(id: number) {
     return await prisma.surveyHeader.findUnique({
       where: {
         id,
       },
     });
   },
-  async findSurveyById(id: string) {
+  async findSurveyById(id: number) {
     return await prisma.surveyHeader.findUnique({
       where: { id },
       include: {

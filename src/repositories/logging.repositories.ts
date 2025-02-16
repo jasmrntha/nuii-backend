@@ -8,7 +8,7 @@ export const Logging = {
   async createLog(
     type: LogType,
     data: {
-      id_material: string;
+      id_material: number;
       id_tipe_material: number;
       nomor_material: number;
       nama_material: string;
