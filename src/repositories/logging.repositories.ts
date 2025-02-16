@@ -10,7 +10,6 @@ export const Logging = {
     data: {
       id_material: number;
       id_tipe_material: number;
-      nomor_material: number;
       nama_material: string;
       satuan_material: string;
       berat_material: number;
@@ -27,13 +26,10 @@ export const Logging = {
   ) {
     const client = tx || prisma;
 
-    const date = new Date();
-
     return await client.logging.create({
       data: {
         tipe_log: type,
         ...data,
-        created_at: date,
       },
     });
   },

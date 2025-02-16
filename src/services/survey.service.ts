@@ -303,6 +303,8 @@ export const SurveyService = {
                 ...materialData,
                 kategori_material: material.kategori_material,
                 kuantitas: material.kuantitas,
+                total_kuantitas:
+                  material.kuantitas * konstruksiCount[idKonstruksi],
                 total_harga_material: totalHargaMaterial,
                 total_pasang: totalPasang,
                 total_bongkar: totalBongkar,
@@ -332,7 +334,7 @@ export const SurveyService = {
 
           return {
             ...materialData,
-            kuantitas: tiangCount[idMaterialTiang],
+            total_kuantitas: tiangCount[idMaterialTiang],
             total_harga_material: totalHargaMaterial,
             total_pasang: totalPasang,
             total_bongkar: totalBongkar,
