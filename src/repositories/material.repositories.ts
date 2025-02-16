@@ -88,4 +88,12 @@ export const Material = {
       },
     });
   },
+
+  async getSelectedMaterial(id_tipe: number) {
+    return await prisma.material.findMany({
+      where: {
+        id_tipe_material: id_tipe,
+      },
+    });
+  },
 };
