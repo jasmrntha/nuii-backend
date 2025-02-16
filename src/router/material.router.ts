@@ -4,11 +4,21 @@
 import express from 'express';
 
 import { MaterialController } from '../controllers';
+import { validate } from '../middleware';
+import { CreateMaterialSchema, UpdateMaterialSchema } from '../validators';
 
 const router = express.Router();
 
-router.post('/create', MaterialController.createMaterial);
-router.put('/update/:id', MaterialController.updateMaterial);
+router.post(
+  '/create',
+  validate(CreateMaterialSchema),
+  MaterialController.createMaterial,
+);
+router.put(
+  '/update/:id',
+  validate(UpdateMaterialSchema),
+  MaterialController.updateMaterial,
+);
 router.delete('/delete/:id', MaterialController.deleteMaterial);
 
 export default router;
