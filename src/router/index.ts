@@ -19,6 +19,7 @@ router.use('/file', SendFileRoutes);
 router.use('/survey', SurveyRoutes);
 
 router.use('/material', MaterialRoutes);
+router.use('/survey', SurveyRoutes);
 router.use('/konstruksi', KonstruksiRoutes);
 
 router.use('/upload-file', UploadFileRoutes);
