@@ -71,6 +71,7 @@ model SurveyDetail {
   petugas_survey        String
   created_at            DateTime    @default(now())
   updated_at            DateTime    @default(now())
+  deleted_at            DateTime?
 
   material_tiang        Material    @relation("SurveyDetailTiang", fields: [id_material_tiang], references: [id])
   material_konduktor    Material    @relation("SurveyDetailKonduktor", fields: [id_material_konduktor], references: [id])
