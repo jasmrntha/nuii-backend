@@ -43,7 +43,6 @@ export const MaterialService = {
           {
             id_material: result.id,
             id_tipe_material: result.id_tipe_material,
-            nomor_material: result.nomor_material,
             nama_material: result.nama_material,
             satuan_material: result.satuan_material,
             berat_material: Number(result.berat_material),
@@ -103,7 +102,6 @@ export const MaterialService = {
           {
             id_material: updatedMaterial.id,
             id_tipe_material: updatedMaterial.id_tipe_material,
-            nomor_material: updatedMaterial.nomor_material,
             nama_material: updatedMaterial.nama_material,
             satuan_material: updatedMaterial.satuan_material,
             berat_material: Number(updatedMaterial.berat_material),
@@ -140,7 +138,6 @@ export const MaterialService = {
           {
             id_material: deletedMaterial.id,
             id_tipe_material: deletedMaterial.id_tipe_material,
-            nomor_material: deletedMaterial.nomor_material,
             nama_material: deletedMaterial.nama_material,
             satuan_material: deletedMaterial.satuan_material,
             berat_material: Number(deletedMaterial.berat_material),

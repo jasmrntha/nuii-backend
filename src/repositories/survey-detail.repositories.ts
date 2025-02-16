@@ -27,8 +27,6 @@ export const SurveyDetail = {
   ) {
     const client = tx || prisma;
 
-    // const date = new Date();
-
     return await client.surveyDetail.create({
       data: {
         ...data,
@@ -58,8 +56,6 @@ export const SurveyDetail = {
     >,
   ) {
     const client = tx || prisma;
-
-    // const date = new Date();
 
     return await client.surveyDetail.update({
       where: {
