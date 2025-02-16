@@ -23,8 +23,6 @@ export const SurveyHeader = {
   ) {
     const client = tx || prisma;
 
-    // const date = new Date();
-
     return await client.surveyHeader.create({
       data: {
         ...data,
@@ -46,8 +44,6 @@ export const SurveyHeader = {
     >,
   ) {
     const client = tx || prisma;
-
-    // const date = new Date();
 
     return await client.surveyHeader.update({
       where: {

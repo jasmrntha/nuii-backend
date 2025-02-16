@@ -25,13 +25,9 @@ export const Material = {
   ) {
     const client = tx || prisma;
 
-    const date = new Date();
-
     return await client.material.create({
       data: {
         ...data,
-        created_at: date,
-        updated_at: date,
       },
     });
   },
@@ -57,14 +53,10 @@ export const Material = {
   ) {
     const client = tx || prisma;
 
-    const date = new Date();
-
     return await client.material.update({
       where: { id },
       data: {
         ...data,
-        created_at: date,
-        updated_at: date,
       },
     });
   },
@@ -92,6 +84,7 @@ export const Material = {
     return await prisma.material.findUnique({
       where: {
         id,
+        deleted_at: null,
       },
     });
   },
