@@ -6,6 +6,7 @@ import KonstruksiRoutes from './konstruksi.router';
 import MaterialRoutes from './material.router';
 import SendFileRoutes from './send-file.router';
 import SendImageRoutes from './send-image.router';
+import SurveyRoutes from './survey.router';
 import UploadFileRoutes from './upload-file.router';
 import UploadImageRoutes from './upload-image.router';
 
@@ -15,6 +16,7 @@ router.use('/upload-file', UploadFileRoutes);
 router.use('/upload-image', UploadImageRoutes);
 router.use('/image', SendImageRoutes);
 router.use('/file', SendFileRoutes);
+router.use('/survey', SurveyRoutes);
 
 router.use('/material', MaterialRoutes);
 router.use('/konstruksi', KonstruksiRoutes);

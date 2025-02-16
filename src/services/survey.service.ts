@@ -349,4 +349,90 @@ export const SurveyService = {
       throw error;
     }
   },
+  async deleteSurveyDetail(id: number) {
+    try {
+      const detail = await SurveyDetail.findDetailById(id);
+
+      if (!detail) {
+        throw new CustomError(StatusCodes.NOT_FOUND, 'Survey Detail Not Found');
+      }
+
+      const deleteSurvey = await SurveyDetail.deleteDetail(id);
+
+      return deleteSurvey;
+    } catch (error) {
+      throw error;
+    }
+  },
+  async deleteSurvey(id: number) {
+    try {
+      const survey = await SurveyHeader.findHeaderById(id);
+
+      if (!survey) {
+        throw new CustomError(StatusCodes.NOT_FOUND, 'Survey Not Found');
+      }
+
+      const getDetails = await SurveyDetail.detailByHeaderId(id);
+
+      if (getDetails.length > 0) {
+        for (const detail of getDetails) {
+          await SurveyDetail.deleteDetail(detail.id);
+        }
+      }
+
+      const deleteSurvey = await SurveyHeader.deleteSurvey(id);
+
+      return deleteSurvey;
+    } catch (error) {
+      throw error;
+    }
+  },
+  async getSurveyNameList() {
+    try {
+      const getNames = await SurveyHeader.getSurveyNameList();
+
+      if (getNames.length === 0) {
+        throw new CustomError(StatusCodes.NOT_FOUND, 'Survey Not Found');
+      }
+
+      return getNames;
+    } catch (error) {
+      throw error;
+    }
+  },
+  async getAllSurveyHeader() {
+    try {
+      const getHeader = await SurveyHeader.getHeaderOnly();
+
+      if (getHeader.length === 0) {
+        throw new CustomError(StatusCodes.NOT_FOUND, 'Survey Not Found');
+      }
+
+      return getHeader;
+    } catch (error) {
+      throw error;
+    }
+  },
+  async getSurveyDetail(id: number) {
+    try {
+      const getHeader = await SurveyHeader.getSurveyHeader(id);
+
+      if (!getHeader) {
+        throw new CustomError(StatusCodes.NOT_FOUND, 'Survey Not Found');
+      }
+
+      const getDetail = await SurveyDetail.detailByHeaderId(id);
+
+      if (getDetail.length === 0) {
+        throw new CustomError(StatusCodes.NOT_FOUND, 'Survey Detail Not Found');
+      }
+
+      return {
+        header: getHeader,
+        detail: getDetail,
+      };
+    } catch (error) {
+      throw error;
+    }
+  },
 };

@@ -73,4 +73,57 @@ export const SurveyHeader = {
       },
     });
   },
+  async getSurveyHeader(id: number) {
+    return await prisma.surveyHeader.findUnique({
+      where: {
+        id,
+        survey_details: {
+          some: { deleted_at: null },
+        },
+      },
+    });
+  },
+  async getSurveyNameList() {
+    return await prisma.surveyHeader.findMany({
+      where: {
+        survey_details: {
+          some: { deleted_at: null },
+        },
+      },
+      select: {
+        id: true,
+        nama_survey: true,
+      },
+    });
+  },
+
+  async getHeaderOnly() {
+    return await prisma.surveyHeader.findMany({
+      where: {
+        survey_details: {
+          some: { deleted_at: null },
+        },
+      },
+    });
+  },
+
+  async getAllSurvey() {
+    return await prisma.surveyHeader.findMany({
+      where: {
+        survey_details: {
+          some: { deleted_at: null },
+        },
+      },
+      include: {
+        survey_details: true,
+      },
+    });
+  },
+
+  async deleteSurvey(id: number) {
+    return await prisma.surveyDetail.update({
+      where: { id },
+      data: { deleted_at: new Date() },
+    });
+  },
 };

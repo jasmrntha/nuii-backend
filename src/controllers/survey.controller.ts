@@ -104,4 +104,96 @@ export const SurveyController = {
       next(error);
     }
   },
+  async deleteSurvey(request: Request, response: Response, next: NextFunction) {
+    try {
+      const { id } = request.params;
+
+      const result = await SurveyService.deleteSurvey(Number(id));
+
+      const resp = new CustomResponse(StatusCodes.OK, 'Survey deleted', result);
+
+      return response.json(resp.toJSON());
+    } catch (error: any) {
+      next(error);
+    }
+  },
+  async deleteSurveyDetail(
+    request: Request,
+    response: Response,
+    next: NextFunction,
+  ) {
+    try {
+      const { id } = request.params;
+
+      const result = await SurveyService.deleteSurveyDetail(Number(id));
+
+      const resp = new CustomResponse(
+        StatusCodes.OK,
+        'Survey Detail deleted',
+        result,
+      );
+
+      return response.json(resp.toJSON());
+    } catch (error: any) {
+      next(error);
+    }
+  },
+  async getSurveyNameList(
+    request: Request,
+    response: Response,
+    next: NextFunction,
+  ) {
+    try {
+      const result = await SurveyService.getSurveyNameList();
+
+      const resp = new CustomResponse(
+        StatusCodes.OK,
+        'Survey Name List',
+        result,
+      );
+
+      return response.json(resp.toJSON());
+    } catch (error: any) {
+      next(error);
+    }
+  },
+  async getHeaderOnly(
+    request: Request,
+    response: Response,
+    next: NextFunction,
+  ) {
+    try {
+      const result = await SurveyService.getAllSurveyHeader();
+
+      const resp = new CustomResponse(
+        StatusCodes.OK,
+        'Survey Header List',
+        result,
+      );
+
+      return response.json(resp.toJSON());
+    } catch (error: any) {
+      next(error);
+    }
+  },
+  async getSurveyDetail(
+    request: Request,
+    response: Response,
+    next: NextFunction,
+  ) {
+    try {
+      const id = request.params.id;
+      const result = await SurveyService.getSurveyDetail(Number(id));
+
+      const resp = new CustomResponse(
+        StatusCodes.OK,
+        'Survey Detail Fetched',
+        result,
+      );
+
+      return response.json(resp.toJSON());
+    } catch (error: any) {
+      next(error);
+    }
+  },
 };
