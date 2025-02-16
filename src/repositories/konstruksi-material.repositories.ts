@@ -5,7 +5,7 @@
 import prisma from '../config/prisma';
 
 export const KonstruksiMaterial = {
-  async findMaterialForKonstruksiById(id_konstruksi: string) {
+  async findMaterialForKonstruksiById(id_konstruksi: number) {
     return await prisma.konstruksiMaterial.findMany({
       where: {
         id_konstruksi,

@@ -91,7 +91,7 @@ export const SurveyController = {
     try {
       const { id } = request.params;
 
-      const result = await SurveyService.exportSurvey(id);
+      const result = await SurveyService.exportSurvey(Number(id));
 
       const resp = new CustomResponse(
         StatusCodes.OK,

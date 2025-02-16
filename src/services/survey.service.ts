@@ -226,7 +226,7 @@ export const SurveyService = {
       throw error;
     }
   },
-  async exportSurvey(id: string) {
+  async exportSurvey(id: number) {
     try {
       // Step 1: Get the survey header and its details
       const survey = await SurveyHeader.findSurveyById(id);
@@ -238,8 +238,8 @@ export const SurveyService = {
       const details = survey.survey_details;
 
       // Step 2: Count the amount of each unique id_konstruksi and id_material_tiang
-      const konstruksiCount: Record<string, number> = {};
-      const tiangCount: Record<string, number> = {};
+      const konstruksiCount: Record<number, number> = {};
+      const tiangCount: Record<number, number> = {};
 
       for (const detail of details) {
         if (!konstruksiCount[detail.id_konstruksi]) {
@@ -257,27 +257,28 @@ export const SurveyService = {
 
       // Step 3: Get all materials required and the amount for each unique konstruksi and tiang
       const konstruksiMaterials = await Promise.all(
-        Object.keys(konstruksiCount).map(async id_konstruksi => {
+        Object.keys(konstruksiCount).map(async key => {
+          const idKonstruksi = Number(key);
           const materials =
             await KonstruksiMaterial.findMaterialForKonstruksiById(
-              id_konstruksi,
+              idKonstruksi,
             );
 
-          return { id_konstruksi, materials };
+          return { idKonstruksi, materials };
         }),
       );
 
       const tiangMaterials = await Promise.all(
-        Object.keys(tiangCount).map(async id_material_tiang => {
-          const materials = await Material.findMaterialById(id_material_tiang);
+        Object.keys(tiangCount).map(async key => {
+          const idMaterialTiang = Number(key);
+          const materials = await Material.findMaterialById(idMaterialTiang);
 
-          return { id_material_tiang, materials };
+          return { idMaterialTiang, materials };
         }),
       );
-
       // Step 4: Calculate the total price of each material for each unique konstruksi
       const totalPrices = await Promise.all(
-        konstruksiMaterials.map(async ({ id_konstruksi, materials }) => {
+        konstruksiMaterials.map(async ({ idKonstruksi, materials }) => {
           const materialPrices = await Promise.all(
             materials.map(async material => {
               const materialData = await Material.findMaterialById(
@@ -286,17 +287,17 @@ export const SurveyService = {
               const totalHargaMaterial =
                 materialData.harga_material *
                 material.kuantitas *
-                konstruksiCount[id_konstruksi];
+                konstruksiCount[idKonstruksi];
 
               const totalPasang =
                 materialData.pasang_rab *
                 material.kuantitas *
-                konstruksiCount[id_konstruksi];
+                konstruksiCount[idKonstruksi];
 
               const totalBongkar =
                 materialData.bongkar *
                 material.kuantitas *
-                konstruksiCount[id_konstruksi];
+                konstruksiCount[idKonstruksi];
 
               return {
                 ...materialData,
@@ -310,7 +311,7 @@ export const SurveyService = {
           );
 
           return {
-            id_konstruksi,
+            idKonstruksi,
             materials: materialPrices,
           };
         }),
@@ -318,20 +319,20 @@ export const SurveyService = {
 
       // Step 5: Calculate the total price of each tiang material
       const tiangPrices = await Promise.all(
-        tiangMaterials.map(({ id_material_tiang, materials }) => {
+        tiangMaterials.map(({ idMaterialTiang, materials }) => {
           const materialData = materials;
           const totalHargaMaterial =
-            materialData.harga_material * tiangCount[id_material_tiang];
+            materialData.harga_material * tiangCount[idMaterialTiang];
 
           const totalPasang =
-            materialData.pasang_rab * tiangCount[id_material_tiang];
+            materialData.pasang_rab * tiangCount[idMaterialTiang];
 
           const totalBongkar =
-            materialData.bongkar * tiangCount[id_material_tiang];
+            materialData.bongkar * tiangCount[idMaterialTiang];
 
           return {
             ...materialData,
-            kuantitas: tiangCount[id_material_tiang],
+            kuantitas: tiangCount[idMaterialTiang],
             total_harga_material: totalHargaMaterial,
             total_pasang: totalPasang,
             total_bongkar: totalBongkar,

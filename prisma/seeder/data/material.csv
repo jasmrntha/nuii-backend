@@ -1,7 +1,7 @@
 nomer_material,tipe_material,nama_material,sat,berat,harga material,pasang_rab,bongkar,jenis_material,kategori_material
 1,1,AAAC 0 70 sqmm ( SPLN ),M,"0,23",21675,2474,1485,MDU PUSAT,PLN
-2,1,AAAC 0 150 sqmm ( SPLN ),M,"0,47",26872,4657,2794,MDU PUSAT,PLN
-3,1,AAAC 0 240 sqmm ( SPLN ),M,"0,94",57662,5322,3193,MDU PUSAT,PLN
+2,3,AAAC 0 150 sqmm ( SPLN ),M,"0,47",26872,4657,2794,MDU PUSAT,PLN
+3,3,AAAC 0 240 sqmm ( SPLN ),M,"0,94",57662,5322,3193,MDU PUSAT,PLN
 4,1,AAAC 0 S 70 sqmm ( SPLN ),M,"0,33",31887,4657,2794,MDU PUSAT,PLN
 5,1,AAAC 0 S 150 sqmm ( SPLN ),M,"0,61",26310,5322,3193,MDU PUSAT,PLN
 6,1,AAAC 0 S 240 sqmm ( SPLN ),M,"1,22",41777,6652,3991,MDU PUSAT,PLN
@@ -361,7 +361,7 @@ nomer_material,tipe_material,nama_material,sat,berat,harga material,pasang_rab,b
 360,1,Cross Arm type 750 NP 0 8 u/ dudukan trafo,S,"2,98",136784,9561,5737,NON MDU,TUNAI
 361,1,Pelat Bordes 2500 x 30 x 3,S,"4,5",293698,16888,10133,NON MDU,TUNAI
 362,1,"Penghalang kayu jati 60 x 40 x 2500 / Besi siku L.50.50.4,5",S,"2,5",176583,28974,17384,NON MDU,TUNAI
-363,1,Tiang Beton 12 0 200 daN + E (524/U/2009),B,1000,6210394,1446270,867762,MDU PUSAT,PLN
+363,2,Tiang Beton 12 0 200 daN + E (524/U/2009),B,1000,6210394,1446270,867762,MDU PUSAT,PLN
 364,1,"LV Panel 250A s/d 400A, lubang atas",S,60,0,849080,509448,MDU PUSAT,PLN
 365,1,AAAC 0 S 150 sqmm ( ex. J 0 Proc ),M,"0,61",26310,5322,3193,MDU PUSAT,PLN
 366,1,Angkutan Material Gresik 0 Bawean,RIT,0,0,0,0,NON MDU,TUNAI
@@ -491,7 +491,7 @@ nomer_material,tipe_material,nama_material,sat,berat,harga material,pasang_rab,b
 490,1,"Dudukan : Trafo Portal, Pipa Kabel, PHB0TR & Dudukan Arrester",S,115,11214960,897188,538313,NON MDU,TUNAI
 491,1,Semi Cond. Preformed Side Tie Double,B,"0,75",200250,8692,5215,NON MDU,TUNAI
 492,1,PHB 0 TR 2 Jurusan 400 A 0 SPLN D5.016.1 : 2010,B,45,11379240,553748,332249,MDU PUSAT,PLN
-493,1,Tiang Beton 14 0 500 daN + E,B,1375,8891907,1553429,932057,MDU PUSAT,PLN
+493,2,Tiang Beton 14 0 500 daN + E,B,1375,8891907,1553429,932057,MDU PUSAT,PLN
 494,1,Plat Extension GW,-,0,0,0,0,NON MDU,TUNAI
 495,1,"Double Arm Band 6"" 0 TM (l=44mm, t=6mm)",B,"2,24",152731,20861,12517,NON MDU,TUNAI
 496,1,"Arm Tie Band 7"" 0 TM",B,"2,11",76023,26076,15646,NON MDU,TUNAI
