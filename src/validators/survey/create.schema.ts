@@ -17,7 +17,7 @@ const SurveyDetailSchema = Joi.object({
   id_konstruksi: Joi.number().integer().positive().required(),
   nama_pekerjaan: Joi.string().required(),
   penyulang: Joi.string().required(),
-  panjang_jaringan: Joi.number().positive().required(),
+  panjang_jaringan: Joi.number().min(0).required(),
   long: Joi.string().required(),
   lat: Joi.string().required(),
   foto: Joi.string().required(),
