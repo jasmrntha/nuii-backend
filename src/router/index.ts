@@ -3,6 +3,7 @@ import express from 'express';
 const router = express.Router();
 
 import KonstruksiRoutes from './konstruksi.router';
+import LogRoutes from './log.router';
 import MaterialRoutes from './material.router';
 import SendFileRoutes from './send-file.router';
 import SendImageRoutes from './send-image.router';
@@ -20,6 +21,7 @@ router.use('/file', SendFileRoutes);
 router.use('/material', MaterialRoutes);
 router.use('/survey', SurveyRoutes);
 router.use('/konstruksi', KonstruksiRoutes);
+router.use('/log', LogRoutes);
 
 router.use('/upload-file', UploadFileRoutes);
 router.use('/upload-image', UploadImageRoutes);
