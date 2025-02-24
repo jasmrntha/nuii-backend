@@ -6,3 +6,5 @@ export * from './survey-detail.repositories';
 export * from './konstruksi.repositories';
 export * from './konstruksi-material.repositories';
 export * from './log.repositories';
+export * from './pole.repositories';
+export * from './grounding.repositories';
