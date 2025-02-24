@@ -8,9 +8,11 @@ export const SurveyHeader = {
   async createHeader(
     data: {
       nama_survey: string;
+      nama_pekerjaan: string;
       lokasi: string;
       user_id: string;
       status_survey: SurveyStatus;
+      id_material_konduktor: number;
     },
     tx?: Omit<
       PrismaClient<Prisma.PrismaClientOptions, never, DefaultArgs>,

@@ -3,9 +3,11 @@ import { type SurveyStatus } from '@prisma/client';
 /* eslint-disable @typescript-eslint/naming-convention */
 interface SurveyHeader {
   nama_survey: string;
+  nama_pekerjaan: string;
   lokasi: string;
   user_id: string;
   status_survey: SurveyStatus;
+  id_material_konduktor: number;
 }
 
 interface SurveyDetail {

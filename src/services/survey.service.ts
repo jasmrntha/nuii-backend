@@ -104,9 +104,11 @@ export const SurveyService = {
         const header = await SurveyHeader.createHeader(
           {
             nama_survey: request.header.nama_survey,
+            nama_pekerjaan: request.header.nama_pekerjaan,
             lokasi: request.header.lokasi,
             user_id: request.header.user_id,
             status_survey: request.header.status_survey,
+            id_material_konduktor: request.detail.id_material_konduktor,
           },
           prisma,
         );
@@ -286,25 +288,25 @@ export const SurveyService = {
               );
               const totalHargaMaterial =
                 materialData.harga_material *
-                material.kuantitas *
+                Number(material.kuantitas) *
                 konstruksiCount[idKonstruksi];
 
               const totalPasang =
                 materialData.pasang_rab *
-                material.kuantitas *
+                Number(material.kuantitas) *
                 konstruksiCount[idKonstruksi];
 
               const totalBongkar =
                 materialData.bongkar *
-                material.kuantitas *
+                Number(material.kuantitas) *
                 konstruksiCount[idKonstruksi];
 
               return {
                 ...materialData,
-                kategori_material: material.kategori_material,
+                kategori_material: materialData.kategori_material,
                 kuantitas: material.kuantitas,
                 total_kuantitas:
-                  material.kuantitas * konstruksiCount[idKonstruksi],
+                  Number(material.kuantitas) * konstruksiCount[idKonstruksi],
                 total_harga_material: totalHargaMaterial,
                 total_pasang: totalPasang,
                 total_bongkar: totalBongkar,
