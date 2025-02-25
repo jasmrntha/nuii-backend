@@ -23,7 +23,11 @@ import {
   GroundingMaterialRepository,
 } from '../repositories';
 
-function formatWorksheetRow(worksheet: ExcelJS.Worksheet, rowIndex: number) {
+function formatWorksheetRow(
+  worksheet: ExcelJS.Worksheet,
+  rowIndex: number,
+  border?: Partial<ExcelJS.Borders>,
+) {
   const row = worksheet.getRow(rowIndex);
 
   // Ensure the row has at least one value to be recognized
@@ -34,15 +38,19 @@ function formatWorksheetRow(worksheet: ExcelJS.Worksheet, rowIndex: number) {
     } // Set a placeholder value
   }
 
+  if (!border) {
+    border = {
+      top: { style: 'dotted' },
+      left: { style: 'thin' },
+      bottom: { style: 'dotted' },
+      right: { style: 'thin' },
+    };
+  }
+
   row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
     if (colNumber > 1 && colNumber < 18) {
       // Skip column A
-      cell.border = {
-        top: { style: 'dotted' },
-        left: { style: 'thin' },
-        bottom: { style: 'dotted' },
-        right: { style: 'thin' },
-      };
+      cell.border = border;
 
       if (cell.value == '-') {
         cell.value = '';
@@ -949,30 +957,30 @@ export const SurveyService = {
       worksheet.getCell('E8').value = 'URAIAN PEKERJAAN';
       worksheet.getCell('H8').value = ':';
       worksheet.getCell('H8').alignment = { horizontal: 'center' };
-      worksheet.getCell('I8').value =
-        'PASANG BARU KOL ESTETIKA PR. ROYAL MENGANTI RESIDENCE 21 UNIT 2200 VA & 54 UNIT 3500 VA';
+      worksheet.getCell('I8').value = `${survey.nama_survey}`;
 
       worksheet.mergeCells('E9:G9');
       worksheet.getCell('E9').value = 'JENIS';
       worksheet.getCell('H9').value = ':';
       worksheet.getCell('H9').alignment = { horizontal: 'center' };
-      worksheet.getCell('I9').value = 'PEMASANGAN SUTM';
+      worksheet.getCell('I9').value = `${survey.nama_pekerjaan}`;
 
       worksheet.mergeCells('E10:G10');
       worksheet.getCell('E10').value = 'LOKASI';
       worksheet.getCell('H10').value = ':';
       worksheet.getCell('H10').alignment = { horizontal: 'center' };
-      worksheet.getCell('I10').value = 'PR. ROYAL MENGANTI RESIDENCE';
+      worksheet.getCell('I10').value = '-';
 
       worksheet.getCell('H11').value = ':';
       worksheet.getCell('H11').alignment = { horizontal: 'center' };
-      worksheet.getCell('I11').value = 'MENGANTI';
+      worksheet.getCell('I11').value = `${survey.lokasi}`;
 
       worksheet.mergeCells('E12:G12');
       worksheet.getCell('E12').value = 'VOLUME';
       worksheet.getCell('H12').value = ':';
       worksheet.getCell('H12').alignment = { horizontal: 'center' };
-      worksheet.getCell('I12').value = '135';
+      worksheet.getCell('I12').value =
+        `${konduktorCount[survey.id_material_konduktor]}`;
       worksheet.getCell('I12').alignment = { horizontal: 'center' };
       worksheet.getCell('J12').value = 'MS';
       worksheet.getCell('J12').alignment = { horizontal: 'center' };
@@ -1474,7 +1482,7 @@ export const SurveyService = {
         await KonstruksiMaterial.findMaterialForKonstruksiById(38);
 
       for (const material of antiClimbing) {
-        const data = await Material.findMaterialById(material.id);
+        const data = await Material.findMaterialById(material.id_material);
         previousRow += 1;
 
         totalAkhirBerat += (Number(data.berat_material) * totalTiang) / 1000;
@@ -1700,7 +1708,7 @@ export const SurveyService = {
           },
           {
             col: 'E',
-            value: 0,
+            value: { formula: '0', result: 0 },
             isAlign: true,
           },
           {
@@ -1710,7 +1718,7 @@ export const SurveyService = {
           },
           {
             col: 'G',
-            value: totalAkhirBerat,
+            value: material.nomor_material === 534 ? totalAkhirBerat : 0,
             isAlign: true,
           },
           {
@@ -1746,6 +1754,60 @@ export const SurveyService = {
 
         formatWorksheetRow(worksheet, previousRow);
       }
+
+      const lastRow = previousRow;
+
+      previousRow += 1;
+      formatWorksheetRow(worksheet, previousRow);
+
+      previousRow += 1;
+      formatWorksheetRow(worksheet, previousRow);
+
+      previousRow += 1;
+      formatWorksheetRow(worksheet, previousRow);
+
+      previousRow += 1;
+      const totalMaterial = previousRow;
+      worksheet.getCell(`C${previousRow}`).value = '   Jumlah Harga Material';
+      worksheet.getCell(`N${previousRow}`).value = {
+        formula: `SUM(N17:N${lastRow})`,
+      };
+      formatWorksheetRow(worksheet, previousRow);
+
+      previousRow += 1;
+      const totalJasa = previousRow;
+      worksheet.getCell(`C${previousRow}`).value = '   Jumlah Harga Jasa';
+      worksheet.getCell(`O${previousRow}`).value = {
+        formula: `SUM(O17:O${lastRow})`,
+      };
+      worksheet.getCell(`P${previousRow}`).value = {
+        formula: `SUM(P17:P${lastRow})`,
+      };
+      formatWorksheetRow(worksheet, previousRow);
+
+      previousRow += 1;
+      const jumlahHarga = previousRow;
+      worksheet.getCell(`C${previousRow}`).value = '   Jumlah Harga';
+      worksheet.getCell(`Q${previousRow}`).value = {
+        formula: `N${totalMaterial} + O${totalJasa} + P${totalJasa}`,
+      };
+      formatWorksheetRow(worksheet, previousRow);
+
+      previousRow += 1;
+      worksheet.getCell(`C${previousRow}`).value = '   Perkiraan Kerja Tambah';
+      formatWorksheetRow(worksheet, previousRow);
+
+      previousRow += 1;
+      worksheet.getCell(`C${previousRow}`).value = '   T O T A L';
+      worksheet.getCell(`Q${previousRow}`).value = {
+        formula: `Q${jumlahHarga}`,
+      };
+      formatWorksheetRow(worksheet, previousRow, {
+        top: { style: 'dotted' },
+        left: { style: 'thin' },
+        bottom: { style: 'thin' },
+        right: { style: 'thin' },
+      });
 
       worksheet.eachRow(row => {
         row.eachCell(cell => {
