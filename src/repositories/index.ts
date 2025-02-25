@@ -8,3 +8,6 @@ export * from './konstruksi-material.repositories';
 export * from './log.repositories';
 export * from './pole.repositories';
 export * from './grounding.repositories';
+export * from './tipe-pekerjaan.repositories';
+export * from './grounding-material.repositories';
+export * from './pole-material.repositories';

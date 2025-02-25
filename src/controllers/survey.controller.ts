@@ -231,4 +231,29 @@ export const SurveyController = {
       next(error);
     }
   },
+
+  async exportSurveyToExcel(
+    request: Request,
+    response: Response,
+    next: NextFunction,
+  ) {
+    try {
+      const id = request.params.id;
+      const excelBuffer = await SurveyService.exportSurveyToExcel(Number(id));
+      const fileName = 'Survey';
+
+      response.setHeader(
+        'Content-Type',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      );
+      response.setHeader(
+        'Content-Disposition',
+        `attachment; filename=${fileName}.xlsx`,
+      );
+
+      return response.status(StatusCodes.OK).send(excelBuffer);
+    } catch (error: any) {
+      next(error);
+    }
+  },
 };

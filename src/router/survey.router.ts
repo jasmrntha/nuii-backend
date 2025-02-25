@@ -42,5 +42,6 @@ router.get('/', SurveyController.getHeaderOnly);
 router.get('/detail/:id', SurveyController.getSurveyDetail);
 router.get('/report', SurveyController.getAllReport);
 router.get('/report/detail/:id', SurveyController.getReportDetail);
+router.get('/export/excel/:id', SurveyController.exportSurveyToExcel);
 
 export default router;
