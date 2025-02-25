@@ -96,4 +96,12 @@ export const Material = {
       },
     });
   },
+
+  async getAllMaterial() {
+    return await prisma.material.findMany({
+      where: {
+        deleted_at: null,
+      },
+    });
+  },
 };
