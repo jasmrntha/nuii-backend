@@ -71,6 +71,7 @@ export const SurveyDetail = {
     return await prisma.surveyDetail.findUnique({
       where: {
         id,
+        deleted_at: null,
       },
     });
   },

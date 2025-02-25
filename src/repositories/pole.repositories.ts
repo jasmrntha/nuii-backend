@@ -11,4 +11,12 @@ export const PoleRepository = {
       },
     });
   },
+
+  async getPoleById(id: number) {
+    return await prisma.poleSupporter.findUnique({
+      where: {
+        id,
+      },
+    });
+  },
 };

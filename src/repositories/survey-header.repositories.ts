@@ -56,12 +56,13 @@ export const SurveyHeader = {
     return await prisma.surveyHeader.findUnique({
       where: {
         id,
+        status_survey: SurveyStatus.Belum_Disetujui,
       },
     });
   },
   async findSurveyById(id: number) {
     return await prisma.surveyHeader.findUnique({
-      where: { id },
+      where: { id, status_survey: SurveyStatus.Belum_Disetujui },
       include: {
         survey_details: true,
       },
@@ -74,6 +75,7 @@ export const SurveyHeader = {
         survey_details: {
           some: { deleted_at: null },
         },
+        status_survey: SurveyStatus.Belum_Disetujui,
       },
     });
   },
@@ -83,6 +85,7 @@ export const SurveyHeader = {
         survey_details: {
           some: { deleted_at: null },
         },
+        status_survey: SurveyStatus.Belum_Disetujui,
       },
       select: {
         id: true,
@@ -97,6 +100,7 @@ export const SurveyHeader = {
         survey_details: {
           some: { deleted_at: null },
         },
+        status_survey: SurveyStatus.Belum_Disetujui,
       },
     });
   },
@@ -107,6 +111,7 @@ export const SurveyHeader = {
         survey_details: {
           some: { deleted_at: null },
         },
+        status_survey: SurveyStatus.Belum_Disetujui,
       },
       include: {
         survey_details: true,

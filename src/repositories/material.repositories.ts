@@ -93,6 +93,7 @@ export const Material = {
     return await prisma.material.findMany({
       where: {
         id_tipe_material: id_tipe,
+        deleted_at: null,
       },
     });
   },
