@@ -9,13 +9,15 @@ const SurveyHeaderSchema = Joi.object({
   status_survey: Joi.string()
     .valid(...Object.values(SurveyStatus))
     .required(),
+  id_material_konduktor: Joi.number().integer().positive().required(),
+  nama_pekerjaan: Joi.string().required(),
 });
 
 const SurveyDetailSchema = Joi.object({
   id_material_tiang: Joi.number().integer().positive().required(),
-  id_material_konduktor: Joi.number().integer().positive().required(),
   id_konstruksi: Joi.number().integer().positive().required(),
-  nama_pekerjaan: Joi.string().required(),
+  id_pole: Joi.number().integer().positive().required(),
+  id_grounding: Joi.number().integer().positive().required(),
   penyulang: Joi.string().required(),
   panjang_jaringan: Joi.number().min(0).required(),
   long: Joi.string().required(),
