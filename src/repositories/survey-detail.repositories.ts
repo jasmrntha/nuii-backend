@@ -39,10 +39,10 @@ export const SurveyDetail = {
     id: number,
     data: {
       id_material_tiang: number;
-      id_material_konduktor: number;
       id_konstruksi: number;
       id_header: number;
-      nama_pekerjaan: string;
+      id_pole_supporter: number;
+      id_grounding_termination: number;
       penyulang: string;
       panjang_jaringan: number;
       long: string;
