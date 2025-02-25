@@ -59,6 +59,29 @@ function formatWorksheetRow(
   });
 }
 
+function countDistance(
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number,
+): number {
+  const R = 6371; // Radius of the Earth in km
+  const rad = Math.PI / 180;
+
+  // Haversine formula for distance calculation
+  const a =
+    0.5 -
+    Math.cos((lat2 - lat1) * rad) / 2 +
+    (Math.cos(lat1 * rad) *
+      Math.cos(lat2 * rad) *
+      (1 - Math.cos((lon2 - lon1) * rad))) /
+      2;
+
+  const distance = 2 * R * Math.asin(Math.sqrt(a)) * 1000; // Distance in meters
+
+  return distance;
+}
+
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export const SurveyService = {
   async createSurvey(request: CreateSurveyRequest) {
@@ -522,8 +545,30 @@ export const SurveyService = {
         throw new CustomError(StatusCodes.NOT_FOUND, 'Survey Detail Not Found');
       }
 
+      const totalPanjangJaringan = getDetail.reduce(
+        (sum, detail) => sum + detail.panjang_jaringan,
+        0,
+      );
+
+      let totalPanjangJaringanCalculated = 0;
+
+      for (let index = 0; index < getDetail.length - 1; index++) {
+        const detail = getDetail[index];
+        const nextDetail = getDetail[index + 1];
+        totalPanjangJaringanCalculated += countDistance(
+          Number(detail.lat),
+          Number(detail.long),
+          Number(nextDetail.lat),
+          Number(nextDetail.long),
+        );
+      }
+
       return {
-        header: getHeader,
+        header: {
+          ...getHeader,
+          total_panjang_jaringan_manual: totalPanjangJaringan,
+          total_panjang_jaringan_otomatis: totalPanjangJaringanCalculated,
+        },
         detail: getDetail,
       };
     } catch (error) {
