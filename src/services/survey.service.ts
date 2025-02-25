@@ -39,7 +39,7 @@ export const SurveyService = {
       );
 
       const konduktor = await Material.findMaterialById(
-        request.detail.id_material_konduktor,
+        header.id_material_konduktor,
       );
 
       if (!tiang || !konduktor) {
@@ -50,9 +50,10 @@ export const SurveyService = {
         const detail = await SurveyDetail.createDetail(
           {
             id_material_tiang: request.detail.id_material_tiang,
-            id_material_konduktor: request.detail.id_material_konduktor,
             id_konstruksi: request.detail.id_konstruksi,
             id_header: request.id_header,
+            id_pole_supporter: request.detail.id_pole,
+            id_grounding_termination: request.detail.id_grounding,
             nama_pekerjaan: request.detail.nama_pekerjaan,
             penyulang: request.detail.penyulang,
             panjang_jaringan: request.detail.panjang_jaringan,
@@ -92,11 +93,11 @@ export const SurveyService = {
         request.detail.id_material_tiang,
       );
 
-      const konduktor = await Material.findMaterialById(
-        request.detail.id_material_konduktor,
-      );
+      // const konduktor = await Material.findMaterialById(
+      //   request.detail.id_material_konduktor,
+      // );
 
-      if (!tiang || !konduktor) {
+      if (!tiang) {
         throw new CustomError(StatusCodes.NOT_FOUND, 'Material Not Found');
       }
 
@@ -104,9 +105,11 @@ export const SurveyService = {
         const header = await SurveyHeader.createHeader(
           {
             nama_survey: request.header.nama_survey,
+            nama_pekerjaan: request.header.nama_pekerjaan,
             lokasi: request.header.lokasi,
             user_id: request.header.user_id,
             status_survey: request.header.status_survey,
+            id_material_konduktor: request.header.id_material_konduktor,
           },
           prisma,
         );
@@ -114,9 +117,10 @@ export const SurveyService = {
         const detail = await SurveyDetail.createDetail(
           {
             id_material_tiang: request.detail.id_material_tiang,
-            id_material_konduktor: request.detail.id_material_konduktor,
             id_konstruksi: request.detail.id_konstruksi,
             id_header: header.id,
+            id_pole_supporter: request.detail.id_pole,
+            id_grounding_termination: request.detail.id_grounding,
             nama_pekerjaan: request.detail.nama_pekerjaan,
             penyulang: request.detail.penyulang,
             panjang_jaringan: request.detail.panjang_jaringan,
@@ -286,25 +290,25 @@ export const SurveyService = {
               );
               const totalHargaMaterial =
                 materialData.harga_material *
-                material.kuantitas *
+                Number(material.kuantitas) *
                 konstruksiCount[idKonstruksi];
 
               const totalPasang =
                 materialData.pasang_rab *
-                material.kuantitas *
+                Number(material.kuantitas) *
                 konstruksiCount[idKonstruksi];
 
               const totalBongkar =
                 materialData.bongkar *
-                material.kuantitas *
+                Number(material.kuantitas) *
                 konstruksiCount[idKonstruksi];
 
               return {
                 ...materialData,
-                kategori_material: material.kategori_material,
+                kategori_material: materialData.kategori_material,
                 kuantitas: material.kuantitas,
                 total_kuantitas:
-                  material.kuantitas * konstruksiCount[idKonstruksi],
+                  Number(material.kuantitas) * konstruksiCount[idKonstruksi],
                 total_harga_material: totalHargaMaterial,
                 total_pasang: totalPasang,
                 total_bongkar: totalBongkar,

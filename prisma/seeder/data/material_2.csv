@@ -1,0 +1,727 @@
+nomer_material,tipe_material,nama_material,sat,berat,harga material,pasang_rab,bongkar,jenis_material,kategori_material
+1,1,AAAC - 70 sqmm ( SPLN ),M,0.23,21.675,2.474,1.485,MDU PUSAT,PLN
+2,3,AAAC - 150 sqmm ( SPLN ),M,0.47,26.872,4.657,2.794,MDU PUSAT,PLN
+3,3,AAAC - 240 sqmm ( SPLN ),M,0.94,57.662,5.322,3.193,MDU PUSAT,PLN
+4,1,AAAC - S 70 sqmm ( SPLN ),M,0.33,31.887,4.657,2.794,MDU PUSAT,PLN
+5,1,AAAC - S 150 sqmm ( SPLN ),M,0.61,26.310,5.322,3.193,MDU PUSAT,PLN
+6,1,AAAC - S 240 sqmm ( SPLN ),M,1.22,41.777,6.652,3.991,MDU PUSAT,PLN
+7,1,Alluminium Binding Wire Ø 4,M,0.04,9.135,5.795,3.477,NON MDU,TUNAI
+8,1,"Alluminium Tape ((l=10mm, t=0,8mm)",M,0.04,9.398,2.433,1.460,NON MDU,TUNAI
+9,1,"Arding Pipe 1,5 - 5,5 mtr",S,4.19,0,0,0,NON MDU,TUNAI
+10,1,"Arding Pipe 1,5"" - 2,5 mtr",S,1.50,253.976,115.308,69.185,NON MDU,TUNAI
+11,1,"Arding Pipe 1,5"" - 6 mtr",S,3.50,0,0,0,NON MDU,TUNAI
+12,1,"Arm Tie Band 8"" - TM - (l=44mm, t=6mm)",B,2.11,83.737,26.076,15.646,NON MDU,TUNAI
+13,1,"Arm Tie Type 750 - 3/4"" - (t=2,3 mm)",B,1.30,73.791,5.215,3.129,NON MDU,TUNAI
+14,1,"Arm Tie Type 900 - 3/4"" - (t=2,3 mm)",B,1.56,74.415,5.215,3.129,NON MDU,TUNAI
+15,1,MV Guy Insulator ( TM ) - belimbing,B,1.50,85.303,7.501,4.500,NON MDU,TUNAI
+16,1,Baut mata,B,0.85,25.811,4.500,2.700,NON MDU,TUNAI
+17,1,BC 50 MM,M,0.19,91.011,4.056,2.434,NON MDU,TUNAI
+18,1,"Begel Ornament 4"" - 10"" - (l=44mm, t=6mm)",B,2.11,155.483,16.805,10.083,NON MDU,TUNAI
+19,1,"Begel Ornament 4"" - 3 u/ Ferlengk - (l=44mm, t=6mm)",B,2.11,80.016,16.805,10.083,NON MDU,TUNAI
+20,1,Beton Block 400 x 400 x 100 - kotak,B,21.15,187.872,131.780,79.068,NON MDU,TUNAI
+21,1,"Beugels 3""+Bolt & nut - (l=44mm, t=6mm)",B,1.20,39.813,6.664,3.998,NON MDU,TUNAI
+22,1,"Beugels u/ dask 1.5 ""/ fixing colar + dekschroeven",B,0.25,0,0,0,NON MDU,TUNAI
+23,1,Klem C 50 mm,B,0.40,55.970,13.328,7.997,NON MDU,TUNAI
+24,1,Bimetal Connector Al/Cu -150 mm,B,0.40,77.434,20.282,12.169,NON MDU,TUNAI
+25,1,"Bolt & Nut 3/16 x 0,5""",B,0.20,6.354,2.318,1.391,NON MDU,TUNAI
+26,1,Bolt & Nut M.16 x 140 (517/U/2009),S,0.26,26.472,3.303,1.982,NON MDU,TUNAI
+27,1,Bolt & Nut M.16 x 120 (517/U/2009),S,0.26,23.914,3.187,1.912,NON MDU,TUNAI
+28,1,Double Arm Bolt & Nut M.16 x 350 (besi as),S,0.68,66.778,4.346,2.608,NON MDU,TUNAI
+29,1,Double Arm Bolt & Nut M.16 x 400 (besi as),S,0.76,73.261,4.636,2.781,NON MDU,TUNAI
+30,1,Bolt & Nut M.16 x 50 (517/U/2009),B,0.14,14.432,2.492,1.495,NON MDU,TUNAI
+31,1,Bolt & Nut M.16 x 75 (517/U/2009),B,0.18,17.626,2.550,1.530,NON MDU,TUNAI
+32,1,Bolt M.12 x 30 - CU,B,0.14,16.723,2.608,1.565,NON MDU,TUNAI
+33,1,Bongkar BC 16 mm / AAAC 35 MM,M,0.23,0,0,0,NON MDU,TUNAI
+34,1,Borring untuk Kabel tanah,M,0.00,1.102.632,897.188,538.313,NON MDU,TUNAI
+35,1,Bundled End Assembly ( BEA ) - komplit,S,0.75,72.238,30.986,18.592,NON MDU,TUNAI
+36,1,Comp. Joint Bimetal Al/Cu - 70/70 mm (507/U/2009),B,0.40,83.341,13.866,8.320,NON MDU,TUNAI
+37,1,Connector for Alluminium 70 mm - Type H (507/U/2009),B,0.10,23.764,22.532,13.519,NON MDU,TUNAI
+38,1,Compresion Joint Sleeve 95 mm (507/U/2009),B,0.18,112.333,13.328,7.997,NON MDU,TUNAI
+39,1,Concrete Slove / pengaman kabel uk.450x300x40 mm,B,0.01,24.363,2.897,1.738,NON MDU,TUNAI
+40,1,Conn. press AL/AL type 6-25 mm2 / 35-70 mm2 + vinil masive,B,0.40,17.537,13.328,7.997,NON MDU,TUNAI
+41,1,Conn. press AL/AL type 6-25 mm2 / 6-25 mm2 + vinil masive,B,0.40,18.409,4.926,2.955,NON MDU,TUNAI
+42,1,Connector press AL/AL type 35-16mm2 & Cover+tanda phasa,B,0.10,18.730,13.354,8.012,NON MDU,TUNAI
+43,1,Connector press AL/AL type 70-35mm2 & Cover+tanda phasa,B,0.10,30.698,13.354,8.012,NON MDU,TUNAI
+44,1,Terminal Lug 50 mm2 AL-CU. (507/U/2009),B,0.04,81.167,12.748,7.649,NON MDU,TUNAI
+45,1,Terminal Lug 70 mm2 AL-CU. (507/U/2009),B,0.04,60.500,12.748,7.649,NON MDU,TUNAI
+46,1,"Cross arm - UNP 100 x 50 x 5 mm - 3000 mm - (l=50mm, t=5mm, tgg=100mm)",B,21.00,763.486,69.185,41.511,NON MDU,TUNAI
+47,1,"Cross arm - UNP 100 x 50 x 5 mm - 6000 mm- (l=50mm, t=5mm, tgg=100mm)",B,42.00,1.537.047,98.835,59.301,NON MDU,TUNAI
+48,1,"Cross Arm Clevis  - TM - (l=50mm, t=6mm)",B,0.82,43.910,6.954,4.172,NON MDU,TUNAI
+49,1,Cross Arm UNP 100 x 50 x 5 - 2.000 - tumpu/tarik,B,14.00,495.328,46.123,27.674,NON MDU,TUNAI
+50,1,Cross Arm UNP 100 x 50 x 5 - 2.000 - tumpu/tarik,B,14.00,495.328,46.123,27.674,NON MDU,TUNAI
+51,1,"Cross Arm UNP-80 - 2500 (l=45mm,t=3,5mm,tgg=80mm)",S,8.00,482.745,49.418,29.651,NON MDU,TUNAI
+52,1,"Cross Arm UNP 100 x 50 x 5 mm - 2500 mm - (l=50mm, t=5mm, tgg=100mm)",B,14.28,642.111,59.301,35.581,NON MDU,TUNAI
+53,1,"Cross Arm UNP-80 - 3000 (l=45mm,t=3,5mm,tgg=80mm)",B,8.93,494.896,52.712,31.627,NON MDU,TUNAI
+54,1,Cross Arm Type 1.500 NP. 10,B,5.71,377.941,29.651,17.790,NON MDU,TUNAI
+55,1,Cross Arm NP. 10 - Type 750,B,2.98,233.361,14.487,8.692,NON MDU,TUNAI
+56,1,"Cross Arm type 1.200 NP. 6,5",B,5.64,123.614,15.166,9.100,NON MDU,TUNAI
+57,1,"Cross Arm type 1.000 NP. 6,5",B,4.70,162.884,14.825,8.895,NON MDU,TUNAI
+58,1,Cross Arm type 900 NP. 8,B,3.57,158.644,13.907,8.344,NON MDU,TUNAI
+59,1,Cross Arm type 500 - NP. 8,B,1.79,104.018,8.113,4.868,NON MDU,TUNAI
+60,1,Cubicle Pelanggan lengkap,B,3.57,0,0,0,NON MDU,TUNAI
+61,1,Kotak APP type C - IA Lengkap,S,50.00,0,0,0,NON MDU,TUNAI
+62,1,CT LS 80 / ……. Amp ( sesuai daya ),S,0.00,0,0,0,NON MDU,TUNAI
+63,1,Footstuken+bolt & nut,S,0.35,39.148,7.243,4.346,NON MDU,TUNAI
+64,1,Plate Cooper,B,0.35,259.161,46.123,27.674,NON MDU,TUNAI
+65,1,NH Fuse,B,0.00,0,0,0,NON MDU,TUNAI
+66,1,CT TR 100/5 - 250/5 A,B,1.20,690.000,69.537,41.722,MDU UP3,PLN
+67,1,"Cubicle Single Incoming , 630 A , 20kV, 16kA Lengkap dengan Incoming Cubicle, LBS , manualMetering Cubicle , VT, manualOutgoing Cubicle , CB Drawout , CT, PT, OCR , motorized (Type DM1W)",S,2250,104.194.433,1.983.421,1.190.053,MDU PUSAT,PLN
+68,1,"manualOutgoing Cubicle , CB Drawout , CT, PT, OCR , motorized (Type DM1W)",S,0.00,0,0,0,NON MDU,TUNAI
+69,1,Dead End Assembly ( DEA ) - komplit,S,1.78,113.561,49.255,29.553,NON MDU,TUNAI
+70,1,"Double Arm Band 8"" - 7"" - TM (504/U/2009)",B,2.24,168.820,23.179,13.907,NON MDU,TUNAI
+71,1,"Double Guy Wire Band 7"" - TM",S,1.83,101.612,20.282,12.169,NON MDU,TUNAI
+72,1,Dudukan Jointing,S,15.00,108.258,13.328,7.997,NON MDU,TUNAI
+73,1,"Ground Rod 16 mm - 2,5 m+clamp - TM - besi As, Electroplatting tembaga 35 micron",S,0.75,291.799,56.007,33.604,NON MDU,TUNAI
+74,1,"Fixing Collar 1.5 """,B,0.50,12.910,13.178,7.907,NON MDU,TUNAI
+75,1,Polymer Cut Out Switch 24 kV + Fuse,S,33.33,902.054,18.543,11.126,MDU PUSAT,PLN
+76,1,3,M,0.44,12.479,3.295,1.977,NON MDU,TUNAI
+77,3,Galvanized Steel Wire 35 mm  (542/U/2009),M,0.44,21.238,3.558,2.135,NON MDU,TUNAI
+78,1,Galvanized Steel Wire 70 mm  (542/U/2009),M,0.95,34.940,3.822,2.293,NON MDU,TUNAI
+79,1,"Gaspijp 1,5"" - 2,3 m, u/ dask Galv",B,3.50,0,0,0,NON MDU,TUNAI
+80,1,"Gaspijp 3 "" - 6 m. Galv",B,6.98,1.167.947,39.534,23.720,NON MDU,TUNAI
+81,1,"Gaspijp 4 "" - 6 m. Galv",B,7.54,1.860.104,30.968,18.581,NON MDU,TUNAI
+82,1,"Gembok ""setara SOLEX""",B,0.40,326.049,5.000,3.000,MDU UP3,PLN
+83,1,"Earthing Rod 16 mm - 1,5 m+clamp - TR- besi As, Electroplatting tembaga 35 micron",S,0.45,220.258,59.301,35.581,NON MDU,TUNAI
+84,1,"Guy Wire Rod 5/8"" ( 15 mm ) - 1.800 mm (514/U/2009)",B,3.48,142.554,32.945,19.767,NON MDU,TUNAI
+85,1,"Guy Wire Rod 5/8"" ( 15 mm ) - 2.500 mm  (514/U/2009)",B,6.96,179.755,32.945,19.767,NON MDU,TUNAI
+86,1,"Guy Wire Timble (t=2,5mm)",B,0.13,5.299,3.822,2.293,NON MDU,TUNAI
+87,1,Insulated Tension Joint 70 mm,B,0.10,49.401,7.243,4.346,NON MDU,TUNAI
+88,1,Insulated Non Tension Joint 50 mm,B,0.10,33.033,0,0,NON MDU,TUNAI
+89,1,Jasa Perakitan / Montage,Ls,0.00,0,45.335,27.201,NON MDU,TUNAI
+90,1,Jasa Perakitan / Montage,Ls,0.00,0,45.335,27.201,NON MDU,TUNAI
+91,1,Jasa Perakitan / Montage,Ls,0.00,0,45.335,27.201,NON MDU,TUNAI
+92,1,Joint Sleeve 70 mm  (507/U/2009),B,0.07,88.851,12.169,7.301,NON MDU,TUNAI
+93,1,Joint Sleeve 150 mm (507/U/2009),B,0.14,154.601,24.709,14.825,NON MDU,TUNAI
+94,1,Joint Sleeve 240 mm,B,0.28,195.293,24.709,14.825,NON MDU,TUNAI
+95,1,Jointing Termination 24 Kv - uk. 150 mm - 3 Core/XLPE,S,7.50,7.264.397,2.297.212,1.378.327,MDU UID,PLN
+96,1,Jointing Termination 24 Kv - uk. 150 mm - 1 Core/MVTIC,S,7.50,7.175.372,1.689.473,1.013.684,MDU UID,PLN
+97,1,Jointing Termination 24 Kv - uk. 240 mm - 3 Core/XLPE,S,7.50,7.381.743,1.689.473,1.013.684,MDU UID,PLN
+98,1,Kanal NP6-60 cm + Bolt&nut,B,3.25,47.488,6.954,4.172,MDU UID,PLN
+99,1,Kawat Segel @ 15 cm,B,0.03,419,2.500,1.500,NON MDU,TUNAI
+100,1,"Klem Begel 3/4"" u/ kabel",B,0.76,27.114,6.954,4.172,NON MDU,TUNAI
+101,1,"Klem Begel U 2"" - (t=3mm, l=35mm)",B,0.45,33.952,6.374,3.825,NON MDU,TUNAI
+102,1,"Klem Begel U 3"" - (t=3mm, l=35mm)",B,0.45,39.813,6.664,3.998,NON MDU,TUNAI
+103,1,"Klem Begel U 10"" - TM - (l=44mm, t=6mm)",B,2.24,78.455,7.012,4.207,NON MDU,TUNAI
+104,1,"Klem Begel U 11"" - TM - (l=44mm, t=6mm)",B,2.46,89.886,7.012,4.207,NON MDU,TUNAI
+105,1,Klem kabel/ Cable suport (508/U/2009),B,1.20,1.398,3.750,2.250,NON MDU,TUNAI
+106,1,"Knee + sook 3"" besi",B,1.00,217.355,9.851,5.911,NON MDU,TUNAI
+107,1,"Knee 2"" - PVC",B,0.78,20.972,6.251,3.750,NON MDU,TUNAI
+108,1,Kotak APP u/kWh Meter Elektronik + Modem,S,3.50,0,0,0,NON MDU,TUNAI
+109,1,kWh Meter 3 ph Elektronik lengkap Modem,S,3.25,0,260.763,156.458,NON MDU,TUNAI
+110,1,kWh m 3 phs. Elektronik lengkap dengan Modem,S,3.25,1.442.800,231.789,139.073,MDU PUSAT,PLN
+111,1,kWh m 3 phs. 220/380 V - 20/60 A ST Clas 1 Elektronik,S,2.50,0,234.686,140.812,NON MDU,TUNAI
+112,1,"kWh m TM Kelas 0,5s dilengkapi fasilitas AMR",S,4.20,1.436.450,260.763,156.458,MDU PUSAT,PLN
+113,1,"KWh meter Electronic Anti Temper 1 Phasa 2 kawat 50 Hz, 5(20) klass 1 lengkap MCB",S,2.20,351.802,60.005,36.003,MDU PUSAT,PLN
+114,1,"L bouw 3 "" PVC",S,0.65,68.246,6.954,4.172,NON MDU,TUNAI
+115,1,Large Angle Assembly ( LAA ),S,2.75,120.241,57.947,34.768,NON MDU,TUNAI
+116,1,"Lengkap dengan Incoming Cubicle, LBS , manualMetering Cubicle , VT,",S,0.00,0,0,0,NON MDU,TUNAI
+117,1,Lightning Arrester 24 kV - 10 kA,S,8.38,715.315,45.199,27.119,MDU PUSAT,PLN
+118,1,Line Tap Connector 50-70 mm type G,B,0.40,24.000,11.589,6.954,NON MDU,TUNAI
+119,1,Line Tap Connector Al 150 - 50 mm type G,B,0.40,36.294,13.328,7.997,NON MDU,TUNAI
+120,1,C Clamp Cu - 50 mm,B,0.40,31.350,13.328,7.997,NON MDU,TUNAI
+121,1,Line Tap Connector Type 70 - 150 mm,B,0.40,30.967,11.589,6.954,NON MDU,TUNAI
+122,1,Line Tap Connector Type Al - 150 mm,B,0.80,36.377,13.328,7.997,NON MDU,TUNAI
+123,1,Link (506/U/2009),B,0.23,4.176,2.000,1.200,NON MDU,TUNAI
+124,1,Load Break Switch 24 kV - 630 A Manual,S,250.00,91.243.638,1.345.782,807.469,MDU PUSAT,PLN
+125,1,"Load Break Switch 24 kV-630 A Motorized 12,5 kA c/w PTCC",S,185.00,68.961.402,1.794.376,1.076.626,MDU PUSAT,PLN
+126,1,Load Segel @ tiap 5 meter,B,1.75,70.840,5.795,3.477,NON MDU,TUNAI
+127,1,"Lodden manchet 1.5 "" berat 0.95 - 1 kg",B,1.00,0,3.627,2.176,NON MDU,TUNAI
+128,1,Termination Outdoor 24 kV - uk. 150 mm - 1 Core/MVTIC,S,7.50,5.503.235,2.510.903,1.506.542,MDU UID,PLN
+129,1,Termination Idoor 24 kV - uk. 150 mm - 1 Core/MVTIC,S,7.50,4.180.342,2.510.903,1.506.542,MDU UID,PLN
+130,1,MCB 230 V - 35 A s/d 50 A - 1 Phasa,B,0.25,35.972,13.413,8.048,MDU PUSAT,PLN
+131,1,MCB 230 V - 2 A s/d 35 A - 1 Phasa,B,0.25,35.972,10.001,6.001,MDU PUSAT,PLN
+132,1,MCB 230 V - 10 s/d 50 A - 3 Phasa,B,0.25,163.076,14.487,8.692,MDU PUSAT,PLN
+133,1,MCB 3 phs. 230 V - 25 A s/d 50 A,B,0.30,500.000,12.001,7.201,MDU PUSAT,PLN
+134,1,MCCB 63 s/d 100 A,B,2.50,0,0,0,MDU UP3,PLN
+135,1,Mountage,Ls,0.00,0,0,0,NON MDU,TUNAI
+136,1,Mountage SLM 250 kva keatas,Ls,0.00,167.163,185.431,111.259,-,PLN
+137,1,Mountage kWH 5/20 A,S,0.00,0,86.921,52.153,38.169,PLN
+138,1,NA2XSEYBY 3 x 150 mm2;20KV;UG,M,10.50,376.091,41.492,24.895,MDU PUSAT,PLN
+139,1,NA2XSEYBY 3 x 240 mm2;20KV;UG,M,12.43,434.745,46.103,27.662,MDU PUSAT,PLN
+140,1,NFA2XSEY-T 3 x 150 + 1 x 95 mm2 - CWS,M,5.29,312.182,46.103,27.662,MDU PUSAT,PLN
+141,1,NFA2XSEY-T 3 x 240 + 1 x 95 mm2 - CWS,M,9.52,375.350,55.323,33.194,MDU PUSAT,PLN
+142,1,NYA 35 sqmm ( SPLN ),M,0.10,79.270,8.001,4.800,NON MDU,TUNAI
+143,1,NYA 50 sqmm ( SPLN ),M,0.19,92.494,11.501,6.901,NON MDU,TUNAI
+144,1,"NYAF / NYA 2,5 mm² ( SPLN )",M,0.12,7.457,5.500,3.300,NON MDU,TUNAI
+145,1,NYAF 10 mm² ( SPLN ),M,0.12,34.596,1.917,1.150,NON MDU,TUNAI
+146,1,NYAF 35 sqmm u/ bawah Arrester ( SPLN ),M,0.10,92.467,11.501,6.901,NON MDU,TUNAI
+147,1,NYY 1 x 70 mm2 ( SPLN ),M,0.10,184.028,0,0,NON MDU,TUNAI
+148,1,NYY 1 x 150 sqmm - Input ( SPLN ),M,0.38,208.393,18.458,11.075,MDU PUSAT,PLN
+149,1,NYY 4 x 70 sqmm - Output ( SPLN ),M,0.76,399.688,31.871,19.123,MDU PUSAT,PLN
+150,1,NYY 4x2.5 mm untuk APP ( SPLN ),M,0.20,21.811,5.500,3.300,NON MDU,TUNAI
+151,1,OA Kast type I Sistim Press cat powder coating,B,18.00,0,434.605,260.763,NON MDU,TUNAI
+152,1,OA Kast type III lengkap cat powder coating,S,55.00,166.689,28.974,17.384,MDU UID,PLN
+153,1,OA Kast type VI cat powder coating,S,45.00,1.884.972,260.763,156.458,MDU UID,PLN
+154,1,"OA Kast type VI ,Kecil cat powder coating",S,35.00,124.494,17.384,10.431,MDU UID,PLN
+155,1,"Ornament Kabel Band 6""",S,2.11,46.092,7.533,4.520,NON MDU,TUNAI
+156,1,"Ornament Kabel Band 9/10."" - 3/4""",S,1.40,28.317,10.720,6.432,NON MDU,TUNAI
+157,1,Pasir urug,M3,0.00,664.419,25.842,15.505,NON MDU,TUNAI
+158,1,Patok Tanda Kabel (169/K/2009),B,5.00,99.028,29.651,17.790,NON MDU,TUNAI
+159,1,"Pipa Air 3/4"" - 3 mtr. u/ pelindung Ground  (555/U/2009)",B,0.00,120.474,11.860,7.116,NON MDU,TUNAI
+160,1,"Pin Post Insulator 20 Kv;12,5 kN - Porcelain",S,8.00,231.633,26.356,15.814,MDU PUSAT,PLN
+161,1,"Pipa Air 3/4"" - 2 mtr. u/ pelindung Ground  (555/U/2009)",B,0.00,81.762,10.542,6.325,NON MDU,TUNAI
+162,1,"Pipa Air 3/4"" - 4 mtr. u/ pelindung Ground  (555/U/2009)",B,0.93,159.177,11.531,6.918,NON MDU,TUNAI
+163,1,"Pipa Air 3/4"" -1 mtr. u/ pelindung Ground (555/U/2009)",B,0.23,47.149,7.907,4.744,NON MDU,TUNAI
+164,1,"Pipa Air 3/4"" - 6 mtr tebal 1,6 mm",B,1.85,211.163,10.431,6.258,NON MDU,TUNAI
+165,1,"Pipa Air 2"" - 1,5 meter ( medium ) (555/U/2009)",B,8.38,287.459,41.064,24.639,NON MDU,TUNAI
+166,1,"Pipa Air 2"" - 3 meter ( medium )  (555/U/2009)",B,2.06,346.941,15.155,9.093,NON MDU,TUNAI
+167,1,"Pipa Air 2"" - 6 mtr tbl 2,5 mm ( medium )",B,2.06,734.315,29.651,17.790,NON MDU,TUNAI
+168,1,"Pipa Air 3"" - 1 meter ( medium )  (555/U/2009)",B,1.40,282.365,17.790,10.674,NON MDU,TUNAI
+169,1,"Pipa Air 3"" - 5 meter ( medium )  tbl = 3 mm",B,8.38,682.032,42.237,25.342,NON MDU,TUNAI
+170,1,"Pipa Air 3"" - 6 mtr tbl 2,5 mm ( medium )",B,8.38,734.315,29.651,17.790,NON MDU,TUNAI
+171,1,"Pipa Air 2"" - 5 mtr tbl 2,5 mm ( medium )",B,1.71,639.861,19.108,11.465,NON MDU,TUNAI
+172,1,"Pipa Air PVC 2"" - 3 meter ( AW )",B,0.00,97.713,7.533,4.520,NON MDU,TUNAI
+173,1,"Pipa Air PVC 3"" - 5 meter ( AW )",B,0.00,659.539,19.175,11.505,NON MDU,TUNAI
+174,1,"Pipa Air 2"" - 2 meter / Strut Tie (555/U/2009)",S,2.06,265.388,14.487,8.692,NON MDU,TUNAI
+175,1,"Pipa Air 3/4"" - 1 meter medium (555/U/2009)",B,0.00,47.149,7.907,4.744,NON MDU,TUNAI
+176,1,"Pipa Air 4"" - 6 mter u/ pelindung jalan  (555/U/2009)",B,9.88,1.860.104,30.968,18.581,NON MDU,TUNAI
+177,1,"Pipa Air 4"" - 6 mtr (555/U/2009)",B,9.88,1.292.576,75.331,45.199,NON MDU,TUNAI
+178,1,"Pipa Pelindung 3/4"" - 2000  (512/U/2009)",B,1.85,81.870,11.201,6.721,NON MDU,TUNAI
+179,1,"Pipa Pelindung 3/4"" - 3000 (555/U/2009)",B,2.25,120.474,11.860,7.116,NON MDU,TUNAI
+180,1,Plastic Strap Medium,B,0.08,2.355,2.318,1.391,NON MDU,TUNAI
+181,1,Plat Cooper 4 x 40 mm,M,1.60,259.161,46.123,27.674,NON MDU,TUNAI
+182,1,Pole Block (504/U/2009),S,1.68,211.466,92.246,55.348,NON MDU,TUNAI
+183,1,"Pole Block Band 12"" - TM (557/U/2009)",S,21.00,73.985,23.062,13.837,NON MDU,TUNAI
+184,1,"Pole Bracket 3-6""",B,0.50,39.573,7.243,4.346,NON MDU,TUNAI
+185,1,"Pole Bracket 6"" - 8""",B,0.50,41.271,8.692,5.215,NON MDU,TUNAI
+186,1,Pondasi type A ( 1 tiang )  (91/U/2009),B,0.00,492.236,295.332,177.199,NON MDU,TUNAI
+187,1,Pondasi type D ( 2 Tiang ) (91/U/2009),B,0.00,946.608,553.748,332.249,NON MDU,TUNAI
+188,1,"Pondasi u/Gaspijp 3""",Ls,0.00,157.785,98.835,59.301,NON MDU,TUNAI
+189,1,Preformed Termination 35 mm  (542/U/2009),B,0.50,52.034,17.384,10.431,NON MDU,TUNAI
+190,1,Preformed Termination 70 mm  (542/U/2009),B,0.40,76.420,20.282,12.169,NON MDU,TUNAI
+191,1,"Protective cap 1.5 """,B,0.50,9.050,863,518,NON MDU,TUNAI
+192,1,"PVC 3/4"" 6 meter",B,0.85,0,0,0,NON MDU,TUNAI
+193,1,Service wedge clamp 2/4 x 6/10 mm,Bh.,0.75,5.383,4.346,2.608,NON MDU,TUNAI
+194,1,Service wedge clamp 4/4 x 10/16 mm,B,0.75,6.296,5.679,3.407,NON MDU,TUNAI
+195,1,"Single Arm Band 8"" (504/U/2009)",B,2.24,113.614,10.431,6.258,NON MDU,TUNAI
+196,1,"Single Guy Wire Band 8"" - TM (513/U/2009)",S,1.40,86.625,14.487,8.692,NON MDU,TUNAI
+197,1,Small Angle Assembly ( SAA ),S,1.76,89.689,28.974,17.384,NON MDU,TUNAI
+198,1,"Sock Pipa PVC 3""",B,0.04,17.430,4.250,2.550,NON MDU,TUNAI
+199,1,Preformed Termination 22 mm  (542/U/2009),B,0.50,29.040,14.487,8.692,NON MDU,TUNAI
+200,1,Square pipe 75 x 75 x 3 - 2000 - tumpu (502/U/2009),B,14.00,0,0,0,NON MDU,TUNAI
+201,1,"Square Washer - (l=50mm, p=50mm, t=2,5mm)",B,0.05,5.541,1.449,869,NON MDU,TUNAI
+202,1,Stainless Steel Strip non magnetic,M,0.02,13.548,5.563,3.338,NON MDU,TUNAI
+203,1,Stoping Buckle non magnetic,B,0.23,3.982,3.651,2.190,NON MDU,TUNAI
+204,1,Strain Clamp 70 - 150 mm - 2 nut,S,0.95,96.584,17.384,10.431,NON MDU,TUNAI
+205,1,Strain Clamp 150 - 240 mm - 3 nut,S,1.20,189.858,23.179,13.907,NON MDU,TUNAI
+206,1,Strain Rod Insulator (88/U/2009),S,9.00,431.581,23.179,13.907,MDU PUSAT,PLN
+207,1,Strainhook & clamp u/. Gaspijp - 1.5',B,0.95,15.403,11.589,6.954,NON MDU,TUNAI
+208,1,"Stroppen u/ loden manchet 1.5""",B,0.85,0,0,0,NON MDU,TUNAI
+209,1,"Strut Arm TM - (l=50mm, t=5mm, tgg=100mm) NP 10 - 30 cm",B,2.80,60.192,20.282,12.169,NON MDU,TUNAI
+210,1,"Strut Arm TR - (l=50mm, t=5mm, tgg=100mm) NP 10 - 25 cm",B,2.00,65.948,20.282,12.169,NON MDU,TUNAI
+211,1,"Strut Tie 2000 - pipe 2""  (512/U/2009)",B,1.37,165.448,11.589,6.954,NON MDU,TUNAI
+212,1,Suspension Clamp For MV,B,0.82,29.370,5.215,3.129,NON MDU,TUNAI
+213,1,"Tanda Bahaya Besar - (l=400mm, tgg=450mm)",B,0.08,82.598,5.215,3.129,NON MDU,TUNAI
+214,1,NFA2X-T;3x70 + 1x50 mm2,M,1.05,75.237,16.257,9.754,NON MDU,TUNAI
+215,1,TC 3 x 50 + 1 x 35 sqmm ( SPLN ),M,0.77,34.095,11.632,6.979,NON MDU,TUNAI
+216,1,Terminal Lug 150 mm - Al 2 Nut,B,0.40,125.750,13.907,8.344,NON MDU,TUNAI
+217,1,Terminal Lug 150 mm - Al / Cu (507/U/2009),B,0.20,128.879,13.907,8.344,NON MDU,TUNAI
+218,1,Terminal Lug 150 mm - Al 2 Nute,B,0.20,125.750,13.907,8.344,NON MDU,TUNAI
+219,1,Terminal Lug 35 mm - Cu (507/U/2009),B,0.40,23.100,9.561,5.737,NON MDU,TUNAI
+220,1,Terminal Lug 35-50 mm - Cu  (507/U/2009),B,0.40,64.504,10.129,6.077,NON MDU,TUNAI
+221,1,Terminal Lug 50 mm - Al (507/U/2009),B,0.23,29.400,12.748,7.649,NON MDU,TUNAI
+222,1,Terminal Lug 50 mm - Cu (507/U/2009),B,0.40,27.500,12.748,7.649,NON MDU,TUNAI
+223,1,Terminal Lug 70 mm - Al/Cu 2 Nut,B,0.40,157.850,12.748,7.649,NON MDU,TUNAI
+224,1,Terminal lug 70 mm AL/CU u/ CO  (507/U/2009),B,0.23,60.500,12.748,7.649,NON MDU,TUNAI
+225,1,Terminal Lug 70 mm - Cu  (507/U/2009),B,0.40,73.733,12.748,7.649,NON MDU,TUNAI
+226,1,Terminal Lug 70 mm Al (507/U/2009),B,0.10,29.600,12.748,7.649,NON MDU,TUNAI
+227,1,Terminal Lug 70 mm Al - Cu  (507/U/2009),B,0.10,60.500,12.748,7.649,NON MDU,TUNAI
+228,1,Terminal Lug 150 mm - Cu (507/U/2009),B,0.80,138.836,13.907,8.344,NON MDU,TUNAI
+229,1,Terminal Lug 50 mm - Cu (507/U/2009),B,0.40,27.500,12.748,7.649,NON MDU,TUNAI
+230,1,Terminal Lug 70 mm - Cu  (507/U/2009),B,0.40,73.733,12.748,7.649,NON MDU,TUNAI
+231,1,Termination ID 3 X 150 MM2 u/XLPE,S,7.50,7.264.397,2.297.212,1.378.327,MDU UID,PLN
+232,1,Termination ID 3 X 240 MM2 u/XLPE,S,7.50,5.685.530,1.689.473,1.013.684,MDU UID,PLN
+233,1,Termination OD 3 X 150 MM2 u/XLPE,S,7.50,6.680.875,2.297.212,1.378.327,MDU UID,PLN
+234,1,Termination OD 3 X 240 MM2 u/ XLPE,S,7.50,6.680.875,1.689.473,1.013.684,MDU UID,PLN
+235,1,Termination Out Door 3 X 150 + 1 x 95 mm u/MVTIC,S,7.50,0,0,0,NON MDU,TUNAI
+236,2,Tiang Beton 11 - 200 daN (524/U/2009),B,900.00,4.439.661,1.325.750,795.450,MDU PUSAT,PLN
+237,2,Tiang Beton 11 - 200 daN + E  (524/U/2009),B,900.00,4.439.661,1.325.750,795.450,MDU PUSAT,PLN
+238,2,Tiang Beton 11 - 350 daN (524/U/2009),B,925.00,5.980.453,1.395.523,837.314,MDU PUSAT,PLN
+239,2,Tiang Beton 11 - 350 daN + E (524/U/2009),B,925.00,5.980.453,1.395.523,837.314,MDU PUSAT,PLN
+240,2,Tiang Beton 12 - 200 daN (524/U/2009),B,1000,6.210.394,1.446.270,867.762,MDU PUSAT,PLN
+241,2,Tiang Beton 12 - 350 daN  (524/U/2009),B,1001,6.850.711,1.522.393,913.436,MDU PUSAT,PLN
+242,2,Tiang Beton 12 - 350 daN + E BC,B,1002,6.850.711,1.522.393,913.436,MDU PUSAT,PLN
+243,2,Tiang Beton 13 - 350 daN + E,B,1150,6.702.592,1.928.000,1.156.800,NON MDU,TUNAI
+244,2,Tiang Beton 13 - 350 daN + E BC,B,1000,6.702.592,1.928.000,1.156.800,MDU PUSAT,PLN
+245,2,Tiang Beton 14 - 350 daN + E,B,1350,8.280.220,1.687.312,1.012.387,MDU PUSAT,PLN
+246,2,Tiang Beton 14 - 350 daN + E BC,B,1150,8.280.220,1.687.312,1.012.387,MDU PUSAT,PLN
+247,2,Tiang Beton 9 - 200 daN,B,350.00,3.150.830,1.103.660,662.196,NON MDU,TUNAI
+248,2,Tiang Beton 9 - 200 daN + E,B,530.00,3.150.830,1.103.660,662.196,MDU PUSAT,PLN
+249,2,Tiang Beton 9 - 200 daN + E BC,B,530.00,3.150.830,1.103.660,662.196,MDU PUSAT,PLN
+250,1,Timah Segel,B,0.20,78.032,1.750,1.050,NON MDU,TUNAI
+251,1,Timah solder + pasta,Ls,0.30,3.171,2.000,1.200,NON MDU,TUNAI
+252,1,Terminal Lug 50 mm - Cu/Al (507/U/2009),B,0.40,81.167,12.748,7.649,NON MDU,TUNAI
+253,1,Trafo Distribusi 20 kV 3 PH 50 KVA Yzn5 ( D3 ),B,465.50,22.553.316,901.216,540.730,MDU PUSAT,PLN
+254,1,Trafo Distribusi 20 kV 3 PH 100 KVA Yzn5 ( D3 ),B,680.50,33.126.830,1.001.352,600.811,MDU PUSAT,PLN
+255,1,Trafo Distribusi 20 kV 3 PH 160 KVA Yzn5 ( D3 ),B,885.50,34.238.060,1.201.622,720.973,MDU PUSAT,PLN
+256,1,Trafo Distribusi 20 kV 3 PH 200 KVA Dyn5 ( D3 ),B,1350,38.791.987,1.301.757,781.054,MDU PUSAT,PLN
+257,1,Trafo Distribusi 20 kV 3 PH 250 KVA Dyn5 ( D3 ),B,1250,45.491.117,1.502.027,901.216,MDU PUSAT,PLN
+258,1,Trafo Single Phase 25 kVA s/d 50 kVA,B,57.46,0,801.081,480.649,MDU PUSAT,PLN
+259,1,"Cross Arm UNP-80 - 6000 (l=45mm,t=3,5mm,tgg=80mm)",B,37.75,934.227,85.657,51.394,NON MDU,TUNAI
+260,1,"Besi siku L.50.50.4,5 - 6000",B,20.24,691.152,51.683,31.010,NON MDU,TUNAI
+261,1,"Besi siku L.35.35.2,5 - 6000",B,7.95,0,0,0,NON MDU,TUNAI
+262,1,"Besi plat - 6000 (l=44mm, t=6mm)",B,12.43,0,0,0,NON MDU,TUNAI
+263,1,"Besi plat - 6000 (l=35mm, t=6mm)",B,9.89,0,0,0,NON MDU,TUNAI
+264,1,Transformer Platform for 1 Pole (Konst. SPLN D3),S,74.05,0,0,0,NON MDU,TUNAI
+265,1,Transformer Platform for 2 Pole (Konst. SPLN D3),S,94.04,0,0,0,NON MDU,TUNAI
+266,1,"Turn Buckle TM 3/4"" (7000 kg) - TM - (l=44mm, t=6mm)",B,2.60,172.112,17.384,10.431,NON MDU,TUNAI
+267,1,"Turn Buckle TR 5/8"" (4000 kg) - TR - (l=35mm, t=6mm)",S,1.80,130.764,16.225,9.735,NON MDU,TUNAI
+268,1,Twisted Cable 2 x 10 mm² - Al,M,0.55,4.140,2.318,1.391,MDU PUSAT,PLN
+269,1,Twisted Cable 3 x 50 + 1 x 35mm²,M,0.77,34.095,11.632,6.979,NON MDU,TUNAI
+270,1,Twisted Cable 4 x 16 mm²,M,1.10,12.300,10.431,6.258,MDU UP3,PLN
+271,1,U - Bolt + Steel Plate TM/TR Bolt M.18 + 2 nut,S,1.55,97.053,6.374,3.825,NON MDU,TUNAI
+272,1,"U - Strap - TM - (l=44mm, t=6mm)",B,1.02,50.450,6.954,4.172,NON MDU,TUNAI
+273,1,"L Bow PVC 2""",B,0.50,36.119,6.664,3.998,NON MDU,TUNAI
+274,1,"L Bow PVC 3""",B,0.65,62.777,6.954,4.172,NON MDU,TUNAI
+275,1,Union Zadel 5/8 mm,B,0.00,0,0,0,NON MDU,TUNAI
+276,1,"Verlenk stuck Pipa 3"" - 3 mt - Medium",S,4.94,448.381,19.767,11.860,NON MDU,TUNAI
+277,1,"Verlenk stuck Pipa 4"" - 3 mt - Medium",S,4.94,961.456,25.697,15.418,NON MDU,TUNAI
+278,1,"Verlenk stuck Pipa 4"" - 4 mt - Medium",S,6.59,1.266.312,25.697,15.418,NON MDU,TUNAI
+279,1,"Verlenk stuck Square Pipe 75x75x3,0 - 2 mt",S,14.00,0,0,0,NON MDU,TUNAI
+280,1,Voetstuken lengkap dng bolt & nut,B,0.35,0,4.413,2.648,NON MDU,TUNAI
+281,1,Wire Clip (510/U/2009),S,0.09,6.373,5.215,3.129,NON MDU,TUNAI
+282,1,1 Unit External PT 20 kV (phasa-phasa),S,70.00,4.769.294,112.013,67.208,MDU PUSAT,PLN
+283,1,"Box RTU protocol DNP 3, IEC (siap komunikasi GSM ) + Kabel data",S,25.00,0,347.684,208.610,NON MDU,TUNAI
+284,1,Setting LBS Motorized,S,0.00,0,0,0,NON MDU,TUNAI
+285,1,Line Tap Connector Cu - 25 mm / Klem C (507/U/2009),B,0.40,36.500,12.169,7.301,NON MDU,TUNAI
+286,1,Line Tap Connector Cu - 50 mm / Klem C (507/U/2009),B,0.40,58.500,13.328,7.997,NON MDU,TUNAI
+287,1,Line Tap Connector Cu - 150 mm / Klem C (507/U/2009),B,0.40,139.500,0,0,NON MDU,TUNAI
+288,1,Bongkar Konstruksi TM-1 Murni & Retour,S,31.50,0,0,0,NON MDU,TUNAI
+289,1,Bongkar Konstruksi TM-1 Numpang & Retour,S,33.50,0,0,0,NON MDU,TUNAI
+290,1,Plat nama Penyulang Besar Double,,,0,0,0,NON MDU,TUNAI
+291,1,Plat nama Penyulang Kecil,,,0,0,0,NON MDU,TUNAI
+292,1,Plat Tembaga Uk.400 x 80 x 5 (untuk jumper Termination),B,1.43,422.306,26.356,15.814,NON MDU,TUNAI
+293,1,Plat Tembaga Uk.600 x 50 x 5 (untuk jumper Termination),B,1.34,395.730,29.651,17.790,NON MDU,TUNAI
+294,1,"Pipa PVC 4"" & Tutup jumperan",B,0.20,92.225,12.748,7.649,NON MDU,TUNAI
+295,1,Cross Arm type 1.200 NP. 10,B,5.64,404.662,22.403,13.442,NON MDU,TUNAI
+296,1,Segel Plastik,B,0.02,4.800,725,435,MDU UP3,PLN
+297,1,Plat Tembaga 600 X 50 X5,,-,395.730,29.651,17.790,NON MDU,TUNAI
+298,1,Galian Aspal & pengurugan kembali Aspal (tebal Aspal 30 cm + dipadatkan),M3,-,0,395.341,237.205,NON MDU,TUNAI
+299,1,LV Insulator A1,B,0.80,76.432,8.692,5.215,MDU PUSAT,PLN
+300,1,"Multi Chamber Arreter 24 kV - 1,5 kA MCA",S,1.70,0,0,0,MDU UP3,PLN
+301,1,Glass Indicator MCA,B,-,0,0,0,NON MDU,TUNAI
+302,1,Bracket Protection Device / Fitting Clamp MCA,B,-,8.858,4.056,2.434,NON MDU,TUNAI
+303,1,Conductor Clamp + Bolt & Nut MCA,S,-,4.381,8.113,4.868,NON MDU,TUNAI
+304,1,Twisted Cable 4 x 35 mm²,M,0.59,46.893,13.328,7.997,MDU UP3,PLN
+305,1,Terminal Lug 240 mm - Al / Cu - 2 Hole (507/U/2009),B,0.20,273.938,14.487,8.692,NON MDU,TUNAI
+306,1,Dudukan Trafo 1 Tiang Lengkap,S,-,4.746.632,628.032,376.819,NON MDU,TUNAI
+307,1,Dudukan Trafo 2 Tiang Lengkap Plat Bordess,S,-,9.854.433,897.188,538.313,NON MDU,TUNAI
+308,1,"MCCB 63 A , 25 kA, 3 Phs (Adj)",B,-,1.042.058,63.742,38.245,MDU UP3,PLN
+309,1,"MCCB 80 A , 18 kA, 3 Phs (Fixed)",B,-,1.097.200,63.742,38.245,MDU UP3,PLN
+310,1,"MCCB 100 A , 18 kA, 3 Phs (Fixed)",B,-,1.097.200,81.126,48.676,MDU UP3,PLN
+311,1,"MCCB 125 A , 18 kA, 3 Phs (Fixed)",B,-,1.796.000,63.742,38.245,MDU UP3,PLN
+312,1,"MCCB 160 A , 18 kA, 3 Phs (Fixed)",B,-,1.867.600,63.742,38.245,MDU UP3,PLN
+313,1,"MCCB 200 A , 18 kA, 3 Phs (Fixed)",B,-,2.000.400,63.742,38.245,MDU UP3,PLN
+314,1,"MCCB 225 A , 18 kA, 3 Phs (Fixed)",B,-,2.000.400,63.742,38.245,MDU UP3,PLN
+315,1,"MCCB 250 A , 18 kA, 3 Phs (Fixed)",B,-,2.000.400,63.742,38.245,MDU UP3,PLN
+316,1,"MCCB 300 A , 36 kA, 3 Phs (Fixed)",B,-,4.327.700,63.742,38.245,MDU UP3,PLN
+317,1,,,-,0,0,0,NON MDU,TUNAI
+318,1,NFA2X-T;3x70 + 1x50 mm2; 4x70 mm2,M,-,75.237,16.257,9.754,MDU PUSAT,PLN
+319,1,"Relay Protection (OCR, DGR, EFR, UFR, OFR)",B,-,19.578.817,559.971,335.983,MDU UID,PLN
+320,1,Terminasi Elastimold Single Core 95-300 mm2,S,-,13.755.170,1.650.156,990.094,NON MDU,TUNAI
+321,1,Terminasi Elastimold Three Core 95-300 mm2,S,-,16.672.933,1.650.156,990.094,NON MDU,TUNAI
+322,1,Tiang Besi 9 Meter 200 daN,B,-,4.394.730,580.105,348.063,MDU PUSAT,PLN
+323,1,Cover Bushing Trafo,B,-,257.400,16.225,9.735,NON MDU,TUNAI
+324,1,Cover FCO,B,-,292.500,16.225,9.735,NON MDU,TUNAI
+325,1,Cover LA,B,-,147.000,16.225,9.735,NON MDU,TUNAI
+326,1,"CT TR 100/5A ; Class 0,5S ; 5 VA (Window)",B,-,690.000,69.537,41.722,MDU UP3,PLN
+327,1,"CT TR 150/5A ; Class 0,5S ; 5 VA (Window)",B,-,690.000,69.537,41.722,MDU UP3,PLN
+328,1,"CT TR 200/5A ; Class 0,5S ; 5 VA (Window)",B,-,650.000,69.537,41.722,MDU UP3,PLN
+329,1,"CT TR 250/5A ; Class 0,5S ; 5 VA (Window)",B,-,650.000,69.537,41.722,MDU UP3,PLN
+330,1,"CT TR 300/5A ; Class 0,5S ; 5 VA (Window)",B,-,650.000,69.537,41.722,MDU UP3,PLN
+331,1,UPS 1500 VA 220 VAC,B,-,68.043,14.487,8.692,MDU UID,PLN
+332,1,"Pipa Galvanized 3"" - 4 meter (tebal= 2,5 mm)",B,32.37,378.887,25.038,15.023,NON MDU,TUNAI
+333,1,"Pipa Galvanized 3/4"" - 6 meter (tebal= 1,6 mm)",B,6.01,211.163,10.431,6.258,NON MDU,TUNAI
+334,1,"Pipa Galvanized 1"" - 6 meter (tebal= 2,0 mm)",B,9.17,0,0,0,NON MDU,TUNAI
+335,1,"Pipa Galvanized 1,5"" - 6 meter (tebal= 2,0 mm)",B,13.61,401.403,8.938,5.363,NON MDU,TUNAI
+336,1,"Pipa Galvanized 2"" - 6 meter (tebal= 2,5 mm)",B,21.27,734.315,29.651,17.790,NON MDU,TUNAI
+337,1,"Pipa Galvanized 3"" - 6 meter (tebal= 2,5 mm)",B,32.37,1.167.947,39.534,23.720,NON MDU,TUNAI
+338,1,"Pipa Galvanized 4"" - 6 meter (tebal= 3,2 mm)",B,52.94,1.860.104,30.968,18.581,NON MDU,TUNAI
+339,1,"Pipa Galvanized 5"" - 6 meter (tebal= 4,0 mm)",B,80.50,1.956.961,46.123,27.674,NON MDU,TUNAI
+340,1,"Pipa Galvanized 6"" - 6 meter (tebal= 5,0 mm)",B,118.38,4.316.282,52.153,31.292,NON MDU,TUNAI
+341,1,Cross Arm UNP 100 x 50 x 5 - 2.500 - tumpu (501/U/2009),B,118.38,642.111,59.301,35.581,NON MDU,TUNAI
+342,1,Besi siku 50 x 50 x 4 -900 mm,B,2.25,108.258,13.328,7.997,NON MDU,TUNAI
+343,1,"Klem Begel U 7"" - TM - (l=44mm, t=6mm)",B,2.10,61.573,6.954,4.172,NON MDU,TUNAI
+344,1,"Klem Begel U 8"" - TM - (l=44mm, t=6mm)",B,1.90,66.145,6.954,4.172,NON MDU,TUNAI
+345,1,"Pipa Air 3"" - 1 meter ( medium ) + Sock Draad 3""",B,3.06,282.365,17.790,10.674,NON MDU,TUNAI
+346,1,"Pipa Air 2"" - 1 meter ( medium ) + Sock Draad 2""",B,2.06,165.681,11.531,6.918,NON MDU,TUNAI
+347,1,"Pipa Air 3"" - 2 meter ( medium ) + Sock Draad 3""",B,4.63,430.392,18.120,10.872,NON MDU,TUNAI
+348,1,"Pipa Air 2"" - 2 meter ( medium ) + Sock Draad 2""",B,3.26,287.968,13.837,8.302,NON MDU,TUNAI
+349,1,"Pipa Air 3"" - 1,5 meter ( medium ) u/ bawah LV Panel",B,3.84,0,0,0,NON MDU,TUNAI
+350,1,"Pipa Air 2"" - 1,5 meter ( medium ) u/ bawah LV Panel",B,3.26,287.459,41.064,24.639,NON MDU,TUNAI
+351,1,Cross Arm type 2.000 NP. 8,B,8.93,369.782,46.123,27.674,NON MDU,TUNAI
+352,1,Cross Arm type 2.000 NP.10,B,14.28,495.328,46.123,27.674,NON MDU,TUNAI
+353,1,Heat Shrink u/ tanda phasa,B,0.02,131.910,13.001,7.801,NON MDU,TUNAI
+354,1,Cross Arm type 2.500 NP. 65,B,7.23,396.664,39.534,23.720,NON MDU,TUNAI
+355,1,Besi Siku L 50 x 50 x 1000 Tiang Pagar luar kiri & kanan,S,3.50,135.110,14.496,8.698,NON MDU,TUNAI
+356,1,Besi Siku L 50 x 50 x 2500 u/ Pelat Bordes,S,8.75,328.435,17.131,10.279,NON MDU,TUNAI
+357,1,Besi Siku L 50 x 50 x 2500 u/ pengaman pagar belakang,S,8.75,328.435,17.131,10.279,NON MDU,TUNAI
+358,1,Besi Siku L 50 x 50 x 260 u/ tempat kayu penghalang,S,0.91,36.000,6.954,4.172,NON MDU,TUNAI
+359,1,Besi Siku L 50 x 50 x 465 u/ penghubung,S,1.82,57.824,8.113,4.868,NON MDU,TUNAI
+360,1,Cross Arm type 1.500 NP - 8,S,5.96,270.923,17.790,10.674,NON MDU,TUNAI
+361,1,Cross Arm type 750 NP - 8 u/ dudukan trafo,S,2.98,136.784,9.561,5.737,NON MDU,TUNAI
+362,1,Pelat Bordes 2500 x 30 x 3,S,4.50,293.698,16.888,10.133,NON MDU,TUNAI
+363,1,"Penghalang kayu jati 60 x 40 x 2500 / Besi siku L.50.50.4,5",S,2.50,176.583,28.974,17.384,NON MDU,TUNAI
+364,2,Tiang Beton 12 - 200 daN + E (524/U/2009),B,1000,6.210.394,1.446.270,867.762,MDU PUSAT,PLN
+365,1,"LV Panel 250A s/d 400A, lubang atas",S,60.00,0,849.080,509.448,MDU PUSAT,PLN
+366,1,AAAC - S 150 sqmm ( ex. J - Proc ),M,0.61,26.310,5.322,3.193,MDU PUSAT,PLN
+367,1,Angkutan Material Gresik - Bawean,RIT,-,0,0,0,NON MDU,TUNAI
+368,1,CT TM Indoor 10-20/5-5 sd 400-,B,18.00,2.361.100,118.602,71.161,MDU PUSAT,PLN
+369,1,CT TM Indoor 50-100/5-5 (Ring),B,18.00,7.415.080,118.602,71.161,MDU PUSAT,PLN
+370,1,PT TM Indoor 20000/V3 : 100/V3,B,-,3.710.980,98.835,59.301,MDU PUSAT,PLN
+371,1,,-,-,0,0,0,NON MDU,TUNAI
+372,1,NFA2XSEY-T 3 x 150 + 1 x 95 mm2 - CWS ( ex. J - Proc ),M,5.29,62.107,46.103,27.662,MDU UP4,PLN
+373,1,NA2XSEYBY 3 x 240 mm2 ( ex. J - Proc ),M,12.43,434.745,46.103,27.662,MDU PUSAT,PLN
+374,1,AAAC 150 sqmm ( ex. E - Proc ),M,0.47,26.872,4.657,2.794,MDU PUSAT,PLN
+375,1,AAAC - S 150 sqmm ( ex. E - Proc ),M,0.61,26.310,5.322,3.193,MDU PUSAT,PLN
+376,1,"Beugel Bev Gaspipj 3"" x 10""",B,-,86.337,9.742,5.845,NON MDU,TUNAI
+377,1,"Verlog sox PVC 3"" - 4"" + isolasi pelindung",B,-,21.209,254,152,NON MDU,TUNAI
+378,1,,,-,0,0,0,NON MDU,TUNAI
+379,1,,,-,0,0,0,NON MDU,TUNAI
+380,1,,,-,0,0,0,NON MDU,TUNAI
+381,1,"LV Panel 630A, 4 Jurusan (SPLN D3.016-1 : 2010)-LBS",S,75.00,22.092.608,849.080,509.448,MDU PUSAT,PLN
+382,1,"LV Panel 250A, 2 Jurusan (SPLN D3.016-1 : 2010)-MCCB",S,75.00,12.219.690,701.414,420.848,MDU PUSAT,PLN
+383,1,Conn.press Al 35-50 mm + cover vinil untuk kumisan,B,0.40,22.600,11.589,6.954,NON MDU,TUNAI
+384,1,Line Tap Connector ( type press ) 6-25 / 35-70 mm + heatshrink,B,0.40,17.537,13.328,7.997,NON MDU,TUNAI
+385,1,Line Tap Connector ( type press ) 35-70 / 35-70 mm + scoth,B,0.40,24.692,13.328,7.997,NON MDU,TUNAI
+386,1,TC 35 mm - 50 cm untuk kumisan,M,0.26,7.457,4.636,2.781,NON MDU,TUNAI
+387,1,TC 3 x 70 + 1 x 50 sqmm ( ex. E - Proc ),M,1.05,0,16.257,9.754,NON MDU,TUNAI
+388,1,"Ground Wire Clamp Type A - TM - (l=50mm, t=6mm, p=300mm)",B,1.02,59.412,9.561,5.737,NON MDU,TUNAI
+389,1,"Ground Wire Clamp Type B - TM - (l=50mm, t=6mm, p=300mm)",B,1.02,59.412,9.561,5.737,NON MDU,TUNAI
+390,1,"Ground Wire Clamp Type C - TM - (l=50mm, t=6mm, p=300mm)",B,1.50,80.630,9.561,5.737,NON MDU,TUNAI
+391,1,"Cousen/Thimble - (t=2,5mm)",B,0.01,10.646,2.608,1.565,NON MDU,TUNAI
+392,1,Preformed Termination 22 mm,B,0.25,29.040,14.487,8.692,NON MDU,TUNAI
+393,1,Wire Clip 22 mm,B,0.04,6.373,5.215,3.129,NON MDU,TUNAI
+394,1,Galvanized Steel Wire 22 mm,M,0.22,12.479,3.295,1.977,NON MDU,TUNAI
+395,1,Bolt & Nut M.8 x 30,B,0.14,2.796,2.318,1.391,NON MDU,TUNAI
+396,1,Suspension Clamp 50 mm,B,0.20,29.500,8.204,4.922,NON MDU,TUNAI
+397,1,Strain Clamp 50 mm,B,0.30,88.000,7.299,4.379,NON MDU,TUNAI
+398,1,"Single Guy Wire Band 6"" - TR - (l=35mm, t=6mm)",S,1.40,64.923,10.603,6.362,NON MDU,TUNAI
+399,1,"Single Arm Band 6"" - TR (l=35mm, t=6mm)",B,2.24,80.555,10.431,6.258,NON MDU,TUNAI
+400,1,Square pipe 75 x 75 x 3 - 3000,B,21.00,0,0,0,NON MDU,TUNAI
+401,1,"L Bow Besi 2""",B,0.50,130.110,7.533,4.520,NON MDU,TUNAI
+402,1,"L Bow Besi 3""",B,0.65,233.276,8.113,4.868,NON MDU,TUNAI
+403,1,Bundl.Cond.3x50 + 1x35 mm - 50 cm ( kumis ),B,0.40,35.155,12.732,7.639,NON MDU,TUNAI
+404,1,"Cross Arm UNP 100 x 50 x 5 - 2.000 - tarik - (l=50mm, t=5mm, tgg=100mm)",B,16.80,495.328,46.123,27.674,NON MDU,TUNAI
+405,1,"Cross Arm UNP 100 x 50 x 5 - 2.000 - tumpu - (l=50mm, t=5mm, tgg=100mm)",B,16.80,495.328,46.123,27.674,NON MDU,TUNAI
+406,1,C Clamp 25 mm,B,0.40,34.460,5.430,3.258,NON MDU,TUNAI
+407,1,"Square pipe 75 x 75 x 3,2 - 3000 - tumpu (522/U/2009)",B,24.00,0,0,0,NON MDU,TUNAI
+408,1,"Square pipe 75 x 75 x 3,2 - 6000 - tumpu (522/U/2009)",B,42.00,0,0,0,NON MDU,TUNAI
+409,1,"Pipa Air 3"" - 2 meter ( medium 2,5mm )",B,8.38,430.392,18.120,10.872,NON MDU,TUNAI
+410,1,Disconnecting Switch 20 kV - … A Out Door,U,42.00,13.025.729,225.030,135.018,MDU UP3,PLN
+411,1,"Disconnecting Switch 20 kV - … A In Door - 25,8 kV",U,42.00,0,153.149,91.889,MDU UP3,PLN
+412,1,"Besi Siku L 50x50x4,5 mm - 2500 mm",B,1.40,328.435,17.131,10.279,NON MDU,TUNAI
+413,1,"Single Guy Wire Band 8"" - TM (l=44mm, t=3,5 mm) untuk Ground Shield Wire",S,1.10,86.625,14.487,8.692,NON MDU,TUNAI
+414,1,"Arm Tie Band 8"" ~ 9"" - - TM (l=44mm, t=3,5 mm) untuk Ground Shield Wire",S,1.10,83.629,25.898,15.539,NON MDU,TUNAI
+415,1,APIK 1 ( Posisi di Insulator @ 1 mtr = 3 bh),Titik,1.20,0,0,0,NON MDU,TUNAI
+416,1,APIK 2 ( Posisi di Konduktor @ 4 meter ),Mtr,1.20,0,0,0,NON MDU,TUNAI
+417,1,Live Line Connector / LTC 50-150,B,0.50,289.676,39.185,23.511,NON MDU,TUNAI
+418,1,Live Line Connector / LTC 70-150,B,0.60,289.450,44.300,26.580,NON MDU,TUNAI
+419,1,Polymer Cut Out Switch 24 Kv - 100 kA,S,1.50,902.054,18.543,11.126,MDU PUSAT,PLN
+420,1,Polymer Arrester 24 kV - 10 kA,S,1.70,717.008,28.974,17.384,MDU PUSAT,PLN
+421,1,"Battery Charger ( input 220 VAC, Output 24VDC, 65 Ah )",S,33.33,0,0,0,NON MDU,TUNAI
+422,1,Automatic Transfer Switch lengkap dg Box,S,33.33,46.271.999,0,0,NON MDU,TUNAI
+423,1,"DS out door 25,8 kV - 800 A",S,105.00,0,206.733,124.040,MDU UP3,PLN
+424,1,LBS Motorized + RTU + Kabel Data,S,165.00,85.891.742,1.794.376,1.076.626,MDU PUSAT,PLN
+425,1,Recloser Motorized + RTU + Kabel Data,S,185.00,183.935.660,2.242.971,1.345.782,MDU UID,PLN
+426,1,Cubicle Pelanggan (LBS Non Motorized ),Unit,85.00,0,0,0,NON MDU,TUNAI
+427,1,Cubicle Pelanggan ( CBOM ),Unit,85.00,0,0,0,NON MDU,TUNAI
+428,1,"Besi Siku L 50x50x3,2 mm - 6000 mm",B,1.40,691.152,51.683,31.010,NON MDU,TUNAI
+429,1,Suspension Clamp Bracket ( Load 700 kg ),B,0.65,26.700,12.241,7.344,NON MDU,TUNAI
+430,1,Suspension Clamp,B,0.15,29.500,8.204,4.922,NON MDU,TUNAI
+431,1,Tension Bracket ( Load 600 kg ),B,0.69,29.501,7.511,4.507,NON MDU,TUNAI
+432,1,Strain Clamp (TR),B,0.47,0,0,0,NON MDU,TUNAI
+433,1,"PVC 2"" - 50 cm",B,0.29,0,0,0,NON MDU,TUNAI
+434,1,Dead End Tubes / Bundled End Protection + komplit,B,0.19,82.126,5.795,3.477,NON MDU,TUNAI
+435,1,Plastic Strap,B,0.08,2.355,2.318,1.391,NON MDU,TUNAI
+436,1,Isolated All. Binding - 4 mm Ø 6,M,0.10,9.135,5.795,3.477,NON MDU,TUNAI
+437,1,Cross Arm UNP 100 x 50 x5 - 2.500 - tumpu,B,0.10,642.111,56.327,33.796,NON MDU,TUNAI
+438,1,"Pipa Air 2"" - 2 meter ( medium )",B,2.79,255.132,13.254,7.952,NON MDU,TUNAI
+439,1,Galian tanah & pengurugan kembali,M3,-,0,263.561,158.136,NON MDU,TUNAI
+440,1,"Pipa Air 3"" - 2 meter ( medium 2,5mm ) + Plat GW Clamp Type A",B,4.19,430.392,18.120,10.872,NON MDU,TUNAI
+441,1,Ground Wire Clamp Type A  ( Khusus Verlenk ),B,1.02,54.266,9.014,5.408,NON MDU,TUNAI
+442,1,Kotak Box Terminal ( persiapan SLO ),B,0.19,47.296,2.043,1.226,MDU UID,PLN
+443,1,LBS Motorized Non RTU,S,165.00,68.961.402,1.588.435,953.061,MDU PUSAT,PLN
+444,1,LVCO + ACCESOSORIESS,B,0.29,0,0,0,MDU PUSAT,PLN
+445,1,Joint Sleeve Non Tenion 150 mm,B,0.57,71.725,22.532,13.519,NON MDU,TUNAI
+446,1,Klem C - 25/25 mm - Cu,B,0.20,45.623,6.674,4.004,NON MDU,TUNAI
+447,1,"Penghalang Panjat / Anti climbing 9"" - 10"" (l=35mm, t=3,2mm, besi 10mm)",S,1.40,124.956,18.026,10.816,NON MDU,TUNAI
+448,1,Tanda Bahaya Kecil,B,0.08,28.563,2.897,1.738,NON MDU,TUNAI
+449,1,Under Frequency Relay ( UFR ),S,1.50,0,0,0,MDU UP3,PLN
+450,1,Digital Timer range time 0 - 30 hari,B,0.05,0,0,0,NON MDU,TUNAI
+451,1,"NYAF 1,5 mm² ( SPLN )",M,0.02,4.059,5.500,3.300,NON MDU,TUNAI
+452,1,MCCB 63 s/d 300 A,B,2.50,0,63.615,38.169,MDU UP3,PLN
+453,1,"Sock Draad Besi 3"" - 4""",B,0.65,108.460,12.144,7.286,NON MDU,TUNAI
+454,1,OA Kast type I C1 Sistim Press cat powder coating,B,18.00,3.095.031,434.605,260.763,MDU UID,PLN
+455,1,ZCT 50/5 - 100/5 A,B,1.20,0,295.332,177.199,NON MDU,TUNAI
+456,1,Gembok Electronic,B,0.20,3.786.825,20.002,12.001,MDU UP3,PLN
+457,1,NYY 4 x 4 mm u/ Wirring Panel,M,3.50,44.407,15.001,9.001,NON MDU,TUNAI
+458,1,NYY 4 x 6 mm u/ Wirring Panel,M,4.50,66.782,20.002,12.001,NON MDU,TUNAI
+459,1,,,-,0,0,0,NON MDU,TUNAI
+460,1,Angkutan Material,km/ton,,0,0,0,NON MDU,TUNAI
+461,1,Preformed Termination 110 mm,B,0.40,0,0,0,NON MDU,TUNAI
+462,1,Polymer Pin Insulator 20 kV,S,0.55,212.400,6.663,3.998,MDU PUSAT,PLN
+463,1,Polymer Strain Insulator 20 kV lengkap (SIR),S,4.00,230.501,11.259,6.756,MDU PUSAT,PLN
+464,1,Plat Tembaga untuk sambungan Termination + baut,B,0.20,0,0,0,NON MDU,TUNAI
+465,1,Begel Klem kaca mata + Bolt 3 u/Steel 70 mm,B,0.20,0,0,0,NON MDU,TUNAI
+466,1,Guy Insulator LV (TR) - belimbing,B,0.80,59.375,6.501,3.900,NON MDU,TUNAI
+467,1,Guy Insulator MV (TM) - belimbing,B,1.20,85.303,7.501,4.500,NON MDU,TUNAI
+468,1,Pipa Wespex 25 mm untuk AAAC 150mm,M,1.10,20.600,22.364,13.418,NON MDU,TUNAI
+469,1,Preformed Side Tie Double 150mm (Semi Cond/non metalic/Composite),B,0.20,200.250,8.692,5.215,NON MDU,TUNAI
+470,1,"LV Panel 250A, 2 Jurusan (SPLN D3.016-1 : 2010)-LBS",S,75.00,11.379.240,701.414,420.848,MDU PUSAT,PLN
+471,1,"LV Panel 400A, 4 Jurusan (SPLN D3.016-1 : 2010)-LBS",S,115.00,14.091.139,849.080,509.448,MDU PUSAT,PLN
+472,1,Preformed Top Tie 150mm (Semi Cond/non metalic/Composite),B,0.20,106.000,11.589,6.954,NON MDU,TUNAI
+473,1,Preformed Side Tie 150mm (Semi Cond/non metalic/Composite),B,0.20,106.000,8.692,5.215,NON MDU,TUNAI
+474,1,"Pipa Air 2"" - 5 meter ( medium )  (555/U/2009)",B,2.06,639.861,19.108,11.465,NON MDU,TUNAI
+475,1,"Pipa Air 2"" - 1 meter ( medium ) + draad u/L Bow besi",B,2.06,165.681,11.531,6.918,NON MDU,TUNAI
+476,1,"Pipa Air 3"" - 1 meter ( medium ) + draad  u/ L Bow besi",B,2.06,282.365,17.790,10.674,NON MDU,TUNAI
+477,1,"L Bow 3"" besi + sock draad dalam",B,3.00,238.619,12.169,7.301,NON MDU,TUNAI
+478,1,"L Bow 2"" besi + sock draad dalam",B,1.50,157.110,11.010,6.606,NON MDU,TUNAI
+479,1,"Pipa Air 2"" - 1,5 meter ( medium ) + draad u/L Bow besi",B,2.06,287.459,41.064,24.639,NON MDU,TUNAI
+480,1,"Pipa Air 3"" - 1,5 meter ( medium ) + draad  u/ L Bow besi",B,2.06,0,0,0,NON MDU,TUNAI
+481,1,Bolt M.12 x 30 + Washer  Cu,B,0.14,16.723,2.608,1.565,NON MDU,TUNAI
+482,1,Galvanized Steel Wire 110 mm,M,0.95,0,0,0,NON MDU,TUNAI
+483,1,Tekep (MV Cover),B,0.75,106.254,20.421,12.253,NON MDU,TUNAI
+484,1,Semi Cond. Preformed Top Tie,B,0.75,106.000,11.589,6.954,NON MDU,TUNAI
+485,1,Semi Cond. Preformed Side Tie,B,0.75,106.000,8.692,5.215,NON MDU,TUNAI
+486,1,Potensial Trafo (PT) 20 kV - Outdoor,B,15.00,4.769.294,112.013,67.208,MDU PUSAT,PLN
+487,1,Current Trafo (CT) 20 kV - Outdoor,B,18.00,4.042.338,118.602,71.161,MDU PUSAT,PLN
+488,1,"Meter Elektronik (ME) 3 ph - 4 W , teg: 57,7/100V; Arus :5A. Class: 0,5",S,2.50,1.436.450,434.605,260.763,MDU UP3,PLN
+489,1,Kotak APP type VI 1 (satu) pintu/kaca,S,112.00,1.884.972,260.763,156.458,MDU UID,PLN
+490,1,NYY 4 x 10 mm u/ Wirring CT,M,4.50,126.454,0,0,NON MDU,TUNAI
+491,1,Mountage PT-CT Exim,Ls,0.00,0,0,0,NON MDU,TUNAI
+492,1,"Gaspijp 1,5"" - 4,0 m, Galvanized",B,3.50,0,0,0,NON MDU,TUNAI
+493,1,"Cross Arm type 1.200 NP. 8,0",B,7.64,173.544,0,0,NON MDU,TUNAI
+494,1,Live Line Connector 150 - 240 mm,B,7.64,312.609,51.683,31.010,NON MDU,TUNAI
+495,1,"Dudukan : Trafo Cantol, Pipa Kabel, PHB-TR & Dudukan Arrester",S,75.00,6.112.197,628.032,376.819,NON MDU,TUNAI
+496,1,"Dudukan : Trafo Portal, Pipa Kabel, PHB-TR & Dudukan Arrester",S,115.00,11.214.960,897.188,538.313,NON MDU,TUNAI
+497,1,Semi Cond. Preformed Side Tie Double,B,0.75,200.250,8.692,5.215,NON MDU,TUNAI
+498,1,PHB - TR 2 Jurusan 400 A - SPLN D5.016.1 : 2010,B,45.00,11.379.240,553.748,332.249,MDU PUSAT,PLN
+499,2,Tiang Beton 14 - 500 daN + E,B,1375,8.891.907,1.553.429,932.057,MDU PUSAT,PLN
+500,1,Plat Extension GW,,-,0,0,0,NON MDU,TUNAI
+501,1,"Double Arm Band 6"" - TM (l=44mm, t=6mm)",B,2.24,152.731,20.861,12.517,NON MDU,TUNAI
+502,1,"Arm Tie Band 7"" - TM",B,2.11,76.023,26.076,15.646,NON MDU,TUNAI
+503,1,Bolt & Nut M.16 x 110,S,0.26,16.986,0,0,NON MDU,TUNAI
+504,1,Jointing Termination 3 X 240 + 1 x 95 mm,S,7.50,0,0,0,NON MDU,TUNAI
+505,1,"Cross Arm type 3.000 NP. 6,5",B,4.70,437.469,56.007,33.604,NON MDU,TUNAI
+506,1,"Pipa Air 3"" - 2 meter ( medium 2,5mm ) + Plat GW Clamp Type A",B,4.19,430.392,18.120,10.872,NON MDU,TUNAI
+507,1,"Pipa Air 3"" - 2 meter ( medium 2,5mm ) + Plat GW Clamp Type B",B,4.19,463.505,18.120,10.872,NON MDU,TUNAI
+508,1,"Pipa Air 3"" - 2 meter ( medium 2,5mm ) + Plat GW Clamp Type C",B,4.19,445.845,18.120,10.872,NON MDU,TUNAI
+509,1,"Single Guy Wire Band 6""-7"" - Lebar 35, tebal 3,5 mm - GSW",S,1.40,76.248,10.431,6.258,NON MDU,TUNAI
+510,1,"Single Guy Wire Band 3""-4"" - Lebar 35, tebal 3,5 mm - GSW",S,1.40,56.631,8.692,5.215,NON MDU,TUNAI
+511,1,Cross Arm type 500 - NP. 10,B,2.39,153.010,13.328,7.997,NON MDU,TUNAI
+512,1,Cross Arm type 1.000 NP.10,B,7.14,258.991,19.108,11.465,NON MDU,TUNAI
+513,1,Dudukan Recloser lengkap,B,16.50,0,0,0,NON MDU,TUNAI
+514,1,Dudukan LBS Motorized lengkap,B,16.50,0,0,0,NON MDU,TUNAI
+515,1,1 Unit External CT 20 kV Oout Door,S,70.00,4.042.338,70.711,42.427,MDU PUSAT,PLN
+516,1,Klem C - 150/35 mm - Cu,B,0.20,149.669,0,0,NON MDU,TUNAI
+517,1,PMCB Out Door 24 kV lengkap,U,175.00,193.315.023,1.635.519,981.311,MDU PUSAT,PLN
+518,1,"Load Break Switch 24 kV-630 A Motorized 12,5 kA non RTU",S,210.00,248.439,25.337,15.202,MDU UID,PLN
+519,1,Wire Clip M8 (Ø 22mm),S,0.10,6.373,5.215,3.129,NON MDU,TUNAI
+520,1,Wire Clip M10 (Ø 35mm),S,0.12,6.589,6.954,4.172,NON MDU,TUNAI
+521,1,Wire Clip M12 (Ø 70mm),S,0.16,5.907,6.954,4.172,NON MDU,TUNAI
+522,1,Wire Clip M16 (Ø 95mm),S,0.26,8.269,6.954,4.172,NON MDU,TUNAI
+523,1,Connection Clamp For Netral + Bolt M12 x 25 - (Acc.MVTIC),S,0.26,31.472,2.897,1.738,NON MDU,TUNAI
+524,1,Extension for GW type B - (Acc.MVTIC),B,0.70,26.934,2.965,1.779,NON MDU,TUNAI
+525,1,Extension for GW type A - (Acc.MVTIC),B,0.60,30.743,2.965,1.779,NON MDU,TUNAI
+526,1,Separator Clamp for Netral - (Acc.MVTIC),B,0.60,33.777,2.636,1.581,NON MDU,TUNAI
+527,1,"Cross Arm Type 750 NP. 10 (l=50mm, t=5mm, tgg=100mm)",B,2.98,233.361,14.487,8.692,NON MDU,TUNAI
+528,1,Iron Wire 6 mm,M,0.20,8.249,5.795,3.477,NON MDU,TUNAI
+529,1,"Cross Arm UNP 80 x 40 x 3,2 - 1.500",S,8.00,270.923,17.790,10.674,NON MDU,TUNAI
+530,1,Joint Sleeve Non Tenion 150 mm - Al,B,16.00,71.725,14.487,8.692,NON MDU,TUNAI
+531,1,Joint Sleeve Non Tenion 95 mm - Al,B,32.00,52.150,13.328,7.997,NON MDU,TUNAI
+532,1,"Begel Ornament 3"" - 0,5"" + baut u/ Clamp MVTIC (l=30 mm, t=3 mm)",B,2.11,28.403,11.010,6.606,NON MDU,TUNAI
+533,1,"Cross Arm UNP 80 x 45 x 3,2 - 2.000",S,8.00,369.782,46.123,27.674,NON MDU,TUNAI
+534,1,Angkutan Material,Ton/M3,,0,168.708,101.225,NON MDU,TUNAI
+535,1,Asuransi Material PLN,Ls,,0,0,0,NON MDU,TUNAI
+536,1,Commisioning test Jaringan JTM,Loks.,,0,521.525,312.915,NON MDU,TUNAI
+537,1,Commisioning test Jaringan Kabel JTM,Loks.,,0,3.319.596,1.991.758,NON MDU,TUNAI
+538,1,Commisioning test GD,Loks.,,0,434.605,260.763,NON MDU,TUNAI
+539,1,Commisioning test JTR,Loks.,,0,318.710,191.226,NON MDU,TUNAI
+540,1,Commisioning test LBS / Recloser,Loks.,,0,1.070.579,642.347,NON MDU,TUNAI
+541,1,Safety Cost K3L,Pek.,,0,314.016,188.410,NON MDU,TUNAI
+542,1,Commisioning SR 1 Phasa,Loks.,,0,0,0,NON MDU,TUNAI
+543,1,Commisioning SR 3 Phasa,Loks.,,0,0,0,NON MDU,TUNAI
+544,1,Kabel NYFGBY 2 x 10 mm2,M,0.60,8.482,19.767,11.860,MDU UP3,PLN
+545,1,Kabel NYFGBY 4 x 10 mm2,M,1.20,131.426,26.356,15.814,MDU UP3,PLN
+546,1,Kabel NYFGBY 4 x 16 mm2,M,1.92,186.420,29.651,17.790,MDU UP3,PLN
+547,1,Kabel NYFGBY 4 x 25 mm2,M,4.80,332.014,36.917,22.150,MDU UP3,PLN
+548,1,Kabel NYFGBY 4 x 50 mm2,M,6.00,553.537,40.608,24.365,MDU UP3,PLN
+549,1,Kabel NYFGBY 4 x 70 mm2,M,8.40,773.599,42.454,25.472,MDU UP3,PLN
+550,1,Kabel NYFGBY 4 x 120 mm2,M,14.40,1.263.846,0,0,MDU UP3,PLN
+551,1,Kabel NYFGBY 4 x 95 mm2,M,11.40,1.539.624,42.454,25.472,MDU UP3,PLN
+552,1,Kabel NYFGBY 4 x 150 mm2,M,18.00,1.395.616,0,0,MDU UP3,PLN
+553,1,Panel MDP Ukuran (PxLxT) 80x30x107 Tebal 2 mm,Bh,35.00,7.550.010,221.499,132.899,NON MDU,TUNAI
+554,1,Perlengkapan Panel MDP Lengkap (Pencabangan) (5 Plg + 1 Cad),Bh,35.00,7.384.747,184.583,110.750,NON MDU,TUNAI
+555,1,Pondasi SDP Sesuai Spesifikasi,Lot,,215.635,270.989,162.594,NON MDU,TUNAI
+556,1,DynaBolt 6x60 mm,,,0,0,0,NON MDU,TUNAI
+557,1,Pengaman kabel TR uk.450x300x40 mm,B,0.01,0,0,0,NON MDU,TUNAI
+558,1,Kanal NP 10 2200,B,8.93,408.072,25.211,15.127,MDU UID,PLN
+559,1,Patok Pelindung SDP,B,2.79,126.998,16.888,10.133,NON MDU,TUNAI
+560,1,Persiapan,,,0,0,0,NON MDU,TUNAI
+561,1,"Perencanaan, pendataan utilitas Jaringan, ijin penggalian & SPS (dibayar sesuai kwitansi resmi)",lokasi,,0,0,0,NON MDU,TUNAI
+562,1,Direksi KITT (2x4 mtr) = 8 m2,lokasi,,0,0,0,NON MDU,TUNAI
+563,1,"Trafic management :
+ - Lampu CR - Rambu peringatan (120x90) cm
+ - Lampu LS - Rambu ""Ada pengerjakaan Pengeboran""
+ - Trafic Cone",Lot,,0,0,0,NON MDU,TUNAI
+564,1,"Pekerjaan Galian dan Perbaikan Lubang HDD (3,0x1,3x1,5) m3",,,0,0,0,NON MDU,TUNAI
+565,1,Pada tanah Keras/Koral Berm,Titik,,0,0,0,NON MDU,TUNAI
+566,1,Pada Tanah Biasa/Rumput/Taman,Titik,,0,0,0,NON MDU,TUNAI
+567,1,Pada Trotoar Inter Blok,Titik,,0,0,0,NON MDU,TUNAI
+568,1,Pada Trotoar Floor Beton,Titik,,0,0,0,NON MDU,TUNAI
+569,1,Pada Jala Lapis Penutup Hotmix Lebar Jalan > 7 m,Titik,,0,0,0,NON MDU,TUNAI
+570,1,Pada Jalan Lapis Paving Block,Titik,,0,0,0,NON MDU,TUNAI
+571,1,"Pada Jalan dengan Konstruksi Beton Segmen Uk. 3,5 x 5 m2",Titik,,0,0,0,NON MDU,TUNAI
+572,1,Pekerjaan Pengeboran HDD,,,0,0,0,NON MDU,TUNAI
+573,1,Pendataan & Penyuntikan Utilitas Terpasang,Titik,,0,0,0,NON MDU,TUNAI
+574,1,Pagar Pengaman (Spandek) Go Green Standar PEMDA,Bh,,0,0,0,NON MDU,TUNAI
+575,1,Mobilisasi Mesin Boring HDD & Perlengkapannya,Rit,,0,0,0,NON MDU,TUNAI
+576,1,Demobilisasi Mesin Boring HDD & perlengkapannya,Rit,,0,0,0,NON MDU,TUNAI
+577,1,"Pengeboran Pipa Diameter 8"" tanpa casing",Mtr,,0,0,0,NON MDU,TUNAI
+578,1,Pengadaan dan Pemasangan,,,0,0,0,NON MDU,TUNAI
+579,1,"Pipa HDPE PN 12,5/PE 100 SDR 13,6 diameter 7"" 180 mm, Ketebalan 13,3 mm warna merah",Mtr,,0,0,0,NON MDU,TUNAI
+580,1,Karet pelindung Kabel untuk menahan air & tanah (reducer),Bh,,0,0,0,NON MDU,TUNAI
+581,1,"Pengikat Reducer bagian depan (klem) untuk menahan air & tanah (Stainless Steel 8"")",Bh,,0,0,0,NON MDU,TUNAI
+582,1,"Pengikat Reducer bagian belakang (klem) untuk menahan air & tanah (Stainless Steel 8"")",Bh,,0,0,0,NON MDU,TUNAI
+583,1,Pengelasan Pipa HDPE,Batang,,0,0,0,NON MDU,TUNAI
+584,1,Tali Pancing,Mtr,,0,0,0,NON MDU,TUNAI
+585,1,Papan penahan Tanah,M3,,0,0,0,NON MDU,TUNAI
+586,1,Penandaan lokasi untuk Patok Boring/Kabel,Bh,,0,0,0,NON MDU,TUNAI
+587,1,Foto Dokumentasi 1set (12 lembar),Set,,0,0,0,NON MDU,TUNAI
+588,1,AS BULIT DRAWING 1:5000 (1 kalkir + 5 Blue Print),Set,,0,0,0,NON MDU,TUNAI
+589,1,AS BULIT DRAWING 1:200 (1 kalkir + 5 Blue Print+ 1 film),Mtr,,0,0,0,NON MDU,TUNAI
+590,1,Pengadaan/Pengangkutan Air untuk Boring,Ltr,,0,0,0,NON MDU,TUNAI
+591,1,Pembersihan Pekerjaan (umum),lokasi,,0,0,0,NON MDU,TUNAI
+592,1,Dop HDPE,Bh,,0,0,0,NON MDU,TUNAI
+593,1,Pengadaan Timah Lebel,Bh,,0,0,0,NON MDU,TUNAI
+594,1,Pengadaan Batu Pengaman,Bh,,0,0,0,NON MDU,TUNAI
+595,1,Pekerjaan Penarikan Kabel,,,0,0,0,NON MDU,TUNAI
+596,1,"Angkutan SKTM 20 kV 3x240 mm/300 mm, 1 Haspel",Rit,,0,0,0,NON MDU,TUNAI
+597,1,"Angkutan SKTM 20 kV 3x240 mm/300 mm, 3 Haspel",Rit,,0,0,0,NON MDU,TUNAI
+598,1,"Angkutan SKTM 20 kV 3x240 mm/300 mm, (50 - 200 meter)",Rit,,0,0,0,NON MDU,TUNAI
+599,1,Penarikan SKTM 20 kV 3x240 mm/300 mm dengan mesin Winch,Mtr,,0,0,0,NON MDU,TUNAI
+600,1,Pelindung (Dop Kabel) 3x240 mm/300 mm,Bh,,0,0,0,NON MDU,TUNAI
+601,1,Material Pelengkap,,,0,0,0,NON MDU,TUNAI
+602,1,Pasir Urug 20 cm,M3,,664.419,25.842,15.505,NON MDU,TUNAI
+603,1,Pekerjaan Penunjang,,,0,0,0,NON MDU,TUNAI
+604,1,Transportasi Pembuangan tanah bekas galian,M3,,0,0,0,NON MDU,TUNAI
+605,1,Penjagaan pekerjaan,HKL,,0,0,0,NON MDU,TUNAI
+606,1,Terminal Lug 25 mm - Cu (507/U/2009),Bh,0.40,40.392,9.272,5.563,NON MDU,TUNAI
+607,1,Terminal Lug 95 mm - Cu (507/U/2009),Bh,0.40,93.467,13.907,8.344,NON MDU,TUNAI
+608,1,Terminal Lug 120 mm - Cu (507/U/2009),Bh,0.23,115.450,19.164,11.499,NON MDU,TUNAI
+609,1,Terminal Lug 150 mm - Cu (507/U/2009),,,138.836,13.907,8.344,NON MDU,TUNAI
+610,1,Plat Beton Penanda Kabel @ tiap 5 Meter,Bh,0.01,99.028,29.651,17.790,NON MDU,TUNAI
+611,1,U Ditch K350 (Uk. 600x800x1200 mm) + Tutup LD,Bh,928.00,1.671.321,259.387,155.632,NON MDU,TUNAI
+612,1,Bata Merah (hanya untuk sekat antar kabel),Bh,3.00,1.165,1.000,600,NON MDU,TUNAI
+613,1,Dyna Bolt & Baut M.10,Bh,0.85,47.257,3.500,2.100,NON MDU,TUNAI
+614,1,"OA Kast type I C1 Sistim Press cat powder coating 41,5 KVA",Bh,18.00,3.095.031,434.605,260.763,MDU UID,PLN
+615,1,OA Kast type I C1 Sistim Press cat powder coating 53 KVA,Bh,18.00,11.196.967,434.605,260.763,MDU UID,PLN
+616,1,OA Kast type I C1 Sistim Press cat powder coating 66 KVA,Bh,18.00,11.196.967,434.605,260.763,MDU UID,PLN
+617,1,"OA Kast type I C1 Sistim Press cat powder coating 82,5 KVA",Bh,18.00,11.937.787,434.605,260.763,MDU UID,PLN
+618,1,OA Kast type I C1 Sistim Press cat powder coating 105 KVA,Bh,18.00,11.937.787,434.605,260.763,MDU UID,PLN
+619,1,OA Kast type I C1 Sistim Press cat powder coating 131 KVA,Bh,18.00,11.937.787,434.605,260.763,MDU UID,PLN
+620,1,OA Kast type I C1 Sistim Press cat powder coating 147 KVA,Bh,18.00,11.937.787,434.605,260.763,MDU UID,PLN
+621,1,OA Kast type I C1 Sistim Press cat powder coating 164 KVA,Bh,18.00,11.937.787,434.605,260.763,MDU UID,PLN
+622,1,OA Kast type I C1 Sistim Press cat powder coating 197 KVA,Bh,18.00,12.890.270,434.605,260.763,MDU UID,PLN
+623,1,,,,0,0,0,NON MDU,TUNAI
+624,1,,,,0,0,0,NON MDU,TUNAI
+625,1,,,,0,0,0,NON MDU,TUNAI
+626,1,,,,0,0,0,NON MDU,TUNAI
+627,1,,,,0,0,0,NON MDU,TUNAI
+628,1,,,,0,0,0,NON MDU,TUNAI
+629,1,,,,0,0,0,NON MDU,TUNAI
+630,1,,,,0,0,0,NON MDU,TUNAI
+631,1,,,,0,0,0,NON MDU,TUNAI
+632,1,,,,0,0,0,NON MDU,TUNAI
+633,1,,,,0,0,0,NON MDU,TUNAI
+634,1,,,,0,0,0,NON MDU,TUNAI
+635,1,,,,0,0,0,NON MDU,TUNAI
+636,1,,,,0,0,0,NON MDU,TUNAI
+637,1,,,,0,0,0,NON MDU,TUNAI
+638,1,,,,0,0,0,NON MDU,TUNAI
+639,1,,,,0,0,0,NON MDU,TUNAI
+640,1,,,,0,0,0,NON MDU,TUNAI
+641,1,,,,0,0,0,NON MDU,TUNAI
+642,1,,,,0,0,0,NON MDU,TUNAI
+643,1,,,,0,0,0,NON MDU,TUNAI
+644,1,,,,0,0,0,NON MDU,TUNAI
+645,1,,,,0,0,0,NON MDU,TUNAI
+646,1,,,,0,0,0,NON MDU,TUNAI
+647,1,,,,0,0,0,NON MDU,TUNAI
+648,1,,,,0,0,0,NON MDU,TUNAI
+649,1,,,,0,0,0,NON MDU,TUNAI
+650,1,,,,0,0,0,NON MDU,TUNAI
+651,1,,,,0,0,0,NON MDU,TUNAI
+652,1,,,,0,0,0,NON MDU,TUNAI
+653,1,,,,0,0,0,NON MDU,TUNAI
+654,1,,,,0,0,0,NON MDU,TUNAI
+655,1,,,,0,0,0,NON MDU,TUNAI
+656,1,,,,0,0,0,NON MDU,TUNAI
+657,1,,,,0,0,0,NON MDU,TUNAI
+658,1,,,,0,0,0,NON MDU,TUNAI
+659,1,,,,0,0,0,NON MDU,TUNAI
+660,1,,,,0,0,0,NON MDU,TUNAI
+661,1,Cubicle Full Insulated Lengkap(Inc+Out+Met),S,2250,0,0,0,NON MDU,TUNAI
+662,1,Cubicle 20 kV;630 A;16 kA (Incoming+Metering+Ougoing),S,1.00,104.194.433,1.983.421,1.190.053,NON MDU,TUNAI
+663,1,Cubicle Incoming,S,2.00,0,1.471.967,883.180,NON MDU,TUNAI
+664,1,Dynabolt S16,Bh,12.00,0,0,0,NON MDU,TUNAI
+665,1,"NYY 2 x 2,5 mm2 ( untuk Heater )",Mt,25.00,21.811,5.500,3.300,NON MDU,TUNAI
+666,1,NYY 4 x 4 mm u/ Wirring Panel,M,15.00,66.782,20.002,12.001,NON MDU,TUNAI
+667,1,NYY 4 x 6 mm u/ Wirring Panel,M,15.00,66.782,20.002,12.001,NON MDU,TUNAI
+668,1,"NYY 2 x 1,5 mm2 ( untuk Heater )",Mt,0.00,11.069,0,0,NON MDU,TUNAI
+669,1,Plat copper 50 x 40 mm,Kg,0.00,442.678,37.652,22.591,NON MDU,TUNAI
+670,1,Preformed Termination 150 mm,0,0.00,0,0,0,NON MDU,TUNAI
+671,1,Stop Kontak AC - Out Bow,B,3.00,17.213,1.570,942,NON MDU,TUNAI
+672,1,Cable suport (508/U/2009),B,25.00,1.398,3.750,2.250,NON MDU,TUNAI
+673,1,Paku Baja 2 mm,Bh,50.00,0,0,0,NON MDU,TUNAI
+674,1,Isolasi PVC hitam,Bh,2.00,0,0,0,NON MDU,TUNAI
+675,1,Bolt M.12 + Washer (517/U/2009,B,20.00,16.723,2.608,1.565,NON MDU,TUNAI
+676,1,Square Washer (517/U/2009),B,20.00,5.541,1.449,869,NON MDU,TUNAI
+677,1,Coper tube Al/Cu 150 mm2 (SKAT 8) 1 Lubang,Bh,0.00,139.115,0,0,NON MDU,TUNAI
+678,1,"Earthing Rod 16 mm - 2,5 m + clamp (509/U/2009)",S,0.00,291.799,56.007,33.604,NON MDU,TUNAI
+679,1,BC 50 MM,M,18.00,91.011,4.056,2.434,NON MDU,TUNAI
+680,1,Gembok Biasa,B,0.00,326.049,5.000,3.000,MDU UP3,PLN
+681,1,Gembok Electronic,B,1.00,3.786.825,20.002,12.001,MDU UP3,PLN
+682,1,"Ground Pipe 3/4"" - 2750 mm",B,4.00,169.567,14.767,8.860,NON MDU,TUNAI
+683,1,Copper Tube Cu - 50 mm,B,6.00,42.774,19.153,11.492,NON MDU,TUNAI
+684,1,Relay Murni Indicator OCR - DGR,B,1.00,19.578.817,559.971,335.983,MDU UID,PLN
+685,1,Power Supply Relay OCR,B,1.00,1.870.958,144.868,86.921,MDU UP3,PLN
+686,1,"Pipa PVC 1,5"" - 4 mtr",B,2.00,0,0,0,NON MDU,TUNAI
+687,1,"Knee PVC 1,5""",B,6.00,0,0,0,NON MDU,TUNAI
+688,1,"Pipa PVC 3/4"" - 4 mtr",B,5.00,10.447,3.477,2.086,NON MDU,TUNAI
+689,1,"Knee PVC 3/4""",B,8.00,0,0,0,NON MDU,TUNAI
+690,1,Fitting Lampu,B,4.00,0,0,0,NON MDU,TUNAI
+691,1,Lampu LED 3 watt,B,4.00,0,0,0,NON MDU,TUNAI
+692,1,Line Tap Connector Cu - 50,B,3.00,58.500,13.328,7.997,NON MDU,TUNAI
+693,1,Plat copper 4 x 1 - panjang 105,B,3.00,0,0,0,NON MDU,TUNAI
+694,1,Heat Shrink 20 kV untuk Plat Cooper,M,3.00,131.910,13.001,7.801,NON MDU,TUNAI
+695,1,Pertinax 110 x 5,pak,2.00,0,0,0,NON MDU,TUNAI
+696,1,Siku 4x4,B,1.00,0,0,0,NON MDU,TUNAI
+697,1,MCB 2 Amper + Kotak MCB,B,1.00,0,0,0,MDU PUSAT,PLN
+698,1,Asuransi Material,Lot,-,0,0,0,NON MDU,TUNAI
+699,1,Pemasangan APP 3 Phasa > 200 kVA (SBU),,Volume,0,0,0,NON MDU,TUNAI
+700,1,Box APP (Powder Coating) Pengukran TM Lengkap kWh Mtr,S,1.00,0,0,0,NON MDU,TUNAI
+701,1,Box APP (Powder Coating) Pengukran TM Lengkap kWh Mtr,,1.00,0,0,0,NON MDU,TUNAI
+702,1,Terminal Blok 15 Pol 100 A U/Pengukuran TM,-,1.00,1.424.482,6.001,3.600,NON MDU,TUNAI
+703,1,"MTR 3P E 57,7-400A;0,5;4W",S,1.00,0,0,0,NON MDU,TUNAI
+704,1,Modem GSM GPRS,,1.00,1.172.083,40.004,24.002,MDU UID,PLN
+705,1,Modem GSM GPRS,U,1.00,1.172.083,40.004,24.002,MDU UID,PLN
+706,1,Kartu Pulsa u/modem,Ls,0.00,0,0,0,NON MDU,TUNAI
+707,1,"NYAF / NYA 2,5 mm² ( SPLN )",M,20.00,7.457,5.500,3.300,NON MDU,TUNAI
+708,1,Timah solder + pasta,Ls,2.00,3.171,2.000,1.200,NON MDU,TUNAI
+709,1,"Bolt & Nut 3/16 x 1""",B,10.00,9.101,2.318,1.391,NON MDU,TUNAI
+710,1,Timah Segel,B,4.00,78.032,1.750,1.050,NON MDU,TUNAI
+711,1,Mountage SLM 250 kva keatas,Ls,1.00,167.163,185.431,111.259,-,PLN
+712,1,Cable ties / Plastic strap 20 cm,Pak,20.00,2.355,2.318,1.391,NON MDU,TUNAI
+713,1,Dina bolt S 16,Bh,0.00,0,0,0,NON MDU,TUNAI
+714,1,"Earthing Rod 16 mm - 2,5 m + clamp (509/U/2009)",S,0.00,291.799,56.007,33.604,NON MDU,TUNAI
+715,1,BC 50 MM,M,0.00,91.011,4.056,2.434,NON MDU,TUNAI
+716,1,Klemp PVC 12 mm U/ kabel NYY,Bh,10.00,531,159,96,NON MDU,TUNAI
+717,1,Paku baja 4 cm,Bh,20.00,0,0,0,NON MDU,TUNAI
+718,1,Coper tube 50 mm,Bh,0.00,42.774,19.153,11.492,NON MDU,TUNAI
+719,1,Gembok Electronic,B,1.00,3.786.825,20.002,12.001,MDU UP3,PLN
+720,1,Galian tanah & pengurugan kembali di bawah PV blok/tembok/plesteran,m3,,0,296.506,177.903,NON MDU,TUNAI
+721,1,"Ornament Cabel Band 3"" x 6"" - lengkap Bolt&Nut-HDG",bh,,104.800,7.533,4.520,NON MDU,TUNAI
+722,1,"Ornament Cabel Band 3"" x 7"" - lengkap Bolt&Nut-HDG",bh,,113.654,7.533,4.520,NON MDU,TUNAI
+723,1,Borring untuk Kabel tanah,m,,0,897.188,538.313,NON MDU,TUNAI
