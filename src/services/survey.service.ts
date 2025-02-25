@@ -229,11 +229,11 @@ export const SurveyService = {
         request.detail.id_material_tiang,
       );
 
-      const konduktor = await Material.findMaterialById(
-        request.detail.id_material_konduktor,
-      );
+      // const konduktor = await Material.findMaterialById(
+      //   request.detail.id_material_konduktor,
+      // );
 
-      if (!tiang || !konduktor) {
+      if (!tiang) {
         throw new CustomError(StatusCodes.NOT_FOUND, 'Material Not Found');
       }
 
@@ -242,10 +242,10 @@ export const SurveyService = {
           request.id_detail,
           {
             id_material_tiang: request.detail.id_material_tiang,
-            id_material_konduktor: request.detail.id_material_konduktor,
             id_konstruksi: request.detail.id_konstruksi,
             id_header: request.detail.id_header,
-            nama_pekerjaan: request.detail.nama_pekerjaan,
+            id_pole_supporter: request.detail.id_pole,
+            id_grounding_termination: request.detail.id_grounding,
             penyulang: request.detail.penyulang,
             panjang_jaringan: request.detail.panjang_jaringan,
             long: request.detail.long,

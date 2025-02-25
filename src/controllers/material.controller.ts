@@ -113,4 +113,24 @@ export const MaterialController = {
       next(error);
     }
   },
+
+  async getAllMaterial(
+    request: Request,
+    response: Response,
+    next: NextFunction,
+  ) {
+    try {
+      const result = await MaterialService.getAllMaterial();
+
+      const resp = new CustomResponse(
+        StatusCodes.OK,
+        'Material listed',
+        result,
+      );
+
+      return response.json(resp.toJSON());
+    } catch (error: any) {
+      next(error);
+    }
+  },
 };

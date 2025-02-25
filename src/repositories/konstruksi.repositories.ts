@@ -15,6 +15,11 @@ export const Konstruksi = {
 
   async getAllKonstruksi() {
     return await prisma.konstruksi.findMany({
+      where: {
+        konstruksi_materials: {
+          some: {},
+        },
+      },
       select: {
         id: true,
         nama_konstruksi: true,
