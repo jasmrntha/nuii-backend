@@ -1,6 +1,6 @@
 import { clerkMiddleware } from '@clerk/express';
 import bodyParser from 'body-parser';
-import cors from 'cors';
+// import cors from 'cors';
 import dotenv from 'dotenv';
 import express from 'express';
 
@@ -9,15 +9,15 @@ import routes from './router';
 
 const app = express();
 
-app.use(
-  cors({
-    origin: '*',
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    allowedHeaders: '*',
-    preflightContinue: false,
-    optionsSuccessStatus: 204,
-  }),
-);
+// app.use(
+//   cors({
+//     origin: '*',
+//     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+//     allowedHeaders: '*',
+//     preflightContinue: false,
+//     optionsSuccessStatus: 204,
+//   }),
+// );
 
 app.use(clerkMiddleware());
 
