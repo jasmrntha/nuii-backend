@@ -1,3 +1,5 @@
+import path from 'node:path';
+
 // eslint-disable-next-line import/no-extraneous-dependencies
 import ExcelJS from 'exceljs';
 import { StatusCodes } from 'http-status-codes';
@@ -299,18 +301,20 @@ export const SurveyService = {
   async exportSurvey(id: number) {
     try {
       // Step 1: Get the survey header and its details
-      const survey = await SurveyHeader.findSurveyById(id);
+      const survey = await SurveyHeader.exportHeaderById(id);
 
       if (!survey) {
         throw new CustomError(StatusCodes.NOT_FOUND, 'Survey Not Found');
       }
 
-      const details = survey.survey_details;
+      const details = await SurveyDetail.exportDetailByHeaderId(survey.id);
 
       // Step 2: Count the amount of each unique id_konstruksi and id_material_tiang
       const konstruksiCount: Record<number, number> = {};
       const tiangCount: Record<number, number> = {};
       const konduktorCount: Record<number, number> = {};
+      const poleCount: Record<number, number> = {};
+      const groundingCount: Record<number, Record<number, number>> = {}; // Fix: Use a nested object
 
       for (const detail of details) {
         if (!konstruksiCount[detail.id_konstruksi]) {
@@ -325,7 +329,39 @@ export const SurveyService = {
 
         tiangCount[detail.id_material_tiang]++;
 
+        if (!konduktorCount[survey.id_material_konduktor]) {
+          konduktorCount[survey.id_material_konduktor] = 0;
+        }
+
         konduktorCount[survey.id_material_konduktor] += detail.panjang_jaringan;
+
+        if (detail.id_pole_supporter) {
+          if (!poleCount[detail.id_pole_supporter]) {
+            poleCount[detail.id_pole_supporter] = 0;
+          }
+
+          poleCount[detail.id_pole_supporter]++;
+        }
+
+        if (detail.id_grounding_termination) {
+          if (!groundingCount[detail.id_grounding_termination]) {
+            groundingCount[detail.id_grounding_termination] = {}; // Fix: Ensure it's an object
+          }
+
+          if (
+            !groundingCount[detail.id_grounding_termination][
+              detail.id_konstruksi
+            ]
+          ) {
+            groundingCount[detail.id_grounding_termination][
+              detail.id_konstruksi
+            ] = 0;
+          }
+
+          groundingCount[detail.id_grounding_termination][
+            detail.id_konstruksi
+          ]++;
+        }
       }
 
       // Step 3: Get all materials required and the amount for each unique konstruksi and tiang
@@ -359,9 +395,37 @@ export const SurveyService = {
         }),
       );
 
+      const poleMaterials = await Promise.all(
+        Object.keys(poleCount).map(async key => {
+          const idPole = Number(key);
+          const materials =
+            await PoleMaterialRepository.getPoleMaterialsByPoleId(idPole);
+
+          return { idPole, materials };
+        }),
+      );
+
+      const groundingMaterials = await Promise.all(
+        Object.keys(groundingCount).map(async key => {
+          const idGrounding = Number(key);
+          const materials =
+            await GroundingMaterialRepository.getGroundingMaterialsByGroundingId(
+              idGrounding,
+            );
+
+          const idKonstruksi = Object.keys(groundingCount[idGrounding]).map(
+            Number,
+          );
+
+          return { idGrounding, idKonstruksi, materials };
+        }),
+      );
+
       // Step 4: Calculate the total price of each material for each unique konstruksi
       const totalPrices = await Promise.all(
         konstruksiMaterials.map(async ({ idKonstruksi, materials }) => {
+          const dataKonstruksi =
+            await Konstruksi.findKonstruksiById(idKonstruksi);
           const materialPrices = await Promise.all(
             materials.map(async material => {
               const materialData = await Material.findMaterialById(
@@ -383,12 +447,19 @@ export const SurveyService = {
               const totalBongkar =
                 materialData.bongkar * konstruksiCount[idKonstruksi];
 
+              const totalBerat =
+                (Number(materialData.berat_material) *
+                  Number(material.kuantitas) *
+                  konstruksiCount[idKonstruksi]) /
+                1000;
+
               return {
                 data_material: { ...materialData },
                 tipe_pekerjaan: tipePekerjaan.tipe_pekerjaan,
                 kuantitas: material.kuantitas,
                 total_kuantitas:
                   Number(material.kuantitas) * konstruksiCount[idKonstruksi],
+                total_berat: totalBerat,
                 total_harga_material: totalHargaMaterial,
                 total_pasang: totalPasang,
                 total_bongkar: totalBongkar,
@@ -398,7 +469,9 @@ export const SurveyService = {
 
           return {
             idKonstruksi,
+            data_konstruksi: dataKonstruksi,
             materials: materialPrices,
+            detail_grounding: [] as any[], // Initialize detail_grounding as an empty array
           };
         }),
       );
@@ -416,9 +489,15 @@ export const SurveyService = {
           const totalBongkar =
             materialData.bongkar * tiangCount[idMaterialTiang];
 
+          const totalBerat =
+            (Number(materialData.berat_material) *
+              tiangCount[idMaterialTiang]) /
+            1000;
+
           return {
             data_tiang: { ...materialData },
             total_kuantitas: tiangCount[idMaterialTiang],
+            total_berat: totalBerat,
             total_harga_material: totalHargaMaterial,
             total_pasang: totalPasang,
             total_bongkar: totalBongkar,
@@ -429,18 +508,29 @@ export const SurveyService = {
       const konduktorPrices = await Promise.all(
         konduktorMaterials.map(({ idKonduktor, materials }) => {
           const materialData = materials;
+
+          let multiplier = materials.nomor_material === 5 ? 3.045 : 3.06;
+
+          if (materials.nomor_material === 77) {
+            multiplier = 1;
+          }
+
+          const totalConductor = (konduktorCount[idKonduktor] * multiplier) / 1;
+
           const totalHargaMaterial =
-            materialData.harga_material * konduktorCount[idKonduktor];
+            materialData.harga_material * totalConductor;
 
-          const totalPasang =
-            materialData.pasang_rab * konduktorCount[idKonduktor];
+          const totalPasang = materialData.pasang_rab * totalConductor;
 
-          const totalBongkar =
-            materialData.bongkar * konduktorCount[idKonduktor];
+          const totalBongkar = materialData.bongkar * totalConductor;
+
+          const totalBerat =
+            (Number(materialData.berat_material) * totalConductor) / 1000;
 
           return {
             data_konduktor: { ...materialData },
-            total_kuantitas: konduktorCount[idKonduktor],
+            total_kuantitas: totalConductor,
+            total_berat: totalBerat,
             total_harga_material: totalHargaMaterial,
             total_pasang: totalPasang,
             total_bongkar: totalBongkar,
@@ -448,8 +538,132 @@ export const SurveyService = {
         }),
       );
 
+      const polePrices = await Promise.all(
+        poleMaterials.map(async ({ idPole, materials }) => {
+          const dataPole = await PoleRepository.getPoleById(idPole);
+          const materialPrices = await Promise.all(
+            materials.map(async material => {
+              const materialData = await Material.findMaterialById(
+                material.id_material,
+              );
+
+              let tipePekerjaan = null;
+
+              if (material.id_tipe_pekerjaan) {
+                tipePekerjaan = await TipePekerjaan.findTipePekerjaanById(
+                  material.id_tipe_pekerjaan,
+                );
+              }
+
+              const totalHargaMaterial =
+                materialData.harga_material *
+                Number(material.kuantitas) *
+                poleCount[idPole];
+
+              const totalPasang =
+                materialData.pasang_rab *
+                Number(material.kuantitas) *
+                poleCount[idPole];
+
+              const totalBongkar = materialData.bongkar * poleCount[idPole];
+
+              const totalBerat =
+                (Number(materialData.berat_material) *
+                  Number(material.kuantitas) *
+                  poleCount[idPole]) /
+                1000;
+
+              return {
+                data_material: { ...materialData },
+                tipe_pekerjaan: tipePekerjaan
+                  ? tipePekerjaan.tipe_pekerjaan
+                  : '',
+                kuantitas: material.kuantitas,
+                total_kuantitas: Number(material.kuantitas) * poleCount[idPole],
+                total_berat: totalBerat,
+                total_harga_material: totalHargaMaterial,
+                total_pasang: totalPasang,
+                total_bongkar: totalBongkar,
+              };
+            }),
+          );
+
+          return {
+            idPole,
+            data_pole: dataPole,
+            materials: materialPrices,
+          };
+        }),
+      );
+
+      const groundingPrices = await Promise.all(
+        groundingMaterials.map(
+          async ({ idGrounding, idKonstruksi, materials }) => {
+            // Sum all counts for the given `idGrounding`
+            const totalGroundingCount = groundingCount[idGrounding]
+              ? Object.values(groundingCount[idGrounding]).reduce(
+                  (accumulator, count) => accumulator + count,
+                  0,
+                )
+              : 0;
+
+            const dataGrounding =
+              await GroundingRepository.getGroundingById(idGrounding);
+
+            const materialPrices = await Promise.all(
+              materials.map(async material => {
+                const materialData = await Material.findMaterialById(
+                  material.id_material,
+                );
+                const tipePekerjaan = await TipePekerjaan.findTipePekerjaanById(
+                  material.id_tipe_pekerjaan,
+                );
+
+                const totalKuantitas =
+                  Number(material.kuantitas) * totalGroundingCount;
+                const totalHargaMaterial =
+                  materialData.harga_material * totalKuantitas;
+                const totalPasang = materialData.pasang_rab * totalKuantitas;
+                const totalBongkar = materialData.bongkar * totalGroundingCount;
+                const totalBerat =
+                  (Number(materialData.berat_material) * totalKuantitas) / 1000;
+
+                return {
+                  data_material: { ...materialData },
+                  tipe_pekerjaan: tipePekerjaan.tipe_pekerjaan,
+                  kuantitas: material.kuantitas,
+                  total_kuantitas: totalKuantitas,
+                  total_berat: totalBerat,
+                  total_harga_material: totalHargaMaterial,
+                  total_pasang: totalPasang,
+                  total_bongkar: totalBongkar,
+                };
+              }),
+            );
+
+            return idKonstruksi.map(konstruksiId => ({
+              idGrounding,
+              idKonstruksi: konstruksiId, // Now explicitly associating each grounding with a konstruksi
+              data_grounding: dataGrounding,
+              materials: materialPrices,
+            }));
+          },
+        ),
+      );
+
+      for (const total of totalPrices) {
+        for (const groundingArray of groundingPrices) {
+          for (const grounding of groundingArray) {
+            if (total.idKonstruksi === grounding.idKonstruksi) {
+              total.detail_grounding.push(grounding);
+            }
+          }
+        }
+      }
+
       return {
         data_survey: survey,
+        detail_poles: polePrices,
         detail_tiang: tiangPrices,
         detail_konstruksi: totalPrices,
         detail_konduktor: konduktorPrices,
@@ -613,13 +827,13 @@ export const SurveyService = {
   async exportSurveyToExcel(id: number) {
     try {
       // Step 1: Get the survey header and its details
-      const survey = await SurveyHeader.findSurveyById(id);
+      const survey = await SurveyHeader.exportHeaderById(id);
 
       if (!survey) {
         throw new CustomError(StatusCodes.NOT_FOUND, 'Survey Not Found');
       }
 
-      const details = survey.survey_details;
+      const details = await SurveyDetail.exportDetailByHeaderId(survey.id);
 
       let totalAkhirBerat = 0;
 
@@ -961,6 +1175,12 @@ export const SurveyService = {
       const workbook = new ExcelJS.Workbook();
       const worksheet = workbook.addWorksheet('Sheet 1');
 
+      const rowTipePekerjaan = [];
+      const rowTitle = [];
+      const rowPoleSupport = [];
+      const rowKonstruksi = [];
+      const rowGrounding = [];
+
       // Set column widths
       worksheet.columns = [
         { width: 5 },
@@ -991,6 +1211,43 @@ export const SurveyService = {
 
       worksheet.mergeCells('C4:D4');
       worksheet.getCell('C4').value = 'UP3 SURABAYA BARAT';
+
+      const imagePath = path.resolve(process.cwd(), 'storage/file/image.png');
+
+      // 📌 Read Image File (Ensure the path is correct)
+      const imageId = workbook.addImage({
+        filename: imagePath, // Replace with your image path
+        extension: 'png',
+      });
+
+      // 📌 Merge Cells in Column B (B2 to B4)
+      worksheet.mergeCells('B2:B4');
+
+      // 📌 Ensure Column B Has a Defined Width
+      const column = worksheet.getColumn(2);
+      if (!column.width) column.width = 10; // Set a default width if not defined
+
+      // 📌 Get Column Width in Pixels (Each unit ≈ 7.5 pixels)
+      const columnWidthPx = column.width * 7.5;
+
+      // 📌 Define Image Width in Pixels
+      const imageWidthPx = 44.6;
+
+      // 📌 Calculate Horizontal Offset (Centering)
+      const offsetX = (columnWidthPx - imageWidthPx) / 2;
+
+      // 📌 Position Image in the Worksheet
+      worksheet.addImage(imageId, {
+        tl: {
+          col: 1, // Column B (zero-based index)
+          row: 1, // Row 2 (zero-based index)
+          nativeCol: 1,
+          nativeColOff: offsetX * 9525, // Convert pixels to Excel EMUs
+          nativeRow: 1,
+          nativeRowOff: 0, // Already centered vertically
+        },
+        ext: { width: 44.6, height: 61.63 }, // Set image size in pixels
+      });
 
       // Merge for Title
       worksheet.mergeCells('B6:Q6');
@@ -1112,6 +1369,8 @@ export const SurveyService = {
 
       formatWorksheetRow(worksheet, previousRow);
 
+      rowTitle.push(previousRow);
+
       let totalTiang = 0;
 
       for (const tiang of tiangPrices) {
@@ -1189,12 +1448,16 @@ export const SurveyService = {
 
       formatWorksheetRow(worksheet, previousRow);
 
+      rowTitle.push(previousRow);
+
       for (const poles of polePrices) {
         const pole = await PoleRepository.getPoleById(poles.idPole);
         previousRow += 1;
         worksheet.getCell(`C${previousRow}`).value =
           `   ${pole.nama_pole.toUpperCase()}`;
         formatWorksheetRow(worksheet, previousRow);
+
+        rowPoleSupport.push(previousRow);
 
         const groupedMaterials: Record<string, typeof poles.materials> = {};
 
@@ -1211,6 +1474,8 @@ export const SurveyService = {
             previousRow += 1;
             worksheet.getCell(`C${previousRow}`).value = `   ${groupKey} :`;
             formatWorksheetRow(worksheet, previousRow);
+
+            rowTipePekerjaan.push(previousRow);
           }
 
           // Process each material in the group
@@ -1288,6 +1553,8 @@ export const SurveyService = {
       worksheet.getCell(`C${previousRow}`).value = '   POLE TOP ARRANGEMENT :';
       formatWorksheetRow(worksheet, previousRow);
 
+      rowTitle.push(previousRow);
+
       for (const calculatedKonstruksi of totalPrices) {
         const konstruksi = await Konstruksi.findKonstruksiById(
           calculatedKonstruksi.idKonstruksi,
@@ -1302,6 +1569,8 @@ export const SurveyService = {
         worksheet.getCell(`C${previousRow}`).value =
           `   ${konstruksi.nama_konstruksi.toUpperCase()}`;
         formatWorksheetRow(worksheet, previousRow);
+
+        rowKonstruksi.push(previousRow);
 
         const groupedMaterials: Record<
           string,
@@ -1321,6 +1590,8 @@ export const SurveyService = {
             previousRow += 1;
             worksheet.getCell(`C${previousRow}`).value = `   ${groupKey} :`;
             formatWorksheetRow(worksheet, previousRow);
+
+            rowTipePekerjaan.push(previousRow);
           }
 
           // Process each material in the group
@@ -1405,6 +1676,8 @@ export const SurveyService = {
             worksheet.getCell(`C${previousRow}`).value =
               `   ${grounding.nama_grounding.toUpperCase()}`;
             formatWorksheetRow(worksheet, previousRow);
+
+            rowGrounding.push(previousRow);
 
             const groupedMaterials: Record<
               string,
@@ -1523,6 +1796,8 @@ export const SurveyService = {
         '   ANTI CLIMBING + DANGER PLATE :';
       formatWorksheetRow(worksheet, previousRow);
 
+      rowTitle.push(previousRow);
+
       const antiClimbing =
         await KonstruksiMaterial.findMaterialForKonstruksiById(38);
 
@@ -1623,6 +1898,8 @@ export const SurveyService = {
       worksheet.getCell(`C${previousRow}`).value = '   CONDUCTOR ACCESSORIES :';
       formatWorksheetRow(worksheet, previousRow);
 
+      rowTitle.push(previousRow);
+
       const konduktor = konduktorPrices[0].data_konduktor;
 
       previousRow += 1;
@@ -1720,6 +1997,8 @@ export const SurveyService = {
       previousRow += 1;
       worksheet.getCell(`C${previousRow}`).value = '   PEKERJAAN PENDUKUNG :';
       formatWorksheetRow(worksheet, previousRow);
+
+      rowTitle.push(previousRow);
 
       const pekerjaanPendukung = [];
 
@@ -1862,6 +2141,112 @@ export const SurveyService = {
           };
         });
       });
+
+      for (let rowIndex = 17; rowIndex <= lastRow; rowIndex++) {
+        worksheet.getCell(`B${rowIndex}`).font = {
+          name: 'Arial',
+          size: 12,
+          color: { argb: 'FF0000' },
+        };
+      }
+
+      for (const row of rowTipePekerjaan) {
+        worksheet.getCell(`C${row}`).font = {
+          name: 'Arial',
+          size: 12,
+          color: { argb: 'FF0000' },
+        };
+      }
+
+      for (const row of rowTitle) {
+        worksheet.getCell(`C${row}`).font = {
+          name: 'Arial',
+          size: 12,
+          bold: true,
+        };
+
+        worksheet.getCell(`C${row}`).fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: 'FDE9D9' },
+        };
+      }
+
+      for (const row of rowPoleSupport) {
+        worksheet.getCell(`C${row}`).font = {
+          name: 'Arial',
+          size: 12,
+          bold: true,
+        };
+
+        worksheet.getCell(`C${row}`).fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: 'F2F2F2' },
+        };
+      }
+
+      for (const row of rowKonstruksi) {
+        worksheet.getCell(`C${row}`).font = {
+          name: 'Arial',
+          size: 12,
+          bold: true,
+        };
+
+        worksheet.getCell(`C${row}`).fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: 'EBF1DE' },
+        };
+      }
+
+      for (const row of rowGrounding) {
+        worksheet.getCell(`C${row}`).font = {
+          name: 'Arial',
+          size: 12,
+          bold: true,
+          color: { argb: 'C00000' },
+        };
+
+        worksheet.getCell(`C${row}`).fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: 'FDE9D9' },
+        };
+      }
+
+      for (let rowIndex = 17; rowIndex <= lastRow; rowIndex++) {
+        for (let colIndex = 11; colIndex <= 17; colIndex++) {
+          // Columns K to Q
+          worksheet.getCell(rowIndex, colIndex).font = {
+            name: 'Arial',
+            size: 12,
+            color: { argb: '00B0F0' },
+          };
+        }
+      }
+
+      for (let rowIndex = totalMaterial; rowIndex <= previousRow; rowIndex++) {
+        worksheet.getCell(`C${rowIndex}`).font = {
+          name: 'Arial',
+          size: 12,
+          bold: true,
+          color: { argb: '002060' },
+        };
+      }
+
+      for (let colIndex = 2; colIndex <= 17; colIndex++) {
+        worksheet.getCell(15, colIndex).fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: 'DAEEF3' },
+        };
+        worksheet.getCell(16, colIndex).fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: 'DAEEF3' },
+        };
+      }
 
       worksheet.getCell('D15').font = { name: 'Arial', size: 12, bold: true };
       worksheet.getCell('B6').font = {

@@ -60,6 +60,14 @@ export const SurveyHeader = {
       },
     });
   },
+  async exportHeaderById(id: number) {
+    return await prisma.surveyHeader.findUnique({
+      where: {
+        id,
+        status_survey: SurveyStatus.Disetujui,
+      },
+    });
+  },
   async findSurveyById(id: number) {
     return await prisma.surveyHeader.findUnique({
       where: { id, status_survey: SurveyStatus.Belum_Disetujui },
