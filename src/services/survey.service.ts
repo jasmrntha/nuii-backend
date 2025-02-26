@@ -2122,6 +2122,7 @@ export const SurveyService = {
       formatWorksheetRow(worksheet, previousRow);
 
       previousRow += 1;
+      const totalRow = previousRow;
       worksheet.getCell(`C${previousRow}`).value = '   T O T A L';
       worksheet.getCell(`Q${previousRow}`).value = {
         formula: `Q${jumlahHarga}`,
@@ -2132,6 +2133,47 @@ export const SurveyService = {
         bottom: { style: 'thin' },
         right: { style: 'thin' },
       });
+
+      previousRow += 1;
+      previousRow += 1;
+      const date = new Date();
+      const months = [
+        'Januari',
+        'Februari',
+        'Maret',
+        'April',
+        'Mei',
+        'Juni',
+        'Juli',
+        'Agustus',
+        'September',
+        'Oktober',
+        'November',
+        'Desember',
+      ];
+
+      worksheet.mergeCells(`O${previousRow}:Q${previousRow}`);
+      worksheet.getCell(`O${previousRow}`).value =
+        `Sidoarjo, ${date.getDate()} ${
+          months[date.getMonth()]
+        } ${date.getFullYear()}`;
+      worksheet.getCell(`O${previousRow}`).alignment = { horizontal: 'center' };
+
+      previousRow += 1;
+      const ttd = [];
+      ttd.push(previousRow);
+      worksheet.mergeCells(`O${previousRow}:Q${previousRow}`);
+      worksheet.getCell(`O${previousRow}`).value = `ASMAN PERENCANAAN`;
+      worksheet.getCell(`O${previousRow}`).alignment = { horizontal: 'center' };
+
+      previousRow += 4;
+
+      worksheet.mergeCells(`O${ttd[0]}:Q${previousRow - 1}`);
+
+      ttd.push(previousRow);
+      worksheet.mergeCells(`O${previousRow}:Q${previousRow}`);
+      worksheet.getCell(`O${previousRow}`).value = `M SYAIFUDIN`;
+      worksheet.getCell(`O${previousRow}`).alignment = { horizontal: 'center' };
 
       worksheet.eachRow(row => {
         row.eachCell(cell => {
@@ -2155,6 +2197,14 @@ export const SurveyService = {
           name: 'Arial',
           size: 12,
           color: { argb: 'FF0000' },
+        };
+      }
+
+      for (const row of ttd) {
+        worksheet.getCell(`Os${row}`).font = {
+          name: 'Arial',
+          size: 12,
+          bold: true,
         };
       }
 
@@ -2226,7 +2276,7 @@ export const SurveyService = {
         }
       }
 
-      for (let rowIndex = totalMaterial; rowIndex <= previousRow; rowIndex++) {
+      for (let rowIndex = totalMaterial; rowIndex <= totalRow; rowIndex++) {
         worksheet.getCell(`C${rowIndex}`).font = {
           name: 'Arial',
           size: 12,
