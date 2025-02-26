@@ -5,6 +5,9 @@ import prisma from '../config/prisma';
 export const PoleRepository = {
   async getPole() {
     return await prisma.poleSupporter.findMany({
+      where: {
+        pole_materials: { some: {} }, // Only get poles that have related records in PoleMaterial
+      },
       select: {
         id: true,
         nama_pole: true,

@@ -19,6 +19,7 @@ export const Konstruksi = {
         konstruksi_materials: {
           some: {},
         },
+        id: { not: 38 },
       },
       select: {
         id: true,

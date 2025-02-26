@@ -401,9 +401,11 @@ export const SurveyService = {
           const materials =
             await PoleMaterialRepository.getPoleMaterialsByPoleId(idPole);
 
-          return { idPole, materials };
+          return materials.length > 0 ? { idPole, materials } : null;
         }),
       );
+
+      poleMaterials.filter(Boolean); // Remove null values
 
       const groundingMaterials = await Promise.all(
         Object.keys(groundingCount).map(async key => {
@@ -929,9 +931,11 @@ export const SurveyService = {
           const materials =
             await PoleMaterialRepository.getPoleMaterialsByPoleId(idPole);
 
-          return { idPole, materials };
+          return materials.length > 0 ? { idPole, materials } : null;
         }),
       );
+
+      const filteredPoleMaterials = poleMaterials.filter(Boolean);
 
       const groundingMaterials = await Promise.all(
         Object.keys(groundingCount).map(async key => {
@@ -1063,7 +1067,7 @@ export const SurveyService = {
       );
 
       const polePrices = await Promise.all(
-        poleMaterials.map(async ({ idPole, materials }) => {
+        filteredPoleMaterials.map(async ({ idPole, materials }) => {
           const materialPrices = await Promise.all(
             materials.map(async material => {
               const materialData = await Material.findMaterialById(
@@ -1443,111 +1447,119 @@ export const SurveyService = {
       previousRow += 1;
       formatWorksheetRow(worksheet, previousRow);
 
-      previousRow += 1;
-      worksheet.getCell(`C${previousRow}`).value = '   POLE SUPPORTER :';
-
-      formatWorksheetRow(worksheet, previousRow);
-
-      rowTitle.push(previousRow);
-
-      for (const poles of polePrices) {
-        const pole = await PoleRepository.getPoleById(poles.idPole);
+      if (polePrices.length > 0) {
         previousRow += 1;
-        worksheet.getCell(`C${previousRow}`).value =
-          `   ${pole.nama_pole.toUpperCase()}`;
+        worksheet.getCell(`C${previousRow}`).value = '   POLE SUPPORTER :';
+
         formatWorksheetRow(worksheet, previousRow);
 
-        rowPoleSupport.push(previousRow);
+        rowTitle.push(previousRow);
 
-        const groupedMaterials: Record<string, typeof poles.materials> = {};
+        for (const poles of polePrices) {
+          const pole = await PoleRepository.getPoleById(poles.idPole);
+          previousRow += 1;
+          worksheet.getCell(`C${previousRow}`).value =
+            `   ${pole.nama_pole.toUpperCase()}`;
+          formatWorksheetRow(worksheet, previousRow);
 
-        for (const item of poles.materials) {
-          if (!groupedMaterials[item.tipe_pekerjaan]) {
-            groupedMaterials[item.tipe_pekerjaan] = [];
-          }
+          rowPoleSupport.push(previousRow);
 
-          groupedMaterials[item.tipe_pekerjaan].push(item);
-        }
+          const groupedMaterials: Record<string, typeof poles.materials> = {};
 
-        for (const [groupKey, group] of Object.entries(groupedMaterials)) {
-          if (groupKey != '') {
-            previousRow += 1;
-            worksheet.getCell(`C${previousRow}`).value = `   ${groupKey} :`;
-            formatWorksheetRow(worksheet, previousRow);
-
-            rowTipePekerjaan.push(previousRow);
-          }
-
-          // Process each material in the group
-          for (const calculatedPole of group) {
-            previousRow += 1;
-
-            totalAkhirBerat += calculatedPole.total_berat;
-
-            const rowData = [
-              { col: 'B', value: calculatedPole.data_material.nomor_material },
-              { col: 'C', value: calculatedPole.data_material.nama_material },
-              {
-                col: 'D',
-                value: calculatedPole.data_material.jenis_material,
-                isAlign: true,
-              },
-              {
-                col: 'E',
-                value: Number(calculatedPole.data_material.berat_material),
-                isAlign: true,
-              },
-              {
-                col: 'F',
-                value: calculatedPole.data_material.satuan_material,
-                isAlign: true,
-              },
-              { col: 'G', value: calculatedPole.total_berat, isAlign: true },
-              {
-                col: 'H',
-                value: calculatedPole.total_kuantitas,
-                isAlign: true,
-              },
-              {
-                col: 'I',
-                value: calculatedPole.total_kuantitas,
-                isAlign: true,
-              },
-              { col: 'J', value: { formula: '0', result: 0 }, isAlign: true },
-              { col: 'K', value: calculatedPole.data_material.harga_material },
-              { col: 'L', value: calculatedPole.data_material.pasang_rab },
-              { col: 'N', value: calculatedPole.total_harga_material },
-              { col: 'O', value: calculatedPole.total_pasang },
-              {
-                col: 'Q',
-                value:
-                  calculatedPole.total_harga_material +
-                  calculatedPole.total_pasang,
-              },
-            ];
-
-            // Apply values and alignments
-            for (const { col, value, isAlign } of rowData) {
-              worksheet.getCell(`${col}${previousRow}`).value = value;
-
-              if (isAlign) {
-                worksheet.getCell(`${col}${previousRow}`).alignment = {
-                  horizontal: 'center',
-                  vertical: 'middle',
-                };
-              }
+          for (const item of poles.materials) {
+            if (!groupedMaterials[item.tipe_pekerjaan]) {
+              groupedMaterials[item.tipe_pekerjaan] = [];
             }
 
-            formatWorksheetRow(worksheet, previousRow);
+            groupedMaterials[item.tipe_pekerjaan].push(item);
           }
+
+          for (const [groupKey, group] of Object.entries(groupedMaterials)) {
+            if (groupKey != '') {
+              previousRow += 1;
+              worksheet.getCell(`C${previousRow}`).value = `   ${groupKey} :`;
+              formatWorksheetRow(worksheet, previousRow);
+
+              rowTipePekerjaan.push(previousRow);
+            }
+
+            // Process each material in the group
+            for (const calculatedPole of group) {
+              previousRow += 1;
+
+              totalAkhirBerat += calculatedPole.total_berat;
+
+              const rowData = [
+                {
+                  col: 'B',
+                  value: calculatedPole.data_material.nomor_material,
+                },
+                { col: 'C', value: calculatedPole.data_material.nama_material },
+                {
+                  col: 'D',
+                  value: calculatedPole.data_material.jenis_material,
+                  isAlign: true,
+                },
+                {
+                  col: 'E',
+                  value: Number(calculatedPole.data_material.berat_material),
+                  isAlign: true,
+                },
+                {
+                  col: 'F',
+                  value: calculatedPole.data_material.satuan_material,
+                  isAlign: true,
+                },
+                { col: 'G', value: calculatedPole.total_berat, isAlign: true },
+                {
+                  col: 'H',
+                  value: calculatedPole.total_kuantitas,
+                  isAlign: true,
+                },
+                {
+                  col: 'I',
+                  value: calculatedPole.total_kuantitas,
+                  isAlign: true,
+                },
+                { col: 'J', value: { formula: '0', result: 0 }, isAlign: true },
+                {
+                  col: 'K',
+                  value: calculatedPole.data_material.harga_material,
+                },
+                { col: 'L', value: calculatedPole.data_material.pasang_rab },
+                { col: 'N', value: calculatedPole.total_harga_material },
+                { col: 'O', value: calculatedPole.total_pasang },
+                {
+                  col: 'Q',
+                  value:
+                    calculatedPole.total_harga_material +
+                    calculatedPole.total_pasang,
+                },
+              ];
+
+              // Apply values and alignments
+              for (const { col, value, isAlign } of rowData) {
+                worksheet.getCell(`${col}${previousRow}`).value = value;
+
+                if (isAlign) {
+                  worksheet.getCell(`${col}${previousRow}`).alignment = {
+                    horizontal: 'center',
+                    vertical: 'middle',
+                  };
+                }
+              }
+
+              formatWorksheetRow(worksheet, previousRow);
+            }
+          }
+
+          previousRow += 1;
+          formatWorksheetRow(worksheet, previousRow);
         }
 
         previousRow += 1;
         formatWorksheetRow(worksheet, previousRow);
       }
-
-      previousRow += 1;
-      formatWorksheetRow(worksheet, previousRow);
 
       previousRow += 1;
       worksheet.getCell(`C${previousRow}`).value = '   POLE TOP ARRANGEMENT :';
@@ -2008,12 +2020,16 @@ export const SurveyService = {
         await Material.findMaterialById(534),
       );
 
+      let rowAngkutan;
+
       for (const material of pekerjaanPendukung) {
         previousRow += 1;
+
         let value = 1;
 
         if (material.nomor_material === 534) {
-          value = totalAkhirBerat;
+          rowAngkutan = previousRow;
+          value = Math.ceil(totalAkhirBerat * 100) / 100;
         }
 
         const rowData = [
@@ -2273,8 +2289,16 @@ export const SurveyService = {
             size: 12,
             color: { argb: '00B0F0' },
           };
+
+          worksheet.getCell(rowIndex, colIndex).numFmt = '#,##0';
         }
       }
+
+      for (let rowIndex = 17; rowIndex <= lastRow; rowIndex++) {
+        worksheet.getCell(`G${rowIndex}`).numFmt = '0.00';
+      }
+
+      worksheet.getCell(`I${rowAngkutan}`).numFmt = '0.00';
 
       for (let rowIndex = totalMaterial; rowIndex <= totalRow; rowIndex++) {
         worksheet.getCell(`C${rowIndex}`).font = {
@@ -2283,6 +2307,12 @@ export const SurveyService = {
           bold: true,
           color: { argb: '002060' },
         };
+      }
+
+      for (let rowIndex = totalMaterial; rowIndex <= totalRow; rowIndex++) {
+        for (let colIndex = 11; colIndex <= 17; colIndex++) {
+          worksheet.getCell(rowIndex, colIndex).numFmt = '#,##0';
+        }
       }
 
       for (let colIndex = 2; colIndex <= 17; colIndex++) {
