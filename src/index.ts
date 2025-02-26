@@ -9,8 +9,6 @@ import routes from './router';
 
 const app = express();
 
-app.use(clerkMiddleware());
-
 app.use(
   cors({
     origin: '*',
@@ -20,6 +18,9 @@ app.use(
     optionsSuccessStatus: 204,
   }),
 );
+
+app.use(clerkMiddleware());
+
 dotenv.config();
 app.use(express.json({ limit: '12mb' }));
 app.use(bodyParser.json());
