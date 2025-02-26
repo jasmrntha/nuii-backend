@@ -2168,7 +2168,7 @@ export const SurveyService = {
 
       previousRow += 4;
 
-      worksheet.mergeCells(`O${ttd[0]}:Q${previousRow - 1}`);
+      worksheet.mergeCells(`O${ttd[0] + 1}:Q${previousRow - 1}`);
 
       ttd.push(previousRow);
       worksheet.mergeCells(`O${previousRow}:Q${previousRow}`);
