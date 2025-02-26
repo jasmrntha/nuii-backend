@@ -1,7 +1,8 @@
-import { requireAuth } from '@clerk/express';
 import express from 'express';
+
 const router = express.Router();
 
+import { AuthMiddleware } from '../middleware';
 import GroundingRoutes from './grounding.router';
 import KonstruksiRoutes from './konstruksi.router';
 import LogRoutes from './log.router';
@@ -13,7 +14,7 @@ import SurveyRoutes from './survey.router';
 import UploadFileRoutes from './upload-file.router';
 import UploadImageRoutes from './upload-image.router';
 
-router.use(requireAuth());
+router.use(AuthMiddleware);
 
 router.use('/upload-file', UploadFileRoutes);
 router.use('/upload-image', UploadImageRoutes);
