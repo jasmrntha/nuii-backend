@@ -1,3 +1,5 @@
+import path from 'node:path';
+
 // eslint-disable-next-line import/no-extraneous-dependencies
 import ExcelJS from 'exceljs';
 import { StatusCodes } from 'http-status-codes';
@@ -1209,6 +1211,43 @@ export const SurveyService = {
 
       worksheet.mergeCells('C4:D4');
       worksheet.getCell('C4').value = 'UP3 SURABAYA BARAT';
+
+      const imagePath = path.resolve(process.cwd(), 'storage/file/image.png');
+
+      // 📌 Read Image File (Ensure the path is correct)
+      const imageId = workbook.addImage({
+        filename: imagePath, // Replace with your image path
+        extension: 'png',
+      });
+
+      // 📌 Merge Cells in Column B (B2 to B4)
+      worksheet.mergeCells('B2:B4');
+
+      // 📌 Ensure Column B Has a Defined Width
+      const column = worksheet.getColumn(2);
+      if (!column.width) column.width = 10; // Set a default width if not defined
+
+      // 📌 Get Column Width in Pixels (Each unit ≈ 7.5 pixels)
+      const columnWidthPx = column.width * 7.5;
+
+      // 📌 Define Image Width in Pixels
+      const imageWidthPx = 44.6;
+
+      // 📌 Calculate Horizontal Offset (Centering)
+      const offsetX = (columnWidthPx - imageWidthPx) / 2;
+
+      // 📌 Position Image in the Worksheet
+      worksheet.addImage(imageId, {
+        tl: {
+          col: 1, // Column B (zero-based index)
+          row: 1, // Row 2 (zero-based index)
+          nativeCol: 1,
+          nativeColOff: offsetX * 9525, // Convert pixels to Excel EMUs
+          nativeRow: 1,
+          nativeRowOff: 0, // Already centered vertically
+        },
+        ext: { width: 44.6, height: 61.63 }, // Set image size in pixels
+      });
 
       // Merge for Title
       worksheet.mergeCells('B6:Q6');
