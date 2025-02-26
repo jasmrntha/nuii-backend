@@ -89,4 +89,25 @@ export const SurveyDetail = {
       },
     });
   },
+  async exportDetailByHeaderId(id: number) {
+    return await prisma.surveyDetail.findMany({
+      where: {
+        id_header: id,
+        deleted_at: null,
+      },
+      select: {
+        id: true,
+        id_material_tiang: true,
+        id_konstruksi: true,
+        id_pole_supporter: true,
+        id_grounding_termination: true,
+        penyulang: true,
+        panjang_jaringan: true,
+        long: true,
+        lat: true,
+        keterangan: true,
+        petugas_survey: true,
+      },
+    });
+  },
 };
