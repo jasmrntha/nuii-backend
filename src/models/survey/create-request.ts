@@ -12,8 +12,9 @@ interface SurveyHeader {
 
 interface SurveyDetail {
   id_material_tiang: number;
-  id_material_konduktor: number;
   id_konstruksi: number;
+  id_pole: number;
+  id_grounding: number;
   nama_pekerjaan: string;
   penyulang: string;
   panjang_jaringan: number;

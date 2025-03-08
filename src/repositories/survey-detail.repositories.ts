@@ -8,9 +8,10 @@ export const SurveyDetail = {
   async createDetail(
     data: {
       id_material_tiang: number;
-      id_material_konduktor: number;
       id_konstruksi: number;
       id_header: number;
+      id_pole_supporter: number;
+      id_grounding_termination: number;
       nama_pekerjaan: string;
       penyulang: string;
       panjang_jaringan: number;
@@ -38,10 +39,10 @@ export const SurveyDetail = {
     id: number,
     data: {
       id_material_tiang: number;
-      id_material_konduktor: number;
       id_konstruksi: number;
       id_header: number;
-      nama_pekerjaan: string;
+      id_pole_supporter: number;
+      id_grounding_termination: number;
       penyulang: string;
       panjang_jaringan: number;
       long: string;
@@ -70,6 +71,7 @@ export const SurveyDetail = {
     return await prisma.surveyDetail.findUnique({
       where: {
         id,
+        deleted_at: null,
       },
     });
   },
@@ -84,6 +86,27 @@ export const SurveyDetail = {
       where: {
         id_header: id,
         deleted_at: null,
+      },
+    });
+  },
+  async exportDetailByHeaderId(id: number) {
+    return await prisma.surveyDetail.findMany({
+      where: {
+        id_header: id,
+        deleted_at: null,
+      },
+      select: {
+        id: true,
+        id_material_tiang: true,
+        id_konstruksi: true,
+        id_pole_supporter: true,
+        id_grounding_termination: true,
+        penyulang: true,
+        panjang_jaringan: true,
+        long: true,
+        lat: true,
+        keterangan: true,
+        petugas_survey: true,
       },
     });
   },

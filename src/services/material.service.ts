@@ -172,4 +172,18 @@ export const MaterialService = {
       throw error;
     }
   },
+
+  async getAllMaterial() {
+    try {
+      const material = await Material.getAllMaterial();
+
+      if (material.length === 0) {
+        throw new CustomError(StatusCodes.NOT_FOUND, 'Material Not Found');
+      }
+
+      return material;
+    } catch (error) {
+      throw error;
+    }
+  },
 };

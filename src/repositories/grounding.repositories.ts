@@ -11,4 +11,12 @@ export const GroundingRepository = {
       },
     });
   },
+
+  async getGroundingById(id: number) {
+    return await prisma.groundingTermination.findUnique({
+      where: {
+        id,
+      },
+    });
+  },
 };
