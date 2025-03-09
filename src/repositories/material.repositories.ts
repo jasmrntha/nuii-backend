@@ -53,10 +53,13 @@ export const Material = {
   ) {
     const client = tx || prisma;
 
+    const date = new Date();
+
     return await client.material.update({
       where: { id },
       data: {
         ...data,
+        updated_at: date,
       },
     });
   },

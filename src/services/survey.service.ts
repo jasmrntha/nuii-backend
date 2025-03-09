@@ -2072,11 +2072,11 @@ export const SurveyService = {
           },
           {
             col: 'O',
-            value: material.pasang_rab * value,
+            value: Math.ceil(material.pasang_rab * value),
           },
           {
             col: 'Q',
-            value: material.pasang_rab * value,
+            value: Math.ceil(material.pasang_rab * value),
           },
         ];
 
