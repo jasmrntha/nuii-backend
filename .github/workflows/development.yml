@@ -22,7 +22,7 @@ jobs:
           #   password: ${{ secrets.VPS_PASSWORD }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            cd /var/www/nuii-backend-3
+            cd /var/www/nuii-backend-dev
             git stash
             git pull origin main
             export NVM_DIR=~/.nvm
