@@ -14,7 +14,7 @@
     "skipLibCheck": true,
     "strict": true,
     "strictNullChecks": false,
-    "noImplicitAny": true,
+    "noImplicitAny": false,
     "strictBindCallApply": true,
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false,
@@ -24,5 +24,6 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "typeRoots": ["./node_module/@types", "./src/utils"]
-  }
+  },
+  "include": ["src/**/*"]
 }
