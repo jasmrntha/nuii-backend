@@ -156,4 +156,27 @@ export const SurveyHeader = {
       data: { deleted_at: new Date() },
     });
   },
+
+  async createHeaderEstimasi(
+    data: {
+      nama_survey: string;
+      nama_pekerjaan: string;
+      lokasi: string;
+      user_id: string;
+      id_material_konduktor: number;
+    },
+    tx?: Omit<
+      PrismaClient<Prisma.PrismaClientOptions, never, DefaultArgs>,
+      '$connect' | '$on' | '$disconnect' | '$use' | '$transaction' | '$extends'
+    >,
+  ) {
+    const client = tx || prisma;
+
+    return await client.surveyHeader.create({
+      data: {
+        ...data,
+        status_survey: SurveyStatus.Belum_Disetujui,
+      },
+    });
+  },
 };

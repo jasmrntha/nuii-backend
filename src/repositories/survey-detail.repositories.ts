@@ -110,4 +110,40 @@ export const SurveyDetail = {
       },
     });
   },
+
+  async createDetailsBatch(
+    data: {
+      id_material_tiang: number;
+      id_konstruksi: number;
+      id_header: number;
+      id_pole_supporter: number;
+      id_grounding_termination: number;
+      nama_pekerjaan: string;
+      penyulang: string;
+      panjang_jaringan: number;
+      long: string;
+      lat: string;
+      foto?: string;
+      keterangan: string;
+      petugas_survey: string;
+    }[],
+    tx?: Omit<
+      PrismaClient<Prisma.PrismaClientOptions, never, DefaultArgs>,
+      '$connect' | '$on' | '$disconnect' | '$use' | '$transaction' | '$extends'
+    >,
+  ) {
+    const client = tx || prisma;
+
+    const processedData = data.map(detail => ({
+      ...detail,
+      foto:
+        detail.foto && detail.foto.trim() !== ''
+          ? detail.foto
+          : 'Belum ada foto',
+    }));
+
+    return await client.surveyDetail.createMany({
+      data: processedData,
+    });
+  },
 };

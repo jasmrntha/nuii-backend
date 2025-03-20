@@ -10,6 +10,7 @@ import {
   CreateNewSurveySchema,
   UpdateSurveyHeaderSchema,
   UpdateSurveyDetailSchema,
+  CreateBatchSurveySchema,
 } from '../validators';
 
 const router = express.Router();
@@ -43,5 +44,10 @@ router.get('/detail/:id', SurveyController.getSurveyDetail);
 router.get('/report', SurveyController.getAllReport);
 router.get('/report/detail/:id', SurveyController.getReportDetail);
 router.get('/export/excel/:id', SurveyController.exportSurveyToExcel);
+router.post(
+  '/create-batch',
+  validate(CreateBatchSurveySchema),
+  SurveyController.createNewSurveyBatch,
+);
 
 export default router;
