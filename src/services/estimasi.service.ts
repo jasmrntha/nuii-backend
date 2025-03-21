@@ -1,19 +1,12 @@
-import polyline from '@mapbox/polyline';
-import { getDistance, computeDestinationPoint, getPathLength } from 'geolib';
+import { getDistance, computeDestinationPoint } from 'geolib';
 import { StatusCodes } from 'http-status-codes';
 
 import { CustomError } from '../middleware';
 import { type RouteRequest } from '../models';
+import { Material, Konstruksi, KonstruksiMaterial } from '../repositories';
 
-const MIN_POLE_DISTANCE = 40;
+// const MIN_POLE_DISTANCE = 40;
 const IDEAL_POLE_DISTANCE = 50;
-
-// Decode polyline to coordinates
-function decodeRoute(encodedGeometry: string) {
-  const decoded = polyline.decode(encodedGeometry);
-
-  return decoded.map(coord => ({ latitude: coord[0], longitude: coord[1] }));
-}
 
 // Remove Duplicate Poles
 function removeDuplicates(poles: { latitude: number; longitude: number }[]) {
@@ -33,38 +26,54 @@ function removeDuplicates(poles: { latitude: number; longitude: number }[]) {
 }
 
 // Calculate the angle between two bearings (in degrees)
-// function calculateTurnAngle(
-//   approachBearing: number,
-//   departureBearing: number,
-// ): number {
-//   // Calculate the angle between the two bearings
-//   let turnAngle = departureBearing - approachBearing;
+function calculateTurnAngle(
+  approachBearing: number,
+  departureBearing: number,
+): number {
+  // Calculate the angle between the two bearings
+  let turnAngle = departureBearing - approachBearing;
 
-//   // Normalize to the range [-180, 180]
-//   if (turnAngle > 180) {
-//     turnAngle -= 360;
-//   } else if (turnAngle < -180) {
-//     turnAngle += 360;
-//   }
+  // Normalize to the range [-180, 180]
+  if (turnAngle > 180) {
+    turnAngle -= 360;
+  } else if (turnAngle < -180) {
+    turnAngle += 360;
+  }
 
-//   // Return the absolute value of the angle
-//   return Math.abs(turnAngle);
-// }
+  // Return the absolute value of the angle
+  return Math.abs(turnAngle);
+}
 
-// Determine the turn type based on the angle
-// function getTurnType(angle: number): number {
-//   if (angle < 20) {
-//     return 0;
-//   } else if (angle < 45) {
-//     return 5;
-//   } else if (angle < 120) {
-//     return 2;
-//   } else if (angle < 150) {
-//     return 3;
-//   } else {
-//     return 4;
-//   }
-// }
+function calculatePathLength(
+  path: { latitude: number; longitude: number }[],
+): number {
+  let totalDistance = 0;
+
+  for (let index = 0; index < path.length - 1; index++) {
+    const pole = path[index];
+    const nextPole = path[index + 1];
+
+    const distance = getDistance(pole, nextPole);
+    totalDistance += distance;
+  }
+
+  return totalDistance;
+}
+
+// // Determine the turn type based on the angle
+function getTurnType(angle: number): number {
+  if (angle < 15) {
+    return 9;
+  } else if (angle < 30) {
+    return 11;
+  } else if (angle < 60) {
+    return 12;
+  } else if (angle < 90) {
+    return 14;
+  } else {
+    return 9;
+  }
+}
 
 // Calculate bearing between two points
 function getBearing(
@@ -85,107 +94,121 @@ function getBearing(
   return (bearingDeg + 360) % 360;
 }
 
-// Find the index of the point in the route closest to the given maneuver location
-function findClosestPointIndex(
-  route: { latitude: number; longitude: number }[],
-  maneuverLocation: [number, number],
-) {
-  const maneuverPoint = {
-    latitude: maneuverLocation[0],
-    longitude: maneuverLocation[1],
-  };
-
-  let closestIndex = 0;
-  let minimumDistance = Number.POSITIVE_INFINITY;
-
-  for (const [index, point] of route.entries()) {
-    const distance = getDistance(maneuverPoint, point);
-
-    if (distance < minimumDistance) {
-      minimumDistance = distance;
-      closestIndex = index;
-    }
-  }
-
-  return closestIndex;
+// Convert coordinates from the API format to geolib format
+function convertCoordinates(coordinates: { lat: number; lng: number }[]) {
+  return coordinates.map(coord => ({
+    latitude: coord.lat,
+    longitude: coord.lng,
+  }));
 }
 
-// function assignConstruction(
-//   poles: { latitude: number; longitude: number }[],
-//   maneuverLocations: [number, number][] = [],
-// ) {
-//   const assignedPoles: {
-//     latitude: number;
-//     longitude: number;
-//     id_konstruksi: number;
-//     id_tiang: number;
-//   }[] = [];
+function assignConstruction(
+  poles: { latitude: number; longitude: number }[],
+  maneuverPoints: { latitude: number; longitude: number }[] = [],
+) {
+  const assignedPoles: {
+    latitude: number;
+    longitude: number;
+    id_konstruksi: number;
+    id_tiang: number;
+  }[] = [];
 
-//   if (poles.length < 2) {
-//     return assignedPoles;
-//   }
+  // Track usage of each construction and pole type
+  const constructionUsage: Record<number, number> = {};
+  const tiangUsage: Record<number, number> = {};
 
-//   // Start with the first pole
-//   let currentPole = poles[0];
+  if (poles.length < 2) {
+    return { assignedPoles, constructionUsage, tiangUsage };
+  }
 
-//   // Assign the first pole
-//   assignedPoles.push({
-//     ...currentPole,
-//     id_konstruksi: 1,
-//     id_tiang: 1,
-//   });
+  // Helper function to check if a point is a maneuver point
+  function isManeuverPoint(point: { latitude: number; longitude: number }) {
+    return maneuverPoints.some(
+      m =>
+        Math.abs(m.latitude - point.latitude) < 1e-7 &&
+        Math.abs(m.longitude - point.longitude) < 1e-7,
+    );
+  }
 
-//   // Process each pole
-//   for (let poleIndex = 1; poleIndex < poles.length - 1; poleIndex++) {
-//     const pole = poles[poleIndex];
+  // Helper function to track usage
+  function trackUsage(id_konstruksi: number, id_tiang: number) {
+    // Track construction usage
+    constructionUsage[id_konstruksi] =
+      (constructionUsage[id_konstruksi] || 0) + 1;
 
-//     if (maneuverLocations.includes([pole.latitude, pole.longitude])) {
-//       const previousPole = poles[poleIndex - 1];
-//       const nextPole = poles[poleIndex + 1];
+    // Track pole type usage
+    tiangUsage[id_tiang] = (tiangUsage[id_tiang] || 0) + 1;
+  }
 
-//       const approachBearing = getBearing(previousPole, currentPole);
-//       const departureBearing = getBearing(currentPole, nextPole);
+  // Assign the first pole
+  const firstPoleKonstruksi = 1;
+  const firstPoleTiang = 1;
 
-//       const turnAngle = calculateTurnAngle(approachBearing, departureBearing);
-//       const turnType = getTurnType(turnAngle);
+  assignedPoles.push({
+    ...poles[0],
+    id_konstruksi: firstPoleKonstruksi,
+    id_tiang: firstPoleTiang,
+  });
 
-//       assignedPoles.push({
-//         ...pole,
-//         id_konstruksi: turnType,
-//         id_tiang: 1,
-//       });
+  trackUsage(firstPoleKonstruksi, firstPoleTiang);
 
-//       currentPole = pole;
-//       continue;
-//     }
+  // Process intermediate poles
+  for (let index = 1; index < poles.length - 1; index++) {
+    const previousPole = poles[index - 1];
+    const currentPole = poles[index];
+    const nextPole = poles[index + 1];
 
-//     // Assign the pole to the current construction
-//     assignedPoles.push({
-//       ...pole,
-//       id_konstruksi: 1,
-//       id_tiang: 1,
-//     });
+    let idKonstruksi = 9; // Default to straight line
+    const idTiang = 243; // Default pole type
 
-//     // Move to the next pole
-//     currentPole = pole;
-//   }
+    if (isManeuverPoint(currentPole)) {
+      // This is a maneuver point, determine the turn type
+      const approachBearing = getBearing(previousPole, currentPole);
+      const departureBearing = getBearing(currentPole, nextPole);
+      const turnAngle = calculateTurnAngle(approachBearing, departureBearing);
+      idKonstruksi = getTurnType(turnAngle);
+    }
 
-//   // Start with the first pole
-//   currentPole = poles.at(-1);
+    assignedPoles.push({
+      ...currentPole,
+      id_konstruksi: idKonstruksi,
+      id_tiang: idTiang,
+    });
 
-//   // Assign the first pole
-//   assignedPoles.push({
-//     ...currentPole,
-//     id_konstruksi: 1,
-//     id_tiang: 1,
-//   });
-// }
+    trackUsage(idKonstruksi, idTiang);
+  }
+
+  // Assign the last pole
+  if (poles.length > 1) {
+    const lastPoleKonstruksi = 1;
+    const lastPoleTiang = 1;
+
+    assignedPoles.push({
+      ...poles.at(-1),
+      id_konstruksi: lastPoleKonstruksi,
+      id_tiang: lastPoleTiang,
+    });
+
+    trackUsage(lastPoleKonstruksi, lastPoleTiang);
+  }
+
+  return { assignedPoles, constructionUsage, tiangUsage };
+}
 
 // Place poles along a route, ensuring poles are placed at maneuver points
 function placePoles(
   route: { latitude: number; longitude: number }[],
-  lastPole: { latitude: number; longitude: number } | null,
-  maneuverLocations: [number, number][] = [],
+  instructions: {
+    type: string;
+    distance: number;
+    time: number;
+    road: string;
+    direction: string;
+    index: number;
+    mode: string;
+    modifier: string;
+    text: string;
+  }[],
 ) {
   const poles: { latitude: number; longitude: number }[] = [];
 
@@ -194,238 +217,376 @@ function placePoles(
     return poles;
   }
 
-  // Find the indices of points closest to maneuver locations
-  const maneuverIndices: number[] = maneuverLocations.map(location =>
-    findClosestPointIndex(route, location),
-  );
+  // Process instructions to find U-turns and other turn points
+  const turnIndices: number[] = [];
+  const uTurnData: {
+    beforeIndex: number;
+    uTurnIndex: number;
+    afterIndex: number;
+    distanceBeforeUTurn: number;
+    distanceAfterUTurn: number;
+    nextInstructionIndex: number;
+  }[] = [];
 
-  console.log(`Found ${maneuverIndices.length} maneuver points in route`);
+  // Create a set of important turn points that should have poles
+  const importantTurnIndices = new Set<number>();
 
-  // Start with last pole position or the first point of the route
-  let currentPosition = lastPole || route[0];
-  let currentRouteIndex = 0;
+  // First pass: identify all turn points and U-turns
+  for (let index = 0; index < instructions.length; index++) {
+    const instruction = instructions[index];
 
-  // If there's a last pole, find the closest point on the route to start from
-  if (lastPole) {
-    let minimumDistance = Number.POSITIVE_INFINITY;
+    if (instruction.modifier === 'Uturn') {
+      // Found a U-turn, need to get the instruction before and after
+      const beforeIndex = index > 0 ? instructions[index - 1].index : 0;
+      const uTurnIndex = instruction.index;
 
-    for (const [index, point] of route.entries()) {
-      const pointDistance = getDistance(lastPole, point);
+      // Get the next instruction after the U-turn
+      const nextInstructionIndex =
+        index < instructions.length - 1 ? index + 1 : -1;
+      const afterIndex =
+        nextInstructionIndex >= 0
+          ? instructions[nextInstructionIndex].index
+          : route.length - 1;
 
-      if (pointDistance < minimumDistance) {
-        minimumDistance = pointDistance;
-        currentRouteIndex = index;
+      // Calculate distance from before-U-turn to U-turn
+      let distanceBeforeUTurn = 0;
+
+      for (let indexJ = beforeIndex; indexJ < uTurnIndex; indexJ++) {
+        distanceBeforeUTurn += getDistance(route[indexJ], route[indexJ + 1]);
       }
-    }
 
-    // If we're already close to a route point, don't add a duplicate pole
-    if (minimumDistance < MIN_POLE_DISTANCE / 2) {
-      currentPosition = route[currentRouteIndex];
+      // Calculate distance from U-turn to next instruction
+      let distanceAfterUTurn = 0;
+
+      for (let indexJ = uTurnIndex + 1; indexJ < afterIndex; indexJ++) {
+        distanceAfterUTurn += getDistance(route[indexJ], route[indexJ + 1]);
+      }
+
+      uTurnData.push({
+        beforeIndex,
+        uTurnIndex,
+        afterIndex,
+        distanceBeforeUTurn,
+        distanceAfterUTurn,
+        nextInstructionIndex:
+          nextInstructionIndex >= 0
+            ? instructions[nextInstructionIndex].index
+            : -1,
+      });
+
+      console.log(
+        `U-turn detected: Before index ${beforeIndex}, U-turn at ${uTurnIndex}, After index ${afterIndex}`,
+      );
     } else {
-      // Add the last pole as our starting point
-      poles.push(currentPosition);
+      // Add other turn points
+      turnIndices.push(instruction.index);
+      importantTurnIndices.add(instruction.index);
     }
-  } else {
-    // Add first point as a pole if there's no previous pole
-    poles.push(currentPosition);
   }
+
+  // Add start and end points as important
+  importantTurnIndices.add(0);
+  importantTurnIndices.add(route.length - 1);
+
+  // Start with the first point of the route
+  poles.push(route[0]);
 
   // Distance traveled since the last pole
   let distanceSinceLastPole = 0;
 
   // Process each segment of the route
-  for (
-    let segmentIndex = Math.max(1, currentRouteIndex);
-    segmentIndex < route.length;
-    segmentIndex++
-  ) {
-    const segmentStart = route[segmentIndex - 1];
-    const segmentEnd = route[segmentIndex];
+  let index = 1;
+  let skipToIndex = -1;
+
+  while (index < route.length) {
+    // Check if we need to skip to a specific index (after U-turn)
+    if (skipToIndex > 0 && index < skipToIndex) {
+      index = skipToIndex;
+      continue;
+    }
+
+    // Check if we're at a point before a U-turn
+    const uTurnPoint = uTurnData.find(u => u.beforeIndex === index - 1);
+
+    if (uTurnPoint) {
+      // U-turn handling (kept unchanged)
+      console.log(
+        `Processing segment with U-turn at index ${uTurnPoint.uTurnIndex}`,
+      );
+
+      const segmentStartBeforeUTurn = route[uTurnPoint.beforeIndex + 2];
+      const uTurnLocation = route[uTurnPoint.uTurnIndex];
+      const uTurnLocation2 = route[uTurnPoint.uTurnIndex + 1];
+      const segmentDistance = getDistance(
+        segmentStartBeforeUTurn,
+        uTurnLocation,
+      );
+
+      const distanceAfterUTurn = getDistance(
+        uTurnLocation2,
+        route[uTurnPoint.afterIndex],
+      );
+
+      poles.push(segmentStartBeforeUTurn);
+      distanceSinceLastPole = 0;
+
+      // Calculate effective segment distance for pole placement
+      const effectiveSegmentDistance = segmentDistance - distanceAfterUTurn;
+
+      if (effectiveSegmentDistance >= 0) {
+        const bearing = getBearing(segmentStartBeforeUTurn, uTurnLocation);
+        let distanceAlongSegment = 0;
+
+        while (distanceAlongSegment < effectiveSegmentDistance) {
+          const distanceNeeded = IDEAL_POLE_DISTANCE - distanceSinceLastPole;
+
+          if (
+            distanceAlongSegment + distanceNeeded <=
+            effectiveSegmentDistance
+          ) {
+            distanceAlongSegment += distanceNeeded;
+            const newPolePosition = computeDestinationPoint(
+              segmentStartBeforeUTurn,
+              distanceAlongSegment,
+              bearing,
+            );
+            poles.push(newPolePosition);
+            distanceSinceLastPole = 0;
+          } else {
+            if (distanceAlongSegment == 0) {
+              const newPolePosition = computeDestinationPoint(
+                segmentStartBeforeUTurn,
+                distanceAlongSegment + effectiveSegmentDistance,
+                bearing,
+              );
+              poles.push(newPolePosition);
+              distanceSinceLastPole = 0;
+            } else {
+              const newPolePosition = computeDestinationPoint(
+                segmentStartBeforeUTurn,
+                distanceAlongSegment +
+                  (effectiveSegmentDistance - distanceAlongSegment),
+                bearing,
+              );
+              poles.push(newPolePosition);
+              distanceSinceLastPole = 0;
+            }
+
+            break;
+          }
+        }
+      } else {
+        const uTurnBearing = getBearing(uTurnLocation, uTurnLocation2);
+        const uTurnDistance = getDistance(uTurnLocation, uTurnLocation2);
+
+        const afterUTurn = Math.abs(effectiveSegmentDistance);
+
+        poles.push(
+          computeDestinationPoint(
+            segmentStartBeforeUTurn,
+            uTurnDistance,
+            uTurnBearing,
+          ),
+        );
+        distanceSinceLastPole = 0;
+
+        if (afterUTurn >= 0) {
+          const bearing = getBearing(
+            poles.at(-1),
+            poles[uTurnPoint.afterIndex],
+          );
+          let distanceAlongSegment = 0;
+
+          while (distanceAlongSegment < afterUTurn) {
+            const distanceNeeded = IDEAL_POLE_DISTANCE - distanceSinceLastPole;
+
+            if (distanceAlongSegment + distanceNeeded <= afterUTurn) {
+              distanceAlongSegment += distanceNeeded;
+              const newPolePosition = computeDestinationPoint(
+                segmentStartBeforeUTurn,
+                distanceAlongSegment,
+                bearing,
+              );
+              poles.push(newPolePosition);
+              distanceSinceLastPole = 0;
+            } else {
+              if (distanceAlongSegment == 0) {
+                const newPolePosition = computeDestinationPoint(
+                  segmentStartBeforeUTurn,
+                  distanceAlongSegment + afterUTurn,
+                  bearing,
+                );
+                poles.push(newPolePosition);
+                distanceSinceLastPole = 0;
+              } else {
+                const newPolePosition = computeDestinationPoint(
+                  segmentStartBeforeUTurn,
+                  distanceAlongSegment + (afterUTurn - distanceAlongSegment),
+                  bearing,
+                );
+                poles.push(newPolePosition);
+                distanceSinceLastPole = 0;
+              }
+
+              break;
+            }
+          }
+        }
+      }
+
+      skipToIndex = uTurnPoint.afterIndex;
+      index = skipToIndex;
+      continue;
+    }
+
+    // *** New check for turn points ***
+    // If the current point is a turn point, force a pole placement
+    if (importantTurnIndices.has(index)) {
+      // Force a pole at this turn point regardless of accumulated distance
+      poles.push(route[index]);
+      distanceSinceLastPole = 0;
+      index++;
+      continue;
+    }
+
+    // Standard processing for non-turn segments
+    const segmentStart = route[index - 1];
+    const segmentEnd = route[index];
     const segmentDistance = getDistance(segmentStart, segmentEnd);
 
     // Skip tiny segments
-    if (segmentDistance < 1) continue;
-
-    // Check if the current point is a maneuver point
-    const isCurrentPointManeuver = maneuverIndices.includes(segmentIndex - 1);
-    const isNextPointManeuver = maneuverIndices.includes(segmentIndex);
-
-    // If starting from a maneuver point, always place a pole there
-    if (
-      isCurrentPointManeuver &&
-      segmentIndex === Math.max(1, currentRouteIndex)
-    ) {
-      // Only add if it's not too close to the last pole
-      const distanceFromLastPole =
-        poles.length > 0
-          ? getDistance(poles.at(-1), segmentStart)
-          : Number.POSITIVE_INFINITY;
-
-      if (distanceFromLastPole > MIN_POLE_DISTANCE / 2) {
-        poles.push(segmentStart);
-        distanceSinceLastPole = 0;
-      }
+    if (segmentDistance < 1) {
+      index++;
+      continue;
     }
 
     const bearing = getBearing(segmentStart, segmentEnd);
-
-    // How far we've moved along the current segment
     let distanceAlongSegment = 0;
 
-    // Process until we've covered the entire segment
     while (distanceAlongSegment < segmentDistance) {
-      // Special case: If we're approaching a maneuver point and haven't yet placed a pole there
-      if (
-        isNextPointManeuver &&
-        distanceAlongSegment + IDEAL_POLE_DISTANCE > segmentDistance
-      ) {
-        // Place pole exactly at the maneuver point
-        poles.push(segmentEnd);
-        distanceSinceLastPole = 0;
-        break;
-      }
-
-      // Normal pole placement logic
       const distanceNeeded = IDEAL_POLE_DISTANCE - distanceSinceLastPole;
 
       if (distanceAlongSegment + distanceNeeded <= segmentDistance) {
-        // Move to the position where the next pole should be placed
         distanceAlongSegment += distanceNeeded;
-
-        // Calculate the position for the new pole
         const newPolePosition = computeDestinationPoint(
           segmentStart,
           distanceAlongSegment,
           bearing,
         );
-
-        // Add the new pole
         poles.push(newPolePosition);
-
-        // Reset the distance counter
         distanceSinceLastPole = 0;
       } else {
-        // We can't place a pole in this segment, so accumulate the distance and move to the next segment
         distanceSinceLastPole += segmentDistance - distanceAlongSegment;
         break;
       }
     }
+
+    index++;
+  }
+
+  // Make sure we have a pole at the final point
+  const lastPoint = route.at(-1);
+
+  if (
+    poles.length > 0 &&
+    !(
+      poles.at(-1).latitude === lastPoint.latitude &&
+      poles.at(-1).longitude === lastPoint.longitude
+    )
+  ) {
+    poles.push(lastPoint);
   }
 
   return poles;
 }
 
+async function calculateCost(
+  constructionUsage: Record<number, number>,
+  tiangUsage: Record<number, number>,
+): Promise<{ totalMaterial: number; totalPasang: number }> {
+  // Calculate the total cost based on construction and pole type usage
+  let totalMaterial = 0;
+  let totalPasang = 0;
+
+  // Calculate cost based on usage
+  for (const [idKonstruksi, count] of Object.entries(constructionUsage)) {
+    // Cost calculation for construction types
+    const konstruksi = await Konstruksi.findKonstruksiById(
+      Number(idKonstruksi),
+    );
+    const konstruksiMaterial =
+      await KonstruksiMaterial.findMaterialForKonstruksiById(
+        Number(idKonstruksi),
+      );
+
+    if (konstruksi && konstruksiMaterial) {
+      for (const material of konstruksiMaterial) {
+        const materialCost = await Material.findMaterialById(
+          material.id_material,
+        );
+
+        if (materialCost) {
+          const hargaMaterial =
+            count * materialCost.harga_material * Number(material.kuantitas);
+          totalMaterial += hargaMaterial;
+
+          const hargaPasang =
+            count * materialCost.pasang_rab * Number(material.kuantitas);
+          totalPasang += hargaPasang;
+        }
+      }
+    }
+  }
+
+  for (const [idTiang, count] of Object.entries(tiangUsage)) {
+    // Cost calculation for pole types
+    const tiang = await Material.findMaterialById(Number(idTiang));
+
+    if (tiang) {
+      const hargaMaterial = count * tiang.harga_material;
+      totalMaterial += hargaMaterial;
+
+      const hargaPasang = count * tiang.pasang_rab;
+      totalPasang += hargaPasang;
+    }
+  }
+
+  return { totalMaterial, totalPasang };
+}
+
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export const EstimasiService = {
-  getEstimasi(route: RouteRequest) {
+  async getEstimasi(route: RouteRequest) {
     try {
-      const steps = route.routes[0].legs[0].steps;
+      // Convert coordinates from the API format to geolib format
+      const coordinates = convertCoordinates(route.coordinates);
 
-      // Array to hold all decoded coordinates for visualization
-      const allSegments: { latitude: number; longitude: number }[] = [];
+      // Get instructions from the route
+      const instructions = route.instructions;
 
-      // Array to hold all poles
-      const allPoles: { latitude: number; longitude: number }[] = [];
+      console.log(
+        `Processing route with ${coordinates.length} coordinates and ${instructions.length} instructions`,
+      );
 
-      // Array to hold all maneuver locations across all steps
-      const allManeuverLocations: [number, number][] = [];
-
-      // Last pole placed in the previous step
-      let lastPole = null;
-
-      // First collect all maneuver locations
-      for (const step of steps) {
-        // Add maneuver location to the array
-        if (
-          step.maneuver &&
-          step.maneuver.location &&
-          step.maneuver.modifier != 'uturn' &&
-          step.maneuver.modifier != 'straight' &&
-          step.maneuver.type != 'depart' &&
-          step.maneuver.type != 'arrive'
-        ) {
-          allManeuverLocations.push(step.maneuver.location);
-          console.log(
-            `Maneuver location: [${step.maneuver.location[0]}, ${step.maneuver.location[1]}], type: ${step.maneuver.type}`,
-          );
-        }
-      }
-
-      let isSkipped = false;
-
-      // Process each step in the route
-      for (const [index, step] of steps.entries()) {
-        // Decode the geometry for this step
-        const decodedSegment = decodeRoute(step.geometry);
-
-        // Skip if segment is empty or invalid
-        if (!decodedSegment || decodedSegment.length < 2) continue;
-
-        // Log step information for debugging
-        console.log(
-          `Processing step: ${step.name}, points: ${decodedSegment.length}`,
-        );
-
-        // Extract maneuver location for this step
-        const stepManeuverLocation = step.maneuver?.location;
-        const nextStepManeuverModifier = steps[index + 1].maneuver?.modifier;
-
-        if (nextStepManeuverModifier == 'uturn') {
-          isSkipped = true;
-
-          continue;
-        }
-
-        // Create an array of maneuver locations that are relevant to this step
-        const relevantManeuvers: [number, number][] = [];
-
-        if (isSkipped) {
-          let minimumDistance = Number.POSITIVE_INFINITY;
-
-          let closestIndex = 0;
-
-          for (const [index, point] of decodedSegment.entries()) {
-            if (getDistance(point, lastPole) < minimumDistance) {
-              minimumDistance = getDistance(point, lastPole);
-              closestIndex = index;
-            }
-          }
-
-          decodedSegment.splice(0, closestIndex);
-
-          isSkipped = false;
-        } else {
-          if (stepManeuverLocation) {
-            relevantManeuvers.push(stepManeuverLocation);
-          }
-        }
-
-        // Add to all segments for visualization
-        allSegments.push(...decodedSegment);
-
-        // Place poles along this segment, ensuring poles are placed at maneuver points
-        const stepPoles = placePoles(
-          decodedSegment,
-          lastPole,
-          relevantManeuvers,
-        );
-        console.log(`Placed ${stepPoles.length} poles in step`);
-
-        // Update the last pole for the next step
-        if (stepPoles.length > 0) {
-          lastPole = stepPoles.at(-1);
-        }
-
-        // Add poles to the overall collection
-        allPoles.push(...stepPoles);
-      }
+      // Place poles along the route
+      const allPoles = placePoles(coordinates, instructions);
 
       // Remove duplicate poles
       const uniquePoles = removeDuplicates(allPoles);
 
-      // Debug overall results
-      console.log(`Total route points: ${allSegments.length}`);
-      console.log(`Total maneuver points: ${allManeuverLocations.length}`);
+      // Get all turn points for visualization
+      const turnPoints = instructions.map(
+        instruction => coordinates[instruction.index],
+      );
+
+      // Get U-turn points specifically
+      const uTurnPoints = instructions
+        .filter(instruction => instruction.modifier === 'Uturn')
+        .map(instruction => coordinates[instruction.index]);
+
+      console.log(`Total route points: ${coordinates.length}`);
+      console.log(`Total turn points: ${turnPoints.length}`);
+      console.log(`Total U-turn points: ${uTurnPoints.length}`);
       console.log(`Total poles placed: ${uniquePoles.length}`);
 
       // If less than 2 poles added, throw an error
@@ -436,16 +597,29 @@ export const EstimasiService = {
         );
       }
 
+      // Assign construction types to poles and track usage
+      const { assignedPoles, constructionUsage, tiangUsage } =
+        assignConstruction(uniquePoles, turnPoints);
+
+      // Calculate total cost
+      let { totalMaterial, totalPasang } = await calculateCost(
+        constructionUsage,
+        tiangUsage,
+      );
+
+      const konduktor = await Material.findMaterialById(5);
+      const totalDistance = calculatePathLength(uniquePoles);
+      totalMaterial += konduktor.harga_material * totalDistance;
+      totalPasang += konduktor.pasang_rab * totalDistance;
+
       // Return the result
       return {
-        poles: uniquePoles,
-        segments: allSegments,
-        maneuverPoints: allManeuverLocations.map(location => ({
-          latitude: location[0],
-          longitude: location[1],
-        })),
+        totalMaterial,
+        totalPasang,
         totalPoles: uniquePoles.length,
-        totalDistance: getPathLength(allSegments),
+        totalDistance: totalDistance,
+        poles: assignedPoles,
+        routes: coordinates,
       };
     } catch (error) {
       console.error('Error in pole estimation:', error);
