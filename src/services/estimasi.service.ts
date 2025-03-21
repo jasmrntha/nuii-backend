@@ -111,6 +111,7 @@ function assignConstruction(
     longitude: number;
     id_konstruksi: number;
     id_tiang: number;
+    panjang_jaringan: number;
   }[] = [];
 
   // Track usage of each construction and pole type
@@ -148,6 +149,7 @@ function assignConstruction(
     ...poles[0],
     id_konstruksi: firstPoleKonstruksi,
     id_tiang: firstPoleTiang,
+    panjang_jaringan: 0,
   });
 
   trackUsage(firstPoleKonstruksi, firstPoleTiang);
@@ -173,6 +175,7 @@ function assignConstruction(
       ...currentPole,
       id_konstruksi: idKonstruksi,
       id_tiang: idTiang,
+      panjang_jaringan: getDistance(previousPole, currentPole),
     });
 
     trackUsage(idKonstruksi, idTiang);
@@ -187,6 +190,7 @@ function assignConstruction(
       ...poles.at(-1),
       id_konstruksi: lastPoleKonstruksi,
       id_tiang: lastPoleTiang,
+      panjang_jaringan: getDistance(poles.at(-2), poles.at(-1)),
     });
 
     trackUsage(lastPoleKonstruksi, lastPoleTiang);
@@ -274,9 +278,9 @@ function placePoles(
             : -1,
       });
 
-      console.log(
-        `U-turn detected: Before index ${beforeIndex}, U-turn at ${uTurnIndex}, After index ${afterIndex}`,
-      );
+      // console.log(
+      //   `U-turn detected: Before index ${beforeIndex}, U-turn at ${uTurnIndex}, After index ${afterIndex}`,
+      // );
     } else {
       // Add other turn points
       turnIndices.push(instruction.index);
@@ -309,10 +313,10 @@ function placePoles(
     const uTurnPoint = uTurnData.find(u => u.beforeIndex === index - 1);
 
     if (uTurnPoint) {
-      // U-turn handling (kept unchanged)
-      console.log(
-        `Processing segment with U-turn at index ${uTurnPoint.uTurnIndex}`,
-      );
+      // U-turn handling
+      // console.log(
+      //   `Processing segment with U-turn at index ${uTurnPoint.uTurnIndex}`,
+      // );
 
       const segmentStartBeforeUTurn = route[uTurnPoint.beforeIndex + 2];
       const uTurnLocation = route[uTurnPoint.uTurnIndex];
@@ -564,9 +568,9 @@ export const EstimasiService = {
       // Get instructions from the route
       const instructions = route.instructions;
 
-      console.log(
-        `Processing route with ${coordinates.length} coordinates and ${instructions.length} instructions`,
-      );
+      // console.log(
+      //   `Processing route with ${coordinates.length} coordinates and ${instructions.length} instructions`,
+      // );
 
       // Place poles along the route
       const allPoles = placePoles(coordinates, instructions);
@@ -579,15 +583,10 @@ export const EstimasiService = {
         instruction => coordinates[instruction.index],
       );
 
-      // Get U-turn points specifically
-      const uTurnPoints = instructions
-        .filter(instruction => instruction.modifier === 'Uturn')
-        .map(instruction => coordinates[instruction.index]);
-
-      console.log(`Total route points: ${coordinates.length}`);
-      console.log(`Total turn points: ${turnPoints.length}`);
-      console.log(`Total U-turn points: ${uTurnPoints.length}`);
-      console.log(`Total poles placed: ${uniquePoles.length}`);
+      // console.log(`Total route points: ${coordinates.length}`);
+      // console.log(`Total turn points: ${turnPoints.length}`);
+      // console.log(`Total U-turn points: ${uTurnPoints.length}`);
+      // console.log(`Total poles placed: ${uniquePoles.length}`);
 
       // If less than 2 poles added, throw an error
       if (uniquePoles.length < 2) {
@@ -622,8 +621,6 @@ export const EstimasiService = {
         routes: coordinates,
       };
     } catch (error) {
-      console.error('Error in pole estimation:', error);
-
       throw error;
     }
   },
