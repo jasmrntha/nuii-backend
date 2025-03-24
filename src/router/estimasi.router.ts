@@ -7,6 +7,6 @@ import { EstimasiController } from '../controllers';
 
 const router = express.Router();
 
-router.get('/get', EstimasiController.getEstimasi);
+router.post('/', EstimasiController.getEstimasi);
 
 export default router;
