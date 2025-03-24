@@ -3,6 +3,7 @@ import express from 'express';
 const router = express.Router();
 
 import { AuthMiddleware } from '../middleware';
+import EstimasiRoutes from './estimasi.router';
 import GroundingRoutes from './grounding.router';
 import KonstruksiRoutes from './konstruksi.router';
 import LogRoutes from './log.router';
@@ -27,6 +28,7 @@ router.use('/konstruksi', KonstruksiRoutes);
 router.use('/log', LogRoutes);
 router.use('/pole', PoleRoutes);
 router.use('/grounding', GroundingRoutes);
+router.use('/estimasi', EstimasiRoutes);
 
 router.use('/upload-file', UploadFileRoutes);
 router.use('/upload-image', UploadImageRoutes);

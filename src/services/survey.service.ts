@@ -11,6 +11,7 @@ import {
   type CreateSurveyRequest,
   type UpdateSurveyHeaderRequest,
   type UpdateSurveyDetailRequest,
+  type CreateNewSurveyBatchRequest,
 } from '../models';
 import {
   SurveyHeader,
@@ -2072,11 +2073,11 @@ export const SurveyService = {
           },
           {
             col: 'O',
-            value: material.pasang_rab * value,
+            value: Math.ceil(material.pasang_rab * value),
           },
           {
             col: 'Q',
-            value: material.pasang_rab * value,
+            value: Math.ceil(material.pasang_rab * value),
           },
         ];
 
@@ -2339,6 +2340,63 @@ export const SurveyService = {
       const excelBuffer = await workbook.xlsx.writeBuffer();
 
       return excelBuffer;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  async createSurveyBatch(request: CreateNewSurveyBatchRequest) {
+    try {
+      const konstruksi = await Konstruksi.findKonstruksiById(
+        request.details[0].id_konstruksi,
+      );
+
+      if (!konstruksi) {
+        throw new CustomError(StatusCodes.NOT_FOUND, 'Konstruksi Not Found');
+      }
+
+      const tiang = await Material.findMaterialById(
+        request.details[0].id_material_tiang,
+      );
+
+      if (!tiang) {
+        throw new CustomError(StatusCodes.NOT_FOUND, 'Material Not Found');
+      }
+
+      const result = await prisma.$transaction(async prisma => {
+        const header = await SurveyHeader.createHeaderEstimasi(
+          {
+            nama_survey: request.header.nama_survey,
+            nama_pekerjaan: request.header.nama_pekerjaan,
+            lokasi: request.header.lokasi,
+            user_id: request.header.user_id,
+            id_material_konduktor: request.header.id_material_konduktor,
+          },
+          prisma,
+        );
+
+        const detailsData = request.details.map(detail => ({
+          id_material_tiang: detail.id_material_tiang,
+          id_konstruksi: detail.id_konstruksi,
+          id_header: header.id,
+          id_pole_supporter: detail.id_pole ?? null,
+          id_grounding_termination: detail.id_grounding ?? null,
+          nama_pekerjaan: detail.nama_pekerjaan,
+          penyulang: detail.penyulang,
+          panjang_jaringan: detail.panjang_jaringan,
+          long: detail.long,
+          lat: detail.lat,
+          foto: detail.foto ?? 'Belum ada foto',
+          keterangan: detail.keterangan ?? '',
+          petugas_survey: detail.petugas_survey,
+        }));
+
+        await SurveyDetail.createDetailsBatch(detailsData, prisma);
+
+        return { header, details: detailsData };
+      });
+
+      return result;
     } catch (error) {
       throw error;
     }

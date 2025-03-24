@@ -5,3 +5,4 @@ export * from './konstruksi.service';
 export * from './log.service';
 export * from './pole.service';
 export * from './grounding.service';
+export * from './estimasi.service';

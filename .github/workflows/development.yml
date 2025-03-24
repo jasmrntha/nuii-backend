@@ -22,7 +22,7 @@ jobs:
           #   password: ${{ secrets.VPS_PASSWORD }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            cd /var/www/nuii-backend-3
+            cd /var/www/nuii-backend-dev
             git stash
             git pull origin main
             export NVM_DIR=~/.nvm
@@ -30,7 +30,7 @@ jobs:
             git stash apply
             npm install
             npm run build
-            pm2 restart nuii-backend-3
+            pm2 restart nuii-backend-dev
 
       - name: Notify Success
         if: success()

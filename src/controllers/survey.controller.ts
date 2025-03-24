@@ -7,6 +7,7 @@ import {
   type CreateNewSurveyRequest,
   type UpdateSurveyHeaderRequest,
   type UpdateSurveyDetailRequest,
+  type CreateNewSurveyBatchRequest,
 } from '../models';
 import { SurveyService } from '../services';
 // import { tokenDecode } from '../utils/JwtToken';
@@ -252,6 +253,24 @@ export const SurveyController = {
       );
 
       return response.status(StatusCodes.OK).send(excelBuffer);
+    } catch (error: any) {
+      next(error);
+    }
+  },
+
+  async createNewSurveyBatch(
+    request: Request,
+    response: Response,
+    next: NextFunction,
+  ) {
+    try {
+      const requestBody = request.body as CreateNewSurveyBatchRequest;
+
+      const result = await SurveyService.createSurveyBatch(requestBody);
+
+      const resp = new CustomResponse(StatusCodes.OK, 'Survey created', result);
+
+      return response.json(resp.toJSON());
     } catch (error: any) {
       next(error);
     }
