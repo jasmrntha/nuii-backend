@@ -102,17 +102,53 @@ function convertCoordinates(coordinates: { lat: number; lng: number }[]) {
   }));
 }
 
-function assignConstruction(
+async function assignConstruction(
   poles: { latitude: number; longitude: number }[],
   maneuverPoints: { latitude: number; longitude: number }[] = [],
-) {
+): Promise<{
+  assignedPoles: {
+    latitude: number;
+    longitude: number;
+    id_konstruksi: number;
+    nama_konstruksi: string;
+    id_tiang: number;
+    nama_tiang: string;
+    panjang_jaringan: number;
+  }[];
+  constructionUsage: Record<number, number>;
+  tiangUsage: Record<number, number>;
+}> {
+  // Initialize assigned poles array
   const assignedPoles: {
     latitude: number;
     longitude: number;
     id_konstruksi: number;
+    nama_konstruksi: string;
     id_tiang: number;
+    nama_tiang: string;
     panjang_jaringan: number;
   }[] = [];
+
+  // Get Poles and Constructions details
+  const poleDetail = await Material.findMaterialById(243);
+
+  const constructionType = [9, 11, 12, 14];
+  const constructionDetail: {
+    id: number;
+    nama_konstruksi: string;
+    nomor_konstruksi: number;
+    created_at: Date;
+    updated_at: Date;
+    deleted_at: Date | null;
+  }[] = [];
+
+  for (const type of constructionType) {
+    const detail = await Konstruksi.findKonstruksiById(type);
+
+    if (detail) {
+      constructionDetail.push(detail);
+    }
+  }
 
   // Track usage of each construction and pole type
   const constructionUsage: Record<number, number> = {};
@@ -142,13 +178,17 @@ function assignConstruction(
   }
 
   // Assign the first pole
-  const firstPoleKonstruksi = 1;
-  const firstPoleTiang = 1;
+  const firstPoleKonstruksi = 9;
+  const firstPoleTiang = 243;
 
   assignedPoles.push({
     ...poles[0],
     id_konstruksi: firstPoleKonstruksi,
+    nama_konstruksi: constructionDetail.find(
+      c => c.nomor_konstruksi === firstPoleKonstruksi,
+    )?.nama_konstruksi,
     id_tiang: firstPoleTiang,
+    nama_tiang: poleDetail.nama_material,
     panjang_jaringan: 0,
   });
 
@@ -174,7 +214,11 @@ function assignConstruction(
     assignedPoles.push({
       ...currentPole,
       id_konstruksi: idKonstruksi,
+      nama_konstruksi: constructionDetail.find(
+        c => c.nomor_konstruksi === idKonstruksi,
+      )?.nama_konstruksi,
       id_tiang: idTiang,
+      nama_tiang: poleDetail.nama_material,
       panjang_jaringan: getDistance(previousPole, currentPole),
     });
 
@@ -183,13 +227,17 @@ function assignConstruction(
 
   // Assign the last pole
   if (poles.length > 1) {
-    const lastPoleKonstruksi = 1;
-    const lastPoleTiang = 1;
+    const lastPoleKonstruksi = 9;
+    const lastPoleTiang = 243;
 
     assignedPoles.push({
       ...poles.at(-1),
       id_konstruksi: lastPoleKonstruksi,
+      nama_konstruksi: constructionDetail.find(
+        c => c.nomor_konstruksi === lastPoleKonstruksi,
+      )?.nama_konstruksi,
       id_tiang: lastPoleTiang,
+      nama_tiang: poleDetail.nama_material,
       panjang_jaringan: getDistance(poles.at(-2), poles.at(-1)),
     });
 
@@ -598,7 +646,7 @@ export const EstimasiService = {
 
       // Assign construction types to poles and track usage
       const { assignedPoles, constructionUsage, tiangUsage } =
-        assignConstruction(uniquePoles, turnPoints);
+        await assignConstruction(uniquePoles, turnPoints);
 
       // Calculate total cost
       let { totalMaterial, totalPasang } = await calculateCost(
