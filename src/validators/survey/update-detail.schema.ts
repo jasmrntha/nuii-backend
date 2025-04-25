@@ -5,8 +5,12 @@ const SurveyDetailSchema = Joi.object({
   id_material_tiang: Joi.number().integer().positive().required(),
   id_konstruksi: Joi.number().integer().positive().required(),
   id_header: Joi.number().integer().positive().required(),
-  id_pole: Joi.number().integer().positive().optional().allow(null),
-  id_grounding: Joi.number().integer().positive().optional().allow(null),
+  id_pole_supporter: Joi.number().integer().positive().optional().allow(null),
+  id_grounding_termination: Joi.number()
+    .integer()
+    .positive()
+    .optional()
+    .allow(null),
   penyulang: Joi.string().required(),
   panjang_jaringan: Joi.number().min(0).required(),
   long: Joi.string().required(),
