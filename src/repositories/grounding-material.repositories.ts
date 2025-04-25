@@ -10,4 +10,12 @@ export const GroundingMaterialRepository = {
       },
     });
   },
+
+  async getGroudingById(id: number) {
+    return await prisma.groundingTermination.findUnique({
+      where: {
+        id,
+      },
+    });
+  },
 };
