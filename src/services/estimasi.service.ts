@@ -112,6 +112,7 @@ async function assignConstruction(
     nama_konstruksi: string;
     id_tiang: number;
     nama_tiang: string;
+    sudut: number;
     panjang_jaringan: number;
   }[];
   constructionUsage: Record<number, number>;
@@ -125,6 +126,7 @@ async function assignConstruction(
     nama_konstruksi: string;
     id_tiang: number;
     nama_tiang: string;
+    sudut: number;
     panjang_jaringan: number;
   }[] = [];
 
@@ -179,6 +181,7 @@ async function assignConstruction(
     )?.nama_konstruksi,
     id_tiang: firstPoleTiang,
     nama_tiang: poleDetail.nama_material,
+    sudut: 0,
     panjang_jaringan: 0,
   });
 
@@ -216,6 +219,7 @@ async function assignConstruction(
       )?.nama_konstruksi,
       id_tiang: idTiang,
       nama_tiang: poleDetail.nama_material,
+      sudut: turnAngle,
       panjang_jaringan: getDistance(previousPole, currentPole),
     });
 
@@ -235,6 +239,7 @@ async function assignConstruction(
       )?.nama_konstruksi,
       id_tiang: lastPoleTiang,
       nama_tiang: poleDetail.nama_material,
+      sudut: 0,
       panjang_jaringan: getDistance(poles.at(-2), poles.at(-1)),
     });
 
