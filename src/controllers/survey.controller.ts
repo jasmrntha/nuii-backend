@@ -1,3 +1,5 @@
+import { Readable } from 'node:stream';
+
 import { type NextFunction, type Request, type Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
@@ -241,7 +243,9 @@ export const SurveyController = {
     try {
       const id = request.params.id;
       const excelBuffer = await SurveyService.exportSurveyToExcel(Number(id));
-      const fileName = 'Survey';
+      const fileName = 'Survey.xlsx';
+
+      const stream = Readable.from([excelBuffer]);
 
       response.setHeader(
         'Content-Type',
@@ -251,8 +255,10 @@ export const SurveyController = {
         'Content-Disposition',
         `attachment; filename=${fileName}.xlsx`,
       );
+      response.status(StatusCodes.OK);
 
-      return response.status(StatusCodes.OK).send(excelBuffer);
+      // return response.send(excelBuffer);
+      return stream.pipe(response);
     } catch (error: any) {
       next(error);
     }
