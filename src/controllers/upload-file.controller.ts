@@ -2,7 +2,10 @@ import { type NextFunction, type Request, type Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
 import { CustomError, CustomResponse } from '../middleware';
-import { UploadExcelService, UploadFileService } from '../services/upload-file.service';
+import {
+  UploadExcelService,
+  UploadFileService,
+} from '../services/upload-file.service';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export const UploadFileController = async (
@@ -32,6 +35,7 @@ export const UploadFileController = async (
   }
 };
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const UploadExcelFileController = async (
   request: Request,
   response: Response,

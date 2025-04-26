@@ -21,6 +21,7 @@ export const UploadFileService = async (
   }
 };
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const UploadExcelService = async (
   request: Request,
   response: Response,

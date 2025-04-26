@@ -138,6 +138,17 @@ export const SurveyHeader = {
     });
   },
 
+  async getAllReportWithExcel() {
+    return await prisma.surveyHeader.findMany({
+      where: {
+        status_survey: SurveyStatus.Disetujui,
+      },
+      include: {
+        excel_archive: true,
+      },
+    });
+  },
+
   async getReportById(id: number) {
     return await prisma.surveyHeader.findUnique({
       where: {
