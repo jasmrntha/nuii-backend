@@ -199,7 +199,14 @@ async function assignConstruction(
     const turnAngle = calculateTurnAngle(approachBearing, departureBearing);
     idKonstruksi = getTurnType(turnAngle);
 
-    // console.log('Turn angle:', turnAngle, ', Turn type:', idKonstruksi);
+    console.log(
+      'Tiang:',
+      index + 1,
+      ', Turn angle:',
+      turnAngle,
+      ', Turn type:',
+      idKonstruksi,
+    );
 
     assignedPoles.push({
       ...currentPole,
