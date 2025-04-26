@@ -11,3 +11,4 @@ export * from './grounding.repositories';
 export * from './tipe-pekerjaan.repositories';
 export * from './grounding-material.repositories';
 export * from './pole-material.repositories';
+export * from './excel-archive.repositories';
