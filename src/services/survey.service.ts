@@ -838,7 +838,7 @@ export const SurveyService = {
 
   async getAllReport() {
     try {
-      const getReport = await SurveyHeader.getAllReport();
+      const getReport = await SurveyHeader.getAllReportWithExcel();
 
       if (getReport.length === 0) {
         throw new CustomError(StatusCodes.NOT_FOUND, 'Report Not Found');

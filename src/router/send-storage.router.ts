@@ -7,6 +7,8 @@ import { StorageController } from '../controllers';
 
 const router = express.Router();
 
-router.get('/storage/file/:file_name', StorageController.getFile);
+router.get('/file/:file_name', StorageController.getFile);
+router.get('/image/:file_name', StorageController.getImage);
+router.get('/excel/:file_name', StorageController.getExcel);
 
 export default router;

@@ -13,7 +13,7 @@ export const StorageService = {
       const isFileExist = fs.existsSync(`./storage/file/${fileName}`);
 
       if (!isFileExist) {
-        throw new CustomError(StatusCodes.BAD_REQUEST, 'image is not exist');
+        throw new CustomError(StatusCodes.BAD_REQUEST, 'image does not exist');
       }
 
       return true;
@@ -27,7 +27,21 @@ export const StorageService = {
       const isFileExist = fs.existsSync(`./storage/file/${fileName}`);
 
       if (!isFileExist) {
-        throw new CustomError(StatusCodes.BAD_REQUEST, 'file is not exist');
+        throw new CustomError(StatusCodes.BAD_REQUEST, 'file does not exist');
+      }
+
+      return true;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  async excelValidate(fileName: string) {
+    try {
+      const isFileExist = fs.existsSync(`./storage/excel/${fileName}`);
+
+      if (!isFileExist) {
+        throw new CustomError(StatusCodes.BAD_REQUEST, 'excel does not exist');
       }
 
       return true;

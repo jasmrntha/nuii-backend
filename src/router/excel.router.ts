@@ -3,10 +3,12 @@
 /* eslint-disable import/no-default-export */
 import express from 'express';
 
-import { StorageController } from '../controllers';
+import { ExcelController } from '../controllers';
+import { validate } from '../middleware';
+import { UploadExcelSchema } from '../validators';
 
 const router = express.Router();
 
-router.get('/storage/file/:file_name', StorageController.getImage);
+router.post('/', validate(UploadExcelSchema), ExcelController.uploadExcel);
 
 export default router;
