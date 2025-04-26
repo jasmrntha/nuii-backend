@@ -133,7 +133,7 @@ async function assignConstruction(
   // Get Poles and Constructions details
   const poleDetail = await Material.findMaterialById(243);
 
-  const constructionType = [9, 11, 12, 14];
+  const constructionType = [9, 11, 12, 13, 14];
   const constructionDetail: {
     id: number;
     nama_konstruksi: string;
