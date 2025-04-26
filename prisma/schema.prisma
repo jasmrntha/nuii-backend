@@ -53,7 +53,7 @@ model SurveyHeader {
 
   survey_details                                        SurveyDetail[]
   material_konduktor                                    Material                                               @relation("SurveyDetailKonduktor", fields: [id_material_konduktor], references: [id])
-
+  excel_archive                                         ExcelArchive[]
 }
 
 enum SurveyStatus {
@@ -198,5 +198,17 @@ model GroundingMaterial {
 
   material                                            Material                                                @relation(fields: [id_material], references: [id])
   grounding_termination                               GroundingTermination                                    @relation(fields: [id_grounding_termination], references: [id])
-  tipe_pekerjaan                                      TipePekerjaan?                                           @relation(fields: [id_tipe_pekerjaan], references: [id])
+  tipe_pekerjaan                                      TipePekerjaan?                                          @relation(fields: [id_tipe_pekerjaan], references: [id])
+}
+
+model ExcelArchive {
+  archive_id                                          Int                                                     @id @default(autoincrement())
+  file_name                                           String?
+  file_path                                           String?
+  survey_header_id                                    Int?
+  created_at                                          DateTime                                                @default(now())
+  updated_at                                          DateTime                                                @default(now())
+  deleted_at                                          DateTime?
+
+  survey_header                                       SurveyHeader?                                           @relation(fields: [survey_header_id], references: [id])
 }

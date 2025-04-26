@@ -62,16 +62,16 @@ function calculatePathLength(
 
 // // Determine the turn type based on the angle
 function getTurnType(angle: number): number {
-  if (angle < 15) {
+  if (angle <= 5) {
     return 9;
-  } else if (angle < 30) {
+  } else if (angle <= 15) {
     return 11;
-  } else if (angle < 60) {
+  } else if (angle <= 30) {
     return 12;
-  } else if (angle < 90) {
-    return 14;
+  } else if (angle <= 60) {
+    return 13;
   } else {
-    return 9;
+    return 14;
   }
 }
 
@@ -104,7 +104,6 @@ function convertCoordinates(coordinates: { lat: number; lng: number }[]) {
 
 async function assignConstruction(
   poles: { latitude: number; longitude: number }[],
-  maneuverPoints: { latitude: number; longitude: number }[] = [],
 ): Promise<{
   assignedPoles: {
     latitude: number;
@@ -113,6 +112,7 @@ async function assignConstruction(
     nama_konstruksi: string;
     id_tiang: number;
     nama_tiang: string;
+    sudut: number;
     panjang_jaringan: number;
   }[];
   constructionUsage: Record<number, number>;
@@ -126,13 +126,14 @@ async function assignConstruction(
     nama_konstruksi: string;
     id_tiang: number;
     nama_tiang: string;
+    sudut: number;
     panjang_jaringan: number;
   }[] = [];
 
   // Get Poles and Constructions details
   const poleDetail = await Material.findMaterialById(243);
 
-  const constructionType = [9, 11, 12, 14];
+  const constructionType = [9, 11, 12, 13, 14];
   const constructionDetail: {
     id: number;
     nama_konstruksi: string;
@@ -158,15 +159,6 @@ async function assignConstruction(
     return { assignedPoles, constructionUsage, tiangUsage };
   }
 
-  // Helper function to check if a point is a maneuver point
-  function isManeuverPoint(point: { latitude: number; longitude: number }) {
-    return maneuverPoints.some(
-      m =>
-        Math.abs(m.latitude - point.latitude) < 1e-7 &&
-        Math.abs(m.longitude - point.longitude) < 1e-7,
-    );
-  }
-
   // Helper function to track usage
   function trackUsage(id_konstruksi: number, id_tiang: number) {
     // Track construction usage
@@ -189,6 +181,7 @@ async function assignConstruction(
     )?.nama_konstruksi,
     id_tiang: firstPoleTiang,
     nama_tiang: poleDetail.nama_material,
+    sudut: 0,
     panjang_jaringan: 0,
   });
 
@@ -203,13 +196,20 @@ async function assignConstruction(
     let idKonstruksi = 9; // Default to straight line
     const idTiang = 243; // Default pole type
 
-    if (isManeuverPoint(currentPole)) {
-      // This is a maneuver point, determine the turn type
-      const approachBearing = getBearing(previousPole, currentPole);
-      const departureBearing = getBearing(currentPole, nextPole);
-      const turnAngle = calculateTurnAngle(approachBearing, departureBearing);
-      idKonstruksi = getTurnType(turnAngle);
-    }
+    // This is a maneuver point, determine the turn type
+    const approachBearing = getBearing(previousPole, currentPole);
+    const departureBearing = getBearing(currentPole, nextPole);
+    const turnAngle = calculateTurnAngle(approachBearing, departureBearing);
+    idKonstruksi = getTurnType(turnAngle);
+
+    console.log(
+      'Tiang:',
+      index + 1,
+      ', Turn angle:',
+      turnAngle,
+      ', Turn type:',
+      idKonstruksi,
+    );
 
     assignedPoles.push({
       ...currentPole,
@@ -219,6 +219,7 @@ async function assignConstruction(
       )?.nama_konstruksi,
       id_tiang: idTiang,
       nama_tiang: poleDetail.nama_material,
+      sudut: turnAngle,
       panjang_jaringan: getDistance(previousPole, currentPole),
     });
 
@@ -238,6 +239,7 @@ async function assignConstruction(
       )?.nama_konstruksi,
       id_tiang: lastPoleTiang,
       nama_tiang: poleDetail.nama_material,
+      sudut: 0,
       panjang_jaringan: getDistance(poles.at(-2), poles.at(-1)),
     });
 
@@ -626,11 +628,6 @@ export const EstimasiService = {
       // Remove duplicate poles
       const uniquePoles = removeDuplicates(allPoles);
 
-      // Get all turn points for visualization
-      const turnPoints = instructions.map(
-        instruction => coordinates[instruction.index],
-      );
-
       // console.log(`Total route points: ${coordinates.length}`);
       // console.log(`Total turn points: ${turnPoints.length}`);
       // console.log(`Total U-turn points: ${uTurnPoints.length}`);
@@ -646,7 +643,7 @@ export const EstimasiService = {
 
       // Assign construction types to poles and track usage
       const { assignedPoles, constructionUsage, tiangUsage } =
-        await assignConstruction(uniquePoles, turnPoints);
+        await assignConstruction(uniquePoles);
 
       // Calculate total cost
       let { totalMaterial, totalPasang } = await calculateCost(

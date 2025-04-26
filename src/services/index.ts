@@ -6,3 +6,4 @@ export * from './log.service';
 export * from './pole.service';
 export * from './grounding.service';
 export * from './estimasi.service';
+export * from './excel.service';
