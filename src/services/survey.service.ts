@@ -121,8 +121,12 @@ export const SurveyService = {
             id_material_tiang: request.detail.id_material_tiang,
             id_konstruksi: request.detail.id_konstruksi,
             id_header: request.id_header,
-            id_pole_supporter: request.detail.id_pole_supporter,
-            id_grounding_termination: request.detail.id_grounding_termination,
+            id_pole_supporter: request.detail.id_pole_supporter
+              ? Number(request.detail.id_pole_supporter)
+              : null,
+            id_grounding_termination: request.detail.id_grounding_termination
+              ? Number(request.detail.id_grounding_termination)
+              : null,
             nama_pekerjaan: request.detail.nama_pekerjaan,
             penyulang: request.detail.penyulang,
             panjang_jaringan: request.detail.panjang_jaringan,
@@ -188,8 +192,12 @@ export const SurveyService = {
             id_material_tiang: request.detail.id_material_tiang,
             id_konstruksi: request.detail.id_konstruksi,
             id_header: header.id,
-            id_pole_supporter: request.detail.id_pole_supporter,
-            id_grounding_termination: request.detail.id_grounding_termination,
+            id_pole_supporter: request.detail.id_pole_supporter
+              ? Number(request.detail.id_pole_supporter)
+              : null,
+            id_grounding_termination: request.detail.id_grounding_termination
+              ? Number(request.detail.id_grounding_termination)
+              : null,
             nama_pekerjaan: request.detail.nama_pekerjaan,
             penyulang: request.detail.penyulang,
             panjang_jaringan: request.detail.panjang_jaringan,
@@ -2512,8 +2520,12 @@ export const SurveyService = {
           id_material_tiang: detail.id_material_tiang,
           id_konstruksi: detail.id_konstruksi,
           id_header: header.id,
-          id_pole_supporter: detail.id_pole_supporter ?? null,
-          id_grounding_termination: detail.id_grounding_termination ?? null,
+          id_pole_supporter: detail.id_pole_supporter
+            ? Number(detail.id_pole_supporter)
+            : null,
+          id_grounding_termination: detail.id_grounding_termination
+            ? Number(detail.id_grounding_termination)
+            : null,
           nama_pekerjaan: detail.nama_pekerjaan,
           penyulang: detail.penyulang,
           panjang_jaringan: detail.panjang_jaringan,
