@@ -239,6 +239,7 @@ export const SurveyService = {
             lokasi: request.header.lokasi,
             user_id: request.header.user_id,
             status_survey: request.header.status_survey,
+            id_material_konduktor: request.header.id_material_konduktor,
           },
           prisma,
         );
