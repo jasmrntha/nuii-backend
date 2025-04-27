@@ -29,7 +29,7 @@ export const uploadFileMiddleware = multer({
 
 export const uploadExcelMiddleware = multer({
   storage: excelStorage,
-  limits: { fileSize: 10 * 1024 * 1024 },
+  limits: { fileSize: 25 * 1024 * 1024 },
 });
 
 export const filePath = (file: Express.Multer.File) => {

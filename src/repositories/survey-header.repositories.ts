@@ -64,7 +64,6 @@ export const SurveyHeader = {
     return await prisma.surveyHeader.findUnique({
       where: {
         id,
-        status_survey: SurveyStatus.Disetujui,
       },
     });
   },
