@@ -106,6 +106,7 @@ export const SurveyDetail = {
         panjang_jaringan: true,
         long: true,
         lat: true,
+        foto: true,
         keterangan: true,
         petugas_survey: true,
       },

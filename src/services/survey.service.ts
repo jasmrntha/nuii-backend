@@ -689,8 +689,28 @@ export const SurveyService = {
         }
       }
 
+      const enrichedDetails = await Promise.all(
+        details.map(detail => ({
+          id: detail.id,
+          id_material_tiang: detail.id_material_tiang,
+          id_konstruksi: detail.id_konstruksi,
+          id_pole_supporter: detail.id_pole_supporter,
+          id_grounding_termination: detail.id_grounding_termination,
+          penyulang: detail.penyulang,
+          panjang_jaringan: detail.panjang_jaringan,
+          long: detail.long,
+          lat: detail.lat,
+          foto: detail.foto,
+          keterangan: detail.keterangan,
+          petugas_survey: detail.petugas_survey,
+        })),
+      );
+
       return {
-        data_survey: survey,
+        data_survey: {
+          ...survey,
+          survey_details: enrichedDetails,
+        },
         detail_poles: polePrices,
         detail_tiang: tiangPrices,
         detail_konstruksi: totalPrices,
@@ -2531,7 +2551,7 @@ export const SurveyService = {
           panjang_jaringan: detail.panjang_jaringan,
           long: detail.long,
           lat: detail.lat,
-          foto: detail.foto ?? 'Belum ada foto',
+          foto: detail.foto ?? '-',
           keterangan: detail.keterangan ?? '',
           petugas_survey: detail.petugas_survey,
         }));
