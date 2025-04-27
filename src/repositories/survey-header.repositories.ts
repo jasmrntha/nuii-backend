@@ -32,6 +32,7 @@ export const SurveyHeader = {
     id: number,
     data: {
       nama_survey: string;
+      nama_pekerjaan: string;
       lokasi: string;
       user_id: string;
       status_survey: SurveyStatus;
