@@ -87,6 +87,7 @@ export const SurveyDetail = {
         id_header: id,
         deleted_at: null,
       },
+      orderBy: { id: 'asc' },
     });
   },
   async exportDetailByHeaderId(id: number) {
