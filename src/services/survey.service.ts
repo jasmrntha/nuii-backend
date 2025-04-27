@@ -604,7 +604,13 @@ export const SurveyService = {
 
           return {
             idPole,
-            data_pole: dataPole,
+            data_pole: {
+              id: dataPole.id,
+              nama_pole_supporter: dataPole.nama_pole,
+              created_at: dataPole.created_at,
+              updated_at: dataPole.updated_at,
+              deleted_at: dataPole.deleted_at,
+            },
             materials: materialPrices,
           };
         }),
@@ -874,9 +880,74 @@ export const SurveyService = {
         throw new CustomError(StatusCodes.NOT_FOUND, 'Report Detail Not Found');
       }
 
+      const totalPanjangJaringan = getDetail.reduce(
+        (sum, detail) => sum + detail.panjang_jaringan,
+        0,
+      );
+
+      let totalPanjangJaringanCalculated = 0;
+
+      for (let index = 0; index < getDetail.length - 1; index++) {
+        const detail = getDetail[index];
+        const nextDetail = getDetail[index + 1];
+        totalPanjangJaringanCalculated += countDistance(
+          Number(detail.lat),
+          Number(detail.long),
+          Number(nextDetail.lat),
+          Number(nextDetail.long),
+        );
+      }
+
+      const enrichedDetails = await Promise.all(
+        getDetail.map(async detail => {
+          const materialTiang = await Material.findMaterialById(
+            detail.id_material_tiang,
+          );
+          const konstruksi = await Konstruksi.findKonstruksiById(
+            detail.id_konstruksi,
+          );
+          const poleSupporter = detail.id_pole_supporter
+            ? await PoleRepository.getPoleById(detail.id_pole_supporter)
+            : null;
+          const groundingTermination = detail.id_grounding_termination
+            ? await GroundingMaterialRepository.getGroudingById(
+                detail.id_grounding_termination,
+              )
+            : null;
+
+          return {
+            id: detail.id,
+            id_material_tiang: detail.id_material_tiang,
+            nama_material_tiang: materialTiang.nama_material || null,
+            id_konstruksi: detail.id_konstruksi,
+            nama_konstruksi: konstruksi.nama_konstruksi || null,
+            id_header: detail.id_header,
+            id_pole_supporter: detail.id_pole_supporter,
+            nama_pole_supporter: poleSupporter?.nama_pole || null,
+            id_grounding_termination: detail.id_grounding_termination,
+            nama_grounding_termination:
+              groundingTermination?.nama_grounding || null,
+            penyulang: detail.penyulang,
+            panjang_jaringan: detail.panjang_jaringan,
+            long: detail.long,
+            lat: detail.lat,
+            foto: detail.foto,
+            keterangan: detail.keterangan,
+            petugas_survey: detail.petugas_survey,
+            created_at: detail.created_at,
+            updated_at: detail.updated_at,
+            deleted_at: detail.deleted_at,
+          };
+        }),
+      );
+
       return {
-        header: getHeader,
-        detail: getDetail,
+        header: {
+          ...getHeader,
+          total_panjang_jaringan_manual: totalPanjangJaringan,
+          total_panjang_jaringan_otomatis: totalPanjangJaringanCalculated,
+        },
+        detail: enrichedDetails,
       };
     } catch (error) {
       throw error;
