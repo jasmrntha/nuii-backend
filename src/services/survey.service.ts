@@ -236,6 +236,7 @@ export const SurveyService = {
           request.id_header,
           {
             nama_survey: request.header.nama_survey,
+            nama_pekerjaan: request.header.nama_pekerjaan,
             lokasi: request.header.lokasi,
             user_id: request.header.user_id,
             status_survey: request.header.status_survey,
