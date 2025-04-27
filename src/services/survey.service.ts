@@ -278,10 +278,12 @@ export const SurveyService = {
             id_material_tiang: request.detail.id_material_tiang,
             id_konstruksi: request.detail.id_konstruksi,
             id_header: request.detail.id_header,
-            id_pole_supporter: Number(request.detail.id_pole_supporter),
-            id_grounding_termination: Number(
-              request.detail.id_grounding_termination,
-            ),
+            id_pole_supporter: request.detail.id_pole_supporter
+              ? Number(request.detail.id_pole_supporter)
+              : null,
+            id_grounding_termination: request.detail.id_grounding_termination
+              ? Number(request.detail.id_grounding_termination)
+              : null,
             penyulang: request.detail.penyulang,
             panjang_jaringan: request.detail.panjang_jaringan,
             long: request.detail.long,
