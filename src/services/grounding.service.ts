@@ -13,7 +13,12 @@ export const GroundingService = {
         throw new CustomError(StatusCodes.NOT_FOUND, 'Grounding Not Found');
       }
 
-      return getGrounding;
+      const grounding = getGrounding.map(grounding => ({
+        id: grounding.id,
+        nama_grounding_termination: grounding.nama_grounding,
+      }));
+
+      return grounding;
     } catch (error) {
       throw error;
     }

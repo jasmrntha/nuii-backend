@@ -121,8 +121,12 @@ export const SurveyService = {
             id_material_tiang: request.detail.id_material_tiang,
             id_konstruksi: request.detail.id_konstruksi,
             id_header: request.id_header,
-            id_pole_supporter: request.detail.id_pole,
-            id_grounding_termination: request.detail.id_grounding,
+            id_pole_supporter: request.detail.id_pole_supporter
+              ? Number(request.detail.id_pole_supporter)
+              : null,
+            id_grounding_termination: request.detail.id_grounding_termination
+              ? Number(request.detail.id_grounding_termination)
+              : null,
             nama_pekerjaan: request.detail.nama_pekerjaan,
             penyulang: request.detail.penyulang,
             panjang_jaringan: request.detail.panjang_jaringan,
@@ -188,8 +192,12 @@ export const SurveyService = {
             id_material_tiang: request.detail.id_material_tiang,
             id_konstruksi: request.detail.id_konstruksi,
             id_header: header.id,
-            id_pole_supporter: request.detail.id_pole,
-            id_grounding_termination: request.detail.id_grounding,
+            id_pole_supporter: request.detail.id_pole_supporter
+              ? Number(request.detail.id_pole_supporter)
+              : null,
+            id_grounding_termination: request.detail.id_grounding_termination
+              ? Number(request.detail.id_grounding_termination)
+              : null,
             nama_pekerjaan: request.detail.nama_pekerjaan,
             penyulang: request.detail.penyulang,
             panjang_jaringan: request.detail.panjang_jaringan,
@@ -278,10 +286,12 @@ export const SurveyService = {
             id_material_tiang: request.detail.id_material_tiang,
             id_konstruksi: request.detail.id_konstruksi,
             id_header: request.detail.id_header,
-            id_pole_supporter: Number(request.detail.id_pole_supporter),
-            id_grounding_termination: Number(
-              request.detail.id_grounding_termination,
-            ),
+            id_pole_supporter: request.detail.id_pole_supporter
+              ? Number(request.detail.id_pole_supporter)
+              : null,
+            id_grounding_termination: request.detail.id_grounding_termination
+              ? Number(request.detail.id_grounding_termination)
+              : null,
             penyulang: request.detail.penyulang,
             panjang_jaringan: request.detail.panjang_jaringan,
             long: request.detail.long,
@@ -602,7 +612,13 @@ export const SurveyService = {
 
           return {
             idPole,
-            data_pole: dataPole,
+            data_pole: {
+              id: dataPole.id,
+              nama_pole_supporter: dataPole.nama_pole,
+              created_at: dataPole.created_at,
+              updated_at: dataPole.updated_at,
+              deleted_at: dataPole.deleted_at,
+            },
             materials: materialPrices,
           };
         }),
@@ -673,8 +689,28 @@ export const SurveyService = {
         }
       }
 
+      const enrichedDetails = await Promise.all(
+        details.map(detail => ({
+          id: detail.id,
+          id_material_tiang: detail.id_material_tiang,
+          id_konstruksi: detail.id_konstruksi,
+          id_pole_supporter: detail.id_pole_supporter,
+          id_grounding_termination: detail.id_grounding_termination,
+          penyulang: detail.penyulang,
+          panjang_jaringan: detail.panjang_jaringan,
+          long: detail.long,
+          lat: detail.lat,
+          foto: detail.foto,
+          keterangan: detail.keterangan,
+          petugas_survey: detail.petugas_survey,
+        })),
+      );
+
       return {
-        data_survey: survey,
+        data_survey: {
+          ...survey,
+          survey_details: enrichedDetails,
+        },
         detail_poles: polePrices,
         detail_tiang: tiangPrices,
         detail_konstruksi: totalPrices,
@@ -872,9 +908,74 @@ export const SurveyService = {
         throw new CustomError(StatusCodes.NOT_FOUND, 'Report Detail Not Found');
       }
 
+      const totalPanjangJaringan = getDetail.reduce(
+        (sum, detail) => sum + detail.panjang_jaringan,
+        0,
+      );
+
+      let totalPanjangJaringanCalculated = 0;
+
+      for (let index = 0; index < getDetail.length - 1; index++) {
+        const detail = getDetail[index];
+        const nextDetail = getDetail[index + 1];
+        totalPanjangJaringanCalculated += countDistance(
+          Number(detail.lat),
+          Number(detail.long),
+          Number(nextDetail.lat),
+          Number(nextDetail.long),
+        );
+      }
+
+      const enrichedDetails = await Promise.all(
+        getDetail.map(async detail => {
+          const materialTiang = await Material.findMaterialById(
+            detail.id_material_tiang,
+          );
+          const konstruksi = await Konstruksi.findKonstruksiById(
+            detail.id_konstruksi,
+          );
+          const poleSupporter = detail.id_pole_supporter
+            ? await PoleRepository.getPoleById(detail.id_pole_supporter)
+            : null;
+          const groundingTermination = detail.id_grounding_termination
+            ? await GroundingMaterialRepository.getGroudingById(
+                detail.id_grounding_termination,
+              )
+            : null;
+
+          return {
+            id: detail.id,
+            id_material_tiang: detail.id_material_tiang,
+            nama_material_tiang: materialTiang.nama_material || null,
+            id_konstruksi: detail.id_konstruksi,
+            nama_konstruksi: konstruksi.nama_konstruksi || null,
+            id_header: detail.id_header,
+            id_pole_supporter: detail.id_pole_supporter,
+            nama_pole_supporter: poleSupporter?.nama_pole || null,
+            id_grounding_termination: detail.id_grounding_termination,
+            nama_grounding_termination:
+              groundingTermination?.nama_grounding || null,
+            penyulang: detail.penyulang,
+            panjang_jaringan: detail.panjang_jaringan,
+            long: detail.long,
+            lat: detail.lat,
+            foto: detail.foto,
+            keterangan: detail.keterangan,
+            petugas_survey: detail.petugas_survey,
+            created_at: detail.created_at,
+            updated_at: detail.updated_at,
+            deleted_at: detail.deleted_at,
+          };
+        }),
+      );
+
       return {
-        header: getHeader,
-        detail: getDetail,
+        header: {
+          ...getHeader,
+          total_panjang_jaringan_manual: totalPanjangJaringan,
+          total_panjang_jaringan_otomatis: totalPanjangJaringanCalculated,
+        },
+        detail: enrichedDetails,
       };
     } catch (error) {
       throw error;
@@ -2439,14 +2540,18 @@ export const SurveyService = {
           id_material_tiang: detail.id_material_tiang,
           id_konstruksi: detail.id_konstruksi,
           id_header: header.id,
-          id_pole_supporter: detail.id_pole ?? null,
-          id_grounding_termination: detail.id_grounding ?? null,
+          id_pole_supporter: detail.id_pole_supporter
+            ? Number(detail.id_pole_supporter)
+            : null,
+          id_grounding_termination: detail.id_grounding_termination
+            ? Number(detail.id_grounding_termination)
+            : null,
           nama_pekerjaan: detail.nama_pekerjaan,
           penyulang: detail.penyulang,
           panjang_jaringan: detail.panjang_jaringan,
           long: detail.long,
           lat: detail.lat,
-          foto: detail.foto ?? 'Belum ada foto',
+          foto: detail.foto ?? '-',
           keterangan: detail.keterangan ?? '',
           petugas_survey: detail.petugas_survey,
         }));

@@ -13,7 +13,12 @@ export const PoleService = {
         throw new CustomError(StatusCodes.NOT_FOUND, 'Pole Not Found');
       }
 
-      return getPole;
+      const poles = getPole.map(pole => ({
+        id: pole.id,
+        nama_pole_supporter: pole.nama_pole,
+      }));
+
+      return poles;
     } catch (error) {
       throw error;
     }
