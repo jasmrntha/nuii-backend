@@ -15,6 +15,7 @@
     "seed:prod": "dotenv -e .env.production -- npx ts-node ./prisma/seeder/seeder.ts",
     "studio:dev": "dotenv -e .env.development -- npx prisma studio",
     "studio:prod": "dotenv -e .env.production -- npx prisma studio",
+    "build:docker": "dotenv -e .env -- docker compose up -d --build",
     "prepare": "husky",
     "format": "prettier --write \"src/**/*.ts\""
   },
