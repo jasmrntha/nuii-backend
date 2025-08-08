@@ -80,16 +80,24 @@ model Material {
   sutm_konduktor       SutmSurvey[]
   sutm_tiang           SutmDetail[]
   sktm_components      SktmComponent[] // Relation to SKTM components
-  sktm_joints          SktmJoint[]
   cubicle_components   CubicleComponent[] // Relation to Cubicle components
   konstruksi_materials KonstruksiMaterial[]
   pole_materials       PoleMaterial[]
   loggings             Logging[]
 
-  CubicleSurvey CubicleSurvey[]
 
   GroundingMaterial GroundingMaterial[]
   AccessoryMaterial AccessoryMaterial[]
+
+  KabelMaterial KabelMaterial[]
+
+  TerminasiMaterial TerminasiMaterial[]
+
+  JointingMaterial JointingMaterial[]
+
+  sktmJointsAsJointMaterial SktmJoint[] @relation("JointMaterial")
+
+  sktmJointsAsKabelMaterial SktmJoint[] @relation("KabelMaterial")
 }
 
 model TipeMaterial {
@@ -152,13 +160,14 @@ model SktmSurvey {
   foto             String
   keterangan       String
   petugas_survey   String
+  has_arrester     Boolean?
   created_at       DateTime  @default(now())
   updated_at       DateTime  @updatedAt
   deleted_at       DateTime?
 
   survey_header   SurveyHeader    @relation(fields: [id_survey_header], references: [id])
-  sktm_components SktmComponent[] // Flexible list of all materials
-  sktm_joints     SktmJoint[] // List of jointing locations
+  sktm_components SktmComponent[] 
+  sktm_joints     SktmJoint[] 
 }
 
 // Flexible table for all SKTM materials (cable, termination, arrester, etc.)
@@ -167,13 +176,14 @@ enum SktmMatType {
   TERMINATION
   JOINTING
   ARRESTER
+  GROUNDING
 }
 
 model SktmComponent {
   id             Int         @id @default(autoincrement())
   id_sktm_survey Int
   id_material    Int
-  tipe_material  SktmMatType // Type of material (e.g., cable, termination)
+  tipe_material  SktmMatType 
   kuantitas      Decimal
   keterangan     String?
   created_at     DateTime    @default(now())
@@ -186,18 +196,20 @@ model SktmComponent {
 
 // Table specifically for jointing points, as they have coordinates
 model SktmJoint {
-  id             Int       @id @default(autoincrement())
-  id_sktm_survey Int
-  id_material    Int // The specific jointing material used
-  lat            String
-  long           String
-  urutan         Int
-  created_at     DateTime  @default(now())
-  updated_at     DateTime  @updatedAt
-  deleted_at     DateTime?
+  id                Int       @id @default(autoincrement())
+  id_sktm_survey    Int
+  id_material_kabel Int
+  id_material_joint Int
+  lat               String
+  long              String
+  urutan            Int
+  created_at        DateTime  @default(now())
+  updated_at        DateTime  @updatedAt
+  deleted_at        DateTime?
 
   sktm_survey SktmSurvey @relation(fields: [id_sktm_survey], references: [id])
-  material    Material   @relation(fields: [id_material], references: [id])
+  material_joint    Material   @relation("JointMaterial", fields: [id_material_joint], references: [id])
+  material_kabel    Material   @relation("KabelMaterial", fields: [id_material_kabel], references: [id])
 }
 
 // --- CUBICLE ---
@@ -205,7 +217,7 @@ model SktmJoint {
 model CubicleSurvey {
   id                    Int       @id @default(autoincrement())
   id_survey_header      Int
-  id_material_grounding Int?
+  has_grounding         Boolean?
   penyulang             String
   long                  String
   lat                   String
@@ -217,7 +229,6 @@ model CubicleSurvey {
   deleted_at            DateTime?
 
   survey_header      SurveyHeader       @relation(fields: [id_survey_header], references: [id])
-  material_grounding Material?          @relation(fields: [id_material_grounding], references: [id])
   cubicle_components CubicleComponent[] // Flexible list of all materials for this cubicle
 }
 
@@ -227,7 +238,7 @@ model CubicleComponent {
   id_cubicle_survey Int
   id_material       Int
   kuantitas         Decimal
-  tipe_cubicle      String // Type of cubicle (e.g., incoming, metering, outgoing)
+  tipe_cubicle      String 
   keterangan        String?
   created_at        DateTime  @default(now())
   updated_at        DateTime  @updatedAt
@@ -315,14 +326,14 @@ model GroundingTermination {
 }
 
 model GroundingMaterial {
-  id                       Int       @id @default(autoincrement())
+  id                       Int        @id @default(autoincrement())
   id_material              Int
   id_grounding_termination Int
   kuantitas                Decimal?
   tipe_survey              SurveyType
   id_tipe_pekerjaan        Int?
-  created_at               DateTime  @default(now())
-  updated_at               DateTime  @default(now())
+  created_at               DateTime   @default(now())
+  updated_at               DateTime   @default(now())
   deleted_at               DateTime?
 
   material              Material             @relation(fields: [id_material], references: [id])
@@ -331,13 +342,53 @@ model GroundingMaterial {
 }
 
 model AccessoryMaterial {
-  id                 Int       @id @default(autoincrement())
-  id_material        Int
-  kuantitas          Decimal?
-  tipe_survey        SurveyType
-  created_at         DateTime  @default(now())
-  updated_at         DateTime  @default(now())
-  deleted_at         DateTime?
+  id            Int        @id @default(autoincrement())
+  id_material   Int
+  nama_material String
+  kuantitas     Decimal?
+  tipe_survey   SurveyType
+  created_at    DateTime   @default(now())
+  updated_at    DateTime   @default(now())
+  deleted_at    DateTime?
+
+  material Material @relation(fields: [id_material], references: [id])
+}
+
+model KabelMaterial {
+  id            Int        @id @default(autoincrement())
+  id_material   Int
+  nama_material String
+  kuantitas     Decimal?
+  tipe_survey   SurveyType
+  created_at    DateTime   @default(now())
+  updated_at    DateTime   @default(now())
+  deleted_at    DateTime?
+
+  material Material @relation(fields: [id_material], references: [id])
+}
+
+model TerminasiMaterial {
+  id            Int        @id @default(autoincrement())
+  id_material   Int
+  nama_material String
+  kuantitas     Decimal?
+  tipe_survey   SurveyType
+  created_at    DateTime   @default(now())
+  updated_at    DateTime   @default(now())
+  deleted_at    DateTime?
+
+  material Material @relation(fields: [id_material], references: [id])
+}
+
+model JointingMaterial {
+  id            Int        @id @default(autoincrement())
+  id_material   Int
+  nama_material String
+  kuantitas     Decimal?
+  tipe_survey   SurveyType
+  created_at    DateTime   @default(now())
+  updated_at    DateTime   @default(now())
+  deleted_at    DateTime?
 
   material Material @relation(fields: [id_material], references: [id])
 }
