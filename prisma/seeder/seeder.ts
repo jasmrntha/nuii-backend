@@ -412,6 +412,7 @@ async function grounding_mat() {
       id_material: parseInt(data.id_material),
       tipe: parseInt(data.tipe),
       kuantitas: data.kuantitas,
+      tipe_survey: data.tipe_survey,
     }));
 
     for (const groundingMat of groundingMats) {
@@ -421,6 +422,7 @@ async function grounding_mat() {
           id_material: groundingMat.id_material,
           id_tipe_pekerjaan: groundingMat.tipe,
           kuantitas: groundingMat.kuantitas,
+          tipe_survey: groundingMat.tipe_survey,
         },
       });
     }
@@ -461,6 +463,96 @@ async function pole_mat() {
   }
 }
 
+async function jointing_mat() {
+  try {
+    const dataJointingMat = await csv().fromFile(
+      __dirname + '/data/jointing_material.csv',
+    );
+
+    let jointingMats = dataJointingMat.map(data => ({
+      nomor_material: parseInt(data.nomor_material),
+      nama_material: data.nama_material,
+      kuantitas: data.kuantitas,
+      tipe_survey: data.tipe_survey,
+    }));
+
+    for (const jointingMat of jointingMats) {
+      await prisma.jointingMaterial.create({
+        data: {
+          id_material: jointingMat.nomor_material,
+          nama_material: jointingMat.nama_material,
+          kuantitas: jointingMat.kuantitas,
+          tipe_survey: jointingMat.tipe_survey,
+        },
+      });
+    }
+
+    console.log('Jointing Material data inserted successfully!');
+  } catch (error) {
+    console.error('Error inserting jointing material data, ', error);
+  }
+}
+
+async function kabel_mat() {
+  try {
+    const dataKabelMat = await csv().fromFile(
+      __dirname + '/data/kabel_material.csv',
+    );
+
+    let kabelMats = dataKabelMat.map(data => ({
+      nomor_material: parseInt(data.nomor_material),
+      nama_material: data.nama_material,
+      kuantitas: data.kuantitas,
+      tipe_survey: data.tipe_survey,
+    }));
+
+    for (const kabelMat of kabelMats) {
+      await prisma.kabelMaterial.create({
+        data: {
+          id_material: kabelMat.nomor_material,
+          nama_material: kabelMat.nama_material,
+          kuantitas: kabelMat.kuantitas,
+          tipe_survey: kabelMat.tipe_survey,
+        },
+      });
+    }
+
+    console.log('Kabel Material data inserted successfully!');
+  } catch (error) {
+    console.error('Error inserting kabel material data, ', error);
+  }
+}
+
+async function accessory_mat() {
+  try {
+    const dataAccessoryMat = await csv().fromFile(
+      __dirname + '/data/accessory_material.csv',
+    );
+
+    let accessoryMats = dataAccessoryMat.map(data => ({
+      nomor_material: parseInt(data.nomor_material),
+      nama_material: data.nama_material,
+      kuantitas: data.kuantitas,
+      tipe_survey: data.tipe_survey,
+    }));
+
+    for (const accessoryMat of accessoryMats) {
+      await prisma.accessoryMaterial.create({
+        data: {
+          id_material: accessoryMat.nomor_material,
+          nama_material: accessoryMat.nama_material,
+          kuantitas: accessoryMat.kuantitas,
+          tipe_survey: accessoryMat.tipe_survey,
+        },
+      });
+    }
+
+    console.log('Accessory Material data inserted successfully!');
+  } catch (error) {
+    console.error('Error inserting accessory material data, ', error);
+  }
+}
+
 const main = async () => {
   // await users();
   await tipe_material();
@@ -474,6 +566,9 @@ const main = async () => {
   await pole();
   await grounding_mat();
   await pole_mat();
+  await jointing_mat();
+  await kabel_mat();
+  await accessory_mat();
 };
 
 main()

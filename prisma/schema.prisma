@@ -98,6 +98,8 @@ model Material {
   sktmJointsAsJointMaterial SktmJoint[] @relation("JointMaterial")
 
   sktmJointsAsKabelMaterial SktmJoint[] @relation("KabelMaterial")
+
+  AppTmComponent AppTmComponent[]
 }
 
 model TipeMaterial {
@@ -230,6 +232,8 @@ model CubicleSurvey {
 
   survey_header      SurveyHeader       @relation(fields: [id_survey_header], references: [id])
   cubicle_components CubicleComponent[] // Flexible list of all materials for this cubicle
+
+  AppTmComponent AppTmComponent[]
 }
 
 // Flexible table for all Cubicle materials (the unit, CTs, grounding, etc.)
@@ -260,6 +264,21 @@ model AppTmSurvey {
 
   survey_header SurveyHeader @relation(fields: [id_survey_header], references: [id])
 }
+
+model AppTmComponent {
+  id                Int       @id @default(autoincrement())
+  id_apptm_survey   Int
+  id_material       Int
+  kuantitas         Decimal
+  keterangan        String?
+  created_at        DateTime  @default(now())
+  updated_at        DateTime  @updatedAt
+  deleted_at        DateTime?
+
+  cubicle_survey CubicleSurvey @relation(fields: [id_apptm_survey], references: [id])
+  material       Material      @relation(fields: [id_material], references: [id])
+}
+
 
 // --- Supporting Models (Konstruksi, Grounding, etc.) ---
 
