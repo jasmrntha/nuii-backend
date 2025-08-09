@@ -56,6 +56,8 @@ export const SKTMSurvey = {
         }),
       );
     }
+
+    return details;
   },
   async getDetailSKTM(id: number) {
     return await prisma.sktmSurvey.findUnique({

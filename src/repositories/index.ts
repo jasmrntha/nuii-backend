@@ -12,3 +12,5 @@ export * from './tipe-pekerjaan.repositories';
 export * from './grounding-material.repositories';
 export * from './pole-material.repositories';
 export * from './excel-archive.repositories';
+export * from './sktm-survey.repositories';
+export * from './survey-sequance.repositories';
