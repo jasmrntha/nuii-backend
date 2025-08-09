@@ -27,7 +27,7 @@ export const ExcelArchive = {
 
   async getDataBySurveyHeaderId(survey_header_id: number) {
     return await prisma.excelArchive.findMany({
-      where: { survey_header_id, deleted_at: null },
+      where: { survey_header_id },
     });
   },
 };

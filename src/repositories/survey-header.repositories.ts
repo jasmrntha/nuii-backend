@@ -73,7 +73,11 @@ export const SurveyHeader = {
     return await prisma.surveyHeader.findUnique({
       where: { id, status_survey: SurveyStatus.Belum_Disetujui },
       include: {
-        survey_details: true,
+        SurveySequance: true,
+        sutm_surveys: true,
+        sktm_surveys: true,
+        cubicle_surveys: true,
+        app_tm_surveys: true,
       },
     });
   },
@@ -81,9 +85,6 @@ export const SurveyHeader = {
     return await prisma.surveyHeader.findUnique({
       where: {
         id,
-        survey_details: {
-          some: { deleted_at: null },
-        },
         status_survey: SurveyStatus.Belum_Disetujui,
       },
     });
@@ -91,9 +92,6 @@ export const SurveyHeader = {
   async getSurveyNameList() {
     return await prisma.surveyHeader.findMany({
       where: {
-        survey_details: {
-          some: { deleted_at: null },
-        },
         status_survey: SurveyStatus.Belum_Disetujui,
       },
       select: {
@@ -106,9 +104,6 @@ export const SurveyHeader = {
   async getHeaderOnly() {
     return await prisma.surveyHeader.findMany({
       where: {
-        survey_details: {
-          some: { deleted_at: null },
-        },
         status_survey: SurveyStatus.Belum_Disetujui,
       },
     });
@@ -117,13 +112,14 @@ export const SurveyHeader = {
   async getAllSurvey() {
     return await prisma.surveyHeader.findMany({
       where: {
-        survey_details: {
-          some: { deleted_at: null },
-        },
         status_survey: SurveyStatus.Belum_Disetujui,
       },
       include: {
-        survey_details: true,
+        SurveySequance: true,
+        sutm_surveys: true,
+        sktm_surveys: true,
+        cubicle_surveys: true,
+        app_tm_surveys: true,
       },
     });
   },
@@ -131,9 +127,6 @@ export const SurveyHeader = {
   async getAllReport() {
     return await prisma.surveyHeader.findMany({
       where: {
-        survey_details: {
-          some: { deleted_at: null },
-        },
         status_survey: SurveyStatus.Disetujui,
       },
     });
@@ -154,18 +147,8 @@ export const SurveyHeader = {
     return await prisma.surveyHeader.findUnique({
       where: {
         id,
-        survey_details: {
-          some: { deleted_at: null },
-        },
         status_survey: SurveyStatus.Disetujui,
       },
-    });
-  },
-
-  async deleteSurvey(id: number) {
-    return await prisma.surveyDetail.update({
-      where: { id },
-      data: { deleted_at: new Date() },
     });
   },
 
