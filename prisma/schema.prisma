@@ -51,6 +51,7 @@ model SurveyHeader {
 model SurveySequance {
   id               Int        @id @default(autoincrement())
   survey_header_id Int
+  survey_detail_id Int?
   tipe             SurveyType
   urutan           Int
   keterangan       String?
@@ -84,7 +85,6 @@ model Material {
   konstruksi_materials KonstruksiMaterial[]
   pole_materials       PoleMaterial[]
   loggings             Logging[]
-
 
   GroundingMaterial GroundingMaterial[]
   AccessoryMaterial AccessoryMaterial[]
@@ -168,8 +168,8 @@ model SktmSurvey {
   deleted_at       DateTime?
 
   survey_header   SurveyHeader    @relation(fields: [id_survey_header], references: [id])
-  sktm_components SktmComponent[] 
-  sktm_joints     SktmJoint[] 
+  sktm_components SktmComponent[]
+  sktm_joints     SktmJoint[]
 }
 
 // Flexible table for all SKTM materials (cable, termination, arrester, etc.)
@@ -185,7 +185,7 @@ model SktmComponent {
   id             Int         @id @default(autoincrement())
   id_sktm_survey Int
   id_material    Int
-  tipe_material  SktmMatType 
+  tipe_material  SktmMatType
   kuantitas      Decimal
   keterangan     String?
   created_at     DateTime    @default(now())
@@ -209,26 +209,26 @@ model SktmJoint {
   updated_at        DateTime  @updatedAt
   deleted_at        DateTime?
 
-  sktm_survey SktmSurvey @relation(fields: [id_sktm_survey], references: [id])
-  material_joint    Material   @relation("JointMaterial", fields: [id_material_joint], references: [id])
-  material_kabel    Material   @relation("KabelMaterial", fields: [id_material_kabel], references: [id])
+  sktm_survey    SktmSurvey @relation(fields: [id_sktm_survey], references: [id])
+  material_joint Material   @relation("JointMaterial", fields: [id_material_joint], references: [id])
+  material_kabel Material   @relation("KabelMaterial", fields: [id_material_kabel], references: [id])
 }
 
 // --- CUBICLE ---
 
 model CubicleSurvey {
-  id                    Int       @id @default(autoincrement())
-  id_survey_header      Int
-  has_grounding         Boolean?
-  penyulang             String
-  long                  String
-  lat                   String
-  foto                  String
-  keterangan            String
-  petugas_survey        String
-  created_at            DateTime  @default(now())
-  updated_at            DateTime  @updatedAt
-  deleted_at            DateTime?
+  id               Int       @id @default(autoincrement())
+  id_survey_header Int
+  has_grounding    Boolean?
+  penyulang        String
+  long             String
+  lat              String
+  foto             String
+  keterangan       String
+  petugas_survey   String
+  created_at       DateTime  @default(now())
+  updated_at       DateTime  @updatedAt
+  deleted_at       DateTime?
 
   survey_header      SurveyHeader       @relation(fields: [id_survey_header], references: [id])
   cubicle_components CubicleComponent[] // Flexible list of all materials for this cubicle
@@ -242,7 +242,7 @@ model CubicleComponent {
   id_cubicle_survey Int
   id_material       Int
   kuantitas         Decimal
-  tipe_cubicle      String 
+  tipe_cubicle      String
   keterangan        String?
   created_at        DateTime  @default(now())
   updated_at        DateTime  @updatedAt
@@ -266,19 +266,18 @@ model AppTmSurvey {
 }
 
 model AppTmComponent {
-  id                Int       @id @default(autoincrement())
-  id_apptm_survey   Int
-  id_material       Int
-  kuantitas         Decimal
-  keterangan        String?
-  created_at        DateTime  @default(now())
-  updated_at        DateTime  @updatedAt
-  deleted_at        DateTime?
+  id              Int       @id @default(autoincrement())
+  id_apptm_survey Int
+  id_material     Int
+  kuantitas       Decimal
+  keterangan      String?
+  created_at      DateTime  @default(now())
+  updated_at      DateTime  @updatedAt
+  deleted_at      DateTime?
 
   cubicle_survey CubicleSurvey @relation(fields: [id_apptm_survey], references: [id])
   material       Material      @relation(fields: [id_material], references: [id])
 }
-
 
 // --- Supporting Models (Konstruksi, Grounding, etc.) ---
 
