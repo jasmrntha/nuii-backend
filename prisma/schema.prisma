@@ -154,6 +154,19 @@ model SutmDetail {
 model SktmSurvey {
   id               Int       @id @default(autoincrement())
   id_survey_header Int
+  created_at       DateTime  @default(now())
+  updated_at       DateTime  @updatedAt
+  deleted_at       DateTime?
+
+  survey_header   SurveyHeader    @relation(fields: [id_survey_header], references: [id])
+  sktm_details    SktmDetail[]
+  sktm_components SktmComponent[]
+  sktm_joints     SktmJoint[]
+}
+
+model SktmDetail {
+  id               Int       @id @default(autoincrement())
+  id_sktm_survey   Int
   penyulang        String
   panjang_jaringan Int
   diameter_kabel   Decimal
@@ -167,9 +180,7 @@ model SktmSurvey {
   updated_at       DateTime  @updatedAt
   deleted_at       DateTime?
 
-  survey_header   SurveyHeader    @relation(fields: [id_survey_header], references: [id])
-  sktm_components SktmComponent[]
-  sktm_joints     SktmJoint[]
+  sktm_survey SktmSurvey @relation(fields: [id_sktm_survey], references: [id])
 }
 
 // Flexible table for all SKTM materials (cable, termination, arrester, etc.)

@@ -4,10 +4,15 @@ import { type DefaultArgs } from '@prisma/client/runtime/library';
 
 import prisma from '../config/prisma';
 
-export const SKTMSurvey = {
-  async createSurvey(
+export const SKTMJoint = {
+  async createJoint(
     data: {
-      id_survey_header: number;
+      id_sktm_survey: number;
+      id_material_kabel: number;
+      id_material_joint: number;
+      lat: string;
+      long: string;
+      urutan: number;
     },
     tx?: Omit<
       PrismaClient<Prisma.PrismaClientOptions, never, DefaultArgs>,
@@ -16,61 +21,39 @@ export const SKTMSurvey = {
   ) {
     const client = tx || prisma;
 
-    return await client.sktmSurvey.create({
+    return await client.sktmJoint.create({
       data: {
         ...data,
       },
     });
   },
-  async getAll(include: boolean = false) {
-    return await prisma.sktmSurvey.findMany({
+  async getAllBySurvey(id_sktm_survey: number, include: boolean = false) {
+    return await prisma.sktmJoint.findMany({
+      where: { id_sktm_survey },
       include: {
-        sktm_details: include,
-        sktm_joints: include,
-        sktm_components: include,
+        material_joint: include,
+        material_kabel: include,
       },
     });
-  },
-  async getAllByHeader(survey_header_id: number, include: boolean = false) {
-    const sequances = await prisma.surveySequance.findMany({
-      where: { survey_header_id, tipe: 'SKTM' },
-    });
-
-    const details = [];
-
-    for (const sequance of sequances) {
-      const id = sequance.survey_detail_id;
-
-      details.push(
-        await prisma.sktmSurvey.findUnique({
-          where: {
-            id,
-          },
-          include: {
-            sktm_details: include,
-            sktm_joints: include,
-            sktm_components: include,
-          },
-        }),
-      );
-    }
-
-    return details;
   },
   async getById(id: number, include: boolean = false) {
-    return await prisma.sktmSurvey.findUnique({
+    return await prisma.sktmJoint.findUnique({
       where: { id },
       include: {
-        sktm_details: include,
-        sktm_joints: include,
-        sktm_components: include,
+        material_joint: include,
+        material_kabel: include,
       },
     });
   },
-  async updateSurvey(
+  async updateJoint(
     id: number,
     data: {
-      id_survey_header: number;
+      id_sktm_survey: number;
+      id_material_kabel: number;
+      id_material_joint: number;
+      lat: string;
+      long: string;
+      urutan: number;
     },
     tx?: Omit<
       PrismaClient<Prisma.PrismaClientOptions, never, DefaultArgs>,
@@ -79,14 +62,14 @@ export const SKTMSurvey = {
   ) {
     const client = tx || prisma;
 
-    return await client.sktmSurvey.update({
+    return await client.sktmJoint.update({
       where: { id },
       data: {
         ...data,
       },
     });
   },
-  async deleteSurvey(
+  async deleteJoint(
     id: number,
     tx?: Omit<
       PrismaClient<Prisma.PrismaClientOptions, never, DefaultArgs>,
@@ -95,7 +78,7 @@ export const SKTMSurvey = {
   ) {
     const client = tx || prisma;
 
-    return await client.sktmSurvey.update({
+    return await client.sktmJoint.update({
       where: { id },
       data: {
         deleted_at: new Date(),
