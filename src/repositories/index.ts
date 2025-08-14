@@ -13,4 +13,7 @@ export * from './grounding-material.repositories';
 export * from './pole-material.repositories';
 export * from './excel-archive.repositories';
 export * from './sktm-survey.repositories';
+export * from './sktm-detail.repositories';
+export * from './sktm-joint.repositories';
+export * from './sktm-component.repositories';
 export * from './survey-sequance.repositories';

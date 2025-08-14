@@ -85,4 +85,13 @@ export const SKTMJoint = {
       },
     });
   },
+  async getMaxUrutan(id_sktm_survey: number) {
+    const result = await prisma.sktmJoint.findFirst({
+      where: { id_sktm_survey },
+      orderBy: { urutan: 'desc' },
+      select: { urutan: true },
+    });
+
+    return result?.urutan ?? 0;
+  },
 };

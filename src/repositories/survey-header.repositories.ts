@@ -54,38 +54,18 @@ export const SurveyHeader = {
       },
     });
   },
-  async findHeaderById(id: number) {
+  async getById(id: number, status?: SurveyStatus, include: boolean = false) {
     return await prisma.surveyHeader.findUnique({
       where: {
         id,
-        status_survey: SurveyStatus.Belum_Disetujui,
+        ...(status ? { status_survey: status } : {}),
       },
-    });
-  },
-  async exportHeaderById(id: number) {
-    return await prisma.surveyHeader.findUnique({
-      where: {
-        id,
-      },
-    });
-  },
-  async findSurveyById(id: number) {
-    return await prisma.surveyHeader.findUnique({
-      where: { id, status_survey: SurveyStatus.Belum_Disetujui },
       include: {
-        SurveySequance: true,
-        sutm_surveys: true,
-        sktm_surveys: true,
-        cubicle_surveys: true,
-        app_tm_surveys: true,
-      },
-    });
-  },
-  async getSurveyHeader(id: number) {
-    return await prisma.surveyHeader.findUnique({
-      where: {
-        id,
-        status_survey: SurveyStatus.Belum_Disetujui,
+        SurveySequance: include,
+        sutm_surveys: include,
+        sktm_surveys: include,
+        cubicle_surveys: include,
+        app_tm_surveys: include,
       },
     });
   },
@@ -100,38 +80,20 @@ export const SurveyHeader = {
       },
     });
   },
-
-  async getHeaderOnly() {
+  async getAll(status?: SurveyStatus, include: boolean = false) {
     return await prisma.surveyHeader.findMany({
       where: {
-        status_survey: SurveyStatus.Belum_Disetujui,
-      },
-    });
-  },
-
-  async getAllSurvey() {
-    return await prisma.surveyHeader.findMany({
-      where: {
-        status_survey: SurveyStatus.Belum_Disetujui,
+        ...(status ? { status_survey: status } : {}),
       },
       include: {
-        SurveySequance: true,
-        sutm_surveys: true,
-        sktm_surveys: true,
-        cubicle_surveys: true,
-        app_tm_surveys: true,
+        SurveySequance: include,
+        sutm_surveys: include,
+        sktm_surveys: include,
+        cubicle_surveys: include,
+        app_tm_surveys: include,
       },
     });
   },
-
-  async getAllReport() {
-    return await prisma.surveyHeader.findMany({
-      where: {
-        status_survey: SurveyStatus.Disetujui,
-      },
-    });
-  },
-
   async getAllReportWithExcel() {
     return await prisma.surveyHeader.findMany({
       where: {
@@ -142,16 +104,6 @@ export const SurveyHeader = {
       },
     });
   },
-
-  async getReportById(id: number) {
-    return await prisma.surveyHeader.findUnique({
-      where: {
-        id,
-        status_survey: SurveyStatus.Disetujui,
-      },
-    });
-  },
-
   async createHeaderEstimasi(
     data: {
       nama_survey: string;

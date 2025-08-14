@@ -81,7 +81,6 @@ model Material {
   sutm_konduktor       SutmSurvey[]
   sutm_tiang           SutmDetail[]
   sktm_components      SktmComponent[] // Relation to SKTM components
-  cubicle_components   CubicleComponent[] // Relation to Cubicle components
   konstruksi_materials KonstruksiMaterial[]
   pole_materials       PoleMaterial[]
   loggings             Logging[]
@@ -180,7 +179,8 @@ model SktmDetail {
   updated_at       DateTime  @updatedAt
   deleted_at       DateTime?
 
-  sktm_survey SktmSurvey @relation(fields: [id_sktm_survey], references: [id])
+  sktm_survey   SktmSurvey      @relation(fields: [id_sktm_survey], references: [id])
+  SktmComponent SktmComponent[]
 }
 
 // Flexible table for all SKTM materials (cable, termination, arrester, etc.)
@@ -194,7 +194,8 @@ enum SktmMatType {
 
 model SktmComponent {
   id             Int         @id @default(autoincrement())
-  id_sktm_survey Int
+  id_sktm_survey Int?
+  id_sktm_detail Int?
   id_material    Int
   tipe_material  SktmMatType
   kuantitas      Decimal
@@ -203,8 +204,9 @@ model SktmComponent {
   updated_at     DateTime    @updatedAt
   deleted_at     DateTime?
 
-  sktm_survey SktmSurvey @relation(fields: [id_sktm_survey], references: [id])
-  material    Material   @relation(fields: [id_material], references: [id])
+  sktm_survey SktmSurvey? @relation(fields: [id_sktm_survey], references: [id])
+  sktm_detail SktmDetail? @relation(fields: [id_sktm_detail], references: [id])
+  material    Material    @relation(fields: [id_material], references: [id])
 }
 
 // Table specifically for jointing points, as they have coordinates
@@ -241,26 +243,9 @@ model CubicleSurvey {
   updated_at       DateTime  @updatedAt
   deleted_at       DateTime?
 
-  survey_header      SurveyHeader       @relation(fields: [id_survey_header], references: [id])
-  cubicle_components CubicleComponent[] // Flexible list of all materials for this cubicle
+  survey_header SurveyHeader @relation(fields: [id_survey_header], references: [id])
 
   AppTmComponent AppTmComponent[]
-}
-
-// Flexible table for all Cubicle materials (the unit, CTs, grounding, etc.)
-model CubicleComponent {
-  id                Int       @id @default(autoincrement())
-  id_cubicle_survey Int
-  id_material       Int
-  kuantitas         Decimal
-  tipe_cubicle      String
-  keterangan        String?
-  created_at        DateTime  @default(now())
-  updated_at        DateTime  @updatedAt
-  deleted_at        DateTime?
-
-  cubicle_survey CubicleSurvey @relation(fields: [id_cubicle_survey], references: [id])
-  material       Material      @relation(fields: [id_material], references: [id])
 }
 
 // --- APP TM (Alat Pengukur Tegangan Menengah) ---
