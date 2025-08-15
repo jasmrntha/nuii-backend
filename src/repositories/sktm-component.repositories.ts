@@ -11,8 +11,7 @@ import prisma from '../config/prisma';
 export const SKTMComponent = {
   async createComponent(
     data: {
-      id_sktm_survey?: number;
-      id_sktm_detail?: number;
+      id_sktm_survey: number;
       id_material: number;
       tipe_material: SktmMatType; // enum or string union
       kuantitas: number; // Decimal → number
@@ -49,18 +48,13 @@ export const SKTMComponent = {
   },
   async getByMaterial(
     id_material: number,
-    id_sktm_survey?: number | null,
-    id_sktm_detail?: number | null,
+    id_sktm_survey: number | null,
     include: boolean = false,
   ) {
     const where: any = { id_material };
 
     if (id_sktm_survey != null) {
       where.id_sktm_survey = id_sktm_survey;
-    }
-
-    if (id_sktm_detail != null) {
-      where.id_sktm_detail = id_sktm_detail;
     }
 
     return prisma.sktmComponent.findMany({
@@ -73,17 +67,12 @@ export const SKTMComponent = {
   async getByTipe(
     tipe_material: SktmMatType,
     id_sktm_survey?: number | null,
-    id_sktm_detail?: number | null,
     include: boolean = false,
   ) {
     const where: any = { tipe_material };
 
     if (id_sktm_survey != null) {
       where.id_sktm_survey = id_sktm_survey;
-    }
-
-    if (id_sktm_detail != null) {
-      where.id_sktm_detail = id_sktm_detail;
     }
 
     return prisma.sktmComponent.findMany({
@@ -96,8 +85,7 @@ export const SKTMComponent = {
   async updateComponents(
     id: number,
     data: {
-      id_sktm_survey?: number;
-      id_sktm_detail?: number;
+      id_sktm_survey: number;
       id_material: number;
       tipe_material: SktmMatType; // enum or string union
       kuantitas: number; // Decimal → number

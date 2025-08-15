@@ -1,4 +1,4 @@
-import { LogType } from '@prisma/client';
+import { LogType, type SurveyType } from '@prisma/client';
 import { StatusCodes } from 'http-status-codes';
 
 import prisma from '../config/prisma';
@@ -8,6 +8,13 @@ import {
   type CreateMaterialRequest,
 } from '../models';
 import { Material, TipeMaterial, Logging } from '../repositories';
+
+enum MaterialTables {
+  CABLE = 'kabelMaterial',
+  ACCESSORY = 'accessoryMaterial',
+  TERMINATION = 'terminasiMaterial',
+  JOINTING = 'jointingMaterial',
+}
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export const MaterialService = {
@@ -185,5 +192,15 @@ export const MaterialService = {
     } catch (error) {
       throw error;
     }
+  },
+
+  async getSurveyMaterials(table: MaterialTables, tipe_survey: SurveyType) {
+    const material = await Material.getSurveyMaterials(table, tipe_survey);
+
+    if (!material[0]) {
+      throw new CustomError(StatusCodes.NOT_FOUND, 'Material not found');
+    }
+
+    return material;
   },
 };

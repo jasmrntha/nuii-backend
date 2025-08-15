@@ -258,7 +258,6 @@ export const SKTMService = {
             SKTMComponent.createComponent(
               {
                 id_sktm_survey: details.id_sktm_survey,
-                id_sktm_detail: details.id,
                 id_material: idTerminationMasuk,
                 tipe_material: 'TERMINATION',
                 kuantitas: 1,

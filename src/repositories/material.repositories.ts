@@ -1,8 +1,19 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-import { type Prisma, type PrismaClient } from '@prisma/client';
+import {
+  type Prisma,
+  type PrismaClient,
+  type SurveyType,
+} from '@prisma/client';
 import { type DefaultArgs } from '@prisma/client/runtime/library';
 
 import prisma from '../config/prisma';
+
+enum MaterialTables {
+  CABLE = 'kabelMaterial',
+  ACCESSORY = 'accessoryMaterial',
+  TERMINATION = 'terminasiMaterial',
+  JOINTING = 'jointingMaterial',
+}
 
 export const Material = {
   async createMaterial(
@@ -106,6 +117,18 @@ export const Material = {
       where: {
         deleted_at: null,
       },
+    });
+  },
+
+  async getSurveyMaterials(table: MaterialTables, tipe_survey?: SurveyType) {
+    const where: any = {};
+
+    if (tipe_survey) {
+      where.tipe_survey = tipe_survey;
+    }
+
+    return await (prisma as any)[table].findMany({
+      where,
     });
   },
 };

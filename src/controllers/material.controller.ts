@@ -1,3 +1,4 @@
+import { type SurveyType } from '@prisma/client';
 import { type NextFunction, type Request, type Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
@@ -9,6 +10,13 @@ import {
 import { MaterialService } from '../services';
 // import { tokenDecode } from '../utils/JwtToken';
 // import { storageQueryValidate } from '../validators';
+
+enum MaterialTables {
+  CABLE = 'kabelMaterial',
+  ACCESSORY = 'accessoryMaterial',
+  TERMINATION = 'terminasiMaterial',
+  JOINTING = 'jointingMaterial',
+}
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export const MaterialController = {
@@ -82,7 +90,7 @@ export const MaterialController = {
     }
   },
 
-  async getTiang(request: Request, response: Response, next: NextFunction) {
+  async getTiang(_: Request, response: Response, next: NextFunction) {
     try {
       const result = await MaterialService.getSelectedMaterial(2);
 
@@ -98,7 +106,7 @@ export const MaterialController = {
     }
   },
 
-  async getKonduktor(request: Request, response: Response, next: NextFunction) {
+  async getKonduktor(_: Request, response: Response, next: NextFunction) {
     try {
       const result = await MaterialService.getSelectedMaterial(3);
 
@@ -114,17 +122,38 @@ export const MaterialController = {
     }
   },
 
-  async getAllMaterial(
-    request: Request,
-    response: Response,
-    next: NextFunction,
-  ) {
+  async getAllMaterial(_: Request, response: Response, next: NextFunction) {
     try {
       const result = await MaterialService.getAllMaterial();
 
       const resp = new CustomResponse(
         StatusCodes.OK,
         'Material listed',
+        result,
+      );
+
+      return response.json(resp.toJSON());
+    } catch (error: any) {
+      next(error);
+    }
+  },
+
+  async getSurveyMaterial(
+    request: Request,
+    response: Response,
+    next: NextFunction,
+  ) {
+    try {
+      const { table, survey } = await request.body;
+
+      const result = await MaterialService.getSurveyMaterials(
+        table as MaterialTables,
+        survey as SurveyType,
+      );
+
+      const resp = new CustomResponse(
+        StatusCodes.OK,
+        'Materials fethced successfully',
         result,
       );
 

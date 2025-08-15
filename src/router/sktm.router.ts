@@ -4,10 +4,16 @@
 import express from 'express';
 
 import { SKTMController } from '../controllers';
+import { validate } from '../middleware';
+import { CreateSKTMDetailSchema } from '../validators';
 
 const router = express.Router();
 
-router.post('/details', SKTMController.createDetail);
+router.post(
+  '/details',
+  validate(CreateSKTMDetailSchema),
+  SKTMController.createDetail,
+);
 router.get('/', SKTMController.getAll);
 router.get('/:id', SKTMController.getById);
 

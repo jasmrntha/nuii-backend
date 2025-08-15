@@ -179,8 +179,7 @@ model SktmDetail {
   updated_at       DateTime  @updatedAt
   deleted_at       DateTime?
 
-  sktm_survey   SktmSurvey      @relation(fields: [id_sktm_survey], references: [id])
-  SktmComponent SktmComponent[]
+  sktm_survey SktmSurvey @relation(fields: [id_sktm_survey], references: [id])
 }
 
 // Flexible table for all SKTM materials (cable, termination, arrester, etc.)
@@ -194,8 +193,7 @@ enum SktmMatType {
 
 model SktmComponent {
   id             Int         @id @default(autoincrement())
-  id_sktm_survey Int?
-  id_sktm_detail Int?
+  id_sktm_survey Int
   id_material    Int
   tipe_material  SktmMatType
   kuantitas      Decimal
@@ -204,9 +202,8 @@ model SktmComponent {
   updated_at     DateTime    @updatedAt
   deleted_at     DateTime?
 
-  sktm_survey SktmSurvey? @relation(fields: [id_sktm_survey], references: [id])
-  sktm_detail SktmDetail? @relation(fields: [id_sktm_detail], references: [id])
-  material    Material    @relation(fields: [id_material], references: [id])
+  sktm_survey SktmSurvey @relation(fields: [id_sktm_survey], references: [id])
+  material    Material   @relation(fields: [id_material], references: [id])
 }
 
 // Table specifically for jointing points, as they have coordinates
