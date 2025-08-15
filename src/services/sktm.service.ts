@@ -194,42 +194,64 @@ async function upsertTerminationKeluar(
 export const SKTMService = {
   async createDetail(payload: CreateSKTMDetailRequest) {
     try {
-      const survey = await SKTMSurvey.getById(payload.id_sktm_survey, true);
-
-      if (!survey) {
-        throw new CustomError(StatusCodes.NOT_FOUND, 'SKTM Survey not found');
-      }
-
       const {
+        id_survey_header: idSurveyHeader,
+        id_sktm_survey: idSKTMSurvey,
         id_termination_masuk: idTerminationMasuk,
         id_termination_keluar: idTerminationKeluar,
         id_kabel: idKabel,
         ...cleanDetail
       } = payload;
 
-      if ((idTerminationMasuk || idKabel) && survey.sktm_details.length > 0) {
+      const isEmpty = idSKTMSurvey ? true : false;
+
+      const survey = isEmpty
+        ? await SKTMSurvey.getById(idSKTMSurvey, true)
+        : null;
+
+      if (!survey && !isEmpty) {
+        throw new CustomError(StatusCodes.NOT_FOUND, 'SKTM Survey not found');
+      }
+
+      const header = await SurveyHeader.getById(
+        idSurveyHeader,
+        'Belum_Disetujui',
+      );
+
+      if (
+        (idTerminationMasuk || idKabel) &&
+        survey.sktm_details.length > 0 &&
+        !isEmpty
+      ) {
         throw new CustomError(
           StatusCodes.BAD_REQUEST,
           'SKTM Detail already exist, cannot initate a new starting point',
         );
       }
 
-      if (idTerminationKeluar && survey.sktm_details.length <= 0) {
+      if (idTerminationKeluar && survey.sktm_details.length <= 0 && !isEmpty) {
         throw new CustomError(
           StatusCodes.BAD_REQUEST,
           'SKTM Detail need to be initiated first',
         );
       }
 
-      if ((idTerminationMasuk || idKabel) && idTerminationKeluar) {
+      if ((idTerminationMasuk || idKabel) && idTerminationKeluar && !isEmpty) {
         throw new CustomError(
           StatusCodes.BAD_REQUEST,
           'SKTM Detail cannot be initiated and ended at the same time',
         );
       }
 
-      const { details } = await prisma.$transaction(async tx => {
-        const details = await SKTMDetail.createDetail(cleanDetail, tx);
+      const { sktm, details, joints } = await prisma.$transaction(async tx => {
+        const sktm = isEmpty
+          ? await SKTMSurvey.createSurvey({ id_survey_header: header.id }, tx)
+          : survey;
+
+        const details = await SKTMDetail.createDetail(
+          { id_sktm_survey: sktm.id, ...cleanDetail },
+          tx,
+        );
 
         if (idTerminationMasuk && idKabel) {
           await Promise.all([
@@ -289,10 +311,24 @@ export const SKTMService = {
           );
         }
 
-        return { details };
+        const joints = idTerminationKeluar
+          ? await SKTMJoint.getAllBySurvey(details.id_sktm_survey)
+          : null;
+
+        return { sktm, details, joints };
       });
 
-      return details;
+      const resp = {
+        ...sktm,
+        details: {
+          ...details,
+        },
+        joints: {
+          ...joints,
+        },
+      };
+
+      return resp;
     } catch (error) {
       throw error;
     }
@@ -316,6 +352,30 @@ export const SKTMService = {
       });
 
       return survey;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  async getSKTM(id_survey_header: number, details: boolean = false) {
+    try {
+      const sktm = await SKTMSurvey.getById(id_survey_header, details);
+
+      if (!sktm) {
+        throw new CustomError(StatusCodes.NOT_FOUND, 'SKTM Survey not found');
+      }
+
+      return sktm;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  async getAllSKTM() {
+    try {
+      const sktm = await SKTMSurvey.getAll();
+
+      return sktm;
     } catch (error) {
       throw error;
     }

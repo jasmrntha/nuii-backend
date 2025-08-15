@@ -12,7 +12,8 @@ interface SKTMDetail {
 }
 
 export interface CreateSKTMDetailRequest extends SKTMDetail {
-  id_sktm_survey: number;
+  id_survey_header: number;
+  id_sktm_survey?: number;
   id_kabel?: number;
   id_termination_masuk?: number;
   id_termination_keluar?: number;

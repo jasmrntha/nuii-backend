@@ -7,3 +7,4 @@ export * from './pole.controller';
 export * from './grounding.controller';
 export * from './estimasi.controller';
 export * from './excel.controller';
+export * from './sktm.controller';

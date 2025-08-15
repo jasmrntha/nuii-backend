@@ -11,6 +11,7 @@ import LogRoutes from './log.router';
 import MaterialRoutes from './material.router';
 import PoleRoutes from './pole.router';
 import SendStorageRoutes from './send-storage.router';
+import SKTMRoutes from './sktm.router';
 import SurveyRoutes from './survey.router';
 import UploadFileRoutes from './upload-file.router';
 import UploadImageRoutes from './upload-image.router';
@@ -29,6 +30,8 @@ router.use('/pole', PoleRoutes);
 router.use('/grounding', GroundingRoutes);
 router.use('/estimasi', EstimasiRoutes);
 router.use('/excel-archive', ExcelRoutes);
+
+router.use('/sktm', SKTMRoutes);
 
 router.use('/upload-file', UploadFileRoutes);
 router.use('/upload-image', UploadImageRoutes);
