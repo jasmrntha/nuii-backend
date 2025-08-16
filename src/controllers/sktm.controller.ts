@@ -27,7 +27,7 @@ export const SKTMController = {
     try {
       const { id } = request.params;
 
-      const result = await SKTMService.getSKTM(Number(id));
+      const result = await SKTMService.getSKTM(Number(id), true);
 
       const resp = new CustomResponse(
         StatusCodes.OK,

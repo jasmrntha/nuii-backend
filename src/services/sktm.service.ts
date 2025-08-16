@@ -203,11 +203,11 @@ export const SKTMService = {
         ...cleanDetail
       } = payload;
 
-      const isEmpty = idSKTMSurvey ? true : false;
+      const isEmpty = idSKTMSurvey ? false : true;
 
       const survey = isEmpty
-        ? await SKTMSurvey.getById(idSKTMSurvey, true)
-        : null;
+        ? null
+        : await SKTMSurvey.getById(idSKTMSurvey, true);
 
       if (!survey && !isEmpty) {
         throw new CustomError(StatusCodes.NOT_FOUND, 'SKTM Survey not found');
@@ -220,7 +220,7 @@ export const SKTMService = {
 
       if (
         (idTerminationMasuk || idKabel) &&
-        survey.sktm_details.length > 0 &&
+        survey?.sktm_details.length > 0 &&
         !isEmpty
       ) {
         throw new CustomError(
@@ -229,7 +229,7 @@ export const SKTMService = {
         );
       }
 
-      if (idTerminationKeluar && survey.sktm_details.length <= 0 && !isEmpty) {
+      if (idTerminationKeluar && survey?.sktm_details.length <= 0 && !isEmpty) {
         throw new CustomError(
           StatusCodes.BAD_REQUEST,
           'SKTM Detail need to be initiated first',
@@ -243,7 +243,7 @@ export const SKTMService = {
         );
       }
 
-      const { sktm, details, joints } = await prisma.$transaction(async tx => {
+      const { sktm } = await prisma.$transaction(async tx => {
         const sktm = isEmpty
           ? await SKTMSurvey.createSurvey({ id_survey_header: header.id }, tx)
           : survey;
@@ -275,6 +275,24 @@ export const SKTMService = {
               tx,
             ),
           ]);
+        } else {
+          const cableComponents = await SKTMComponent.getByTipe(
+            'CABLE',
+            details.id_sktm_survey,
+          );
+
+          const cableComponent = cableComponents[0];
+
+          const newLength =
+            Number(cableComponent.kuantitas) + details.panjang_jaringan;
+
+          await SKTMComponent.updateComponents(cableComponent.id, {
+            id_sktm_survey: cableComponent.id_sktm_survey,
+            id_material: cableComponent.id_material,
+            tipe_material: cableComponent.tipe_material,
+            kuantitas: newLength,
+            keterangan: cableComponent.keterangan,
+          });
         }
 
         if (idTerminationKeluar) {
@@ -297,7 +315,7 @@ export const SKTMService = {
             }
 
             case 139: {
-              jointMaterialId = 96;
+              jointMaterialId = 97;
             }
           }
 
@@ -310,21 +328,13 @@ export const SKTMService = {
           );
         }
 
-        const joints = idTerminationKeluar
-          ? await SKTMJoint.getAllBySurvey(details.id_sktm_survey)
-          : null;
+        const newSktm = await SKTMSurvey.getById(details.id_sktm_survey, true);
 
-        return { sktm, details, joints };
+        return { sktm: newSktm };
       });
 
       const resp = {
         ...sktm,
-        details: {
-          ...details,
-        },
-        joints: {
-          ...joints,
-        },
       };
 
       return resp;

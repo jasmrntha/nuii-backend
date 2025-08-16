@@ -6,6 +6,7 @@
 //
 // import prisma from '../config/prisma';
 // import { CustomError } from '../middleware';
+import { CreateSurveyHeaderRequest } from '../models';
 // import {
 //   type CreateNewSurveyRequest,
 //   type CreateSurveyRequest,
@@ -13,18 +14,18 @@
 //   type UpdateSurveyDetailRequest,
 //   type CreateNewSurveyBatchRequest,
 // } from '../models';
-// import {
-//   SurveyHeader,
-//   SurveyDetail,
-//   Material,
-//   Konstruksi,
-//   KonstruksiMaterial,
-//   TipePekerjaan,
-//   PoleRepository,
-//   GroundingRepository,
-//   PoleMaterialRepository,
-//   GroundingMaterialRepository,
-// } from '../repositories';
+import {
+  SurveyHeader,
+  // SurveyDetail,
+  // Material,
+  // Konstruksi,
+  // KonstruksiMaterial,
+  // TipePekerjaan,
+  // PoleRepository,
+  // GroundingRepository,
+  // PoleMaterialRepository,
+  // GroundingMaterialRepository,
+} from '../repositories';
 
 // function formatWorksheetRow(
 //   worksheet: ExcelJS.Worksheet,
@@ -87,6 +88,15 @@
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export const SurveyService = {
+  async createSurveyHeader(payload: CreateSurveyHeaderRequest) {
+    try {
+      const header = await SurveyHeader.createHeader(payload);
+
+      return header;
+    } catch (error) {
+      throw error;
+    }
+  },
   // async createSurvey(request: CreateSurveyRequest) {
   //   try {
   //     const header = await SurveyHeader.findHeaderById(request.id_header);

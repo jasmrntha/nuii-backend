@@ -16,7 +16,6 @@ export const ExcelService = {
             lokasi: request.header.lokasi,
             user_id: request.header.user_id,
             status_survey: SurveyStatus.Disetujui,
-            id_material_konduktor: request.header.id_material_konduktor,
           },
           prisma,
         );

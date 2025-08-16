@@ -1,22 +1,44 @@
 // import { Readable } from 'node:stream';
 //
-// import { type NextFunction, type Request, type Response } from 'express';
-// import { StatusCodes } from 'http-status-codes';
-//
-// import { CustomResponse } from '../middleware';
-// import {
-//   type CreateSurveyRequest,
-//   type CreateNewSurveyRequest,
-//   type UpdateSurveyHeaderRequest,
-//   type UpdateSurveyDetailRequest,
-//   type CreateNewSurveyBatchRequest,
-// } from '../models';
-// import { SurveyService } from '../services';
+import { type NextFunction, type Request, type Response } from 'express';
+import { StatusCodes } from 'http-status-codes';
+
+import { CustomResponse } from '../middleware';
+import {
+  type CreateSurveyHeaderRequest,
+  // type CreateSurveyRequest,
+  // type CreateNewSurveyRequest,
+  // type UpdateSurveyHeaderRequest,
+  // type UpdateSurveyDetailRequest,
+  // type CreateNewSurveyBatchRequest,
+} from '../models';
+import { SurveyService } from '../services';
 // import { tokenDecode } from '../utils/JwtToken';
 // import { storageQueryValidate } from '../validators';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export const SurveyController = {
+  async createSurveyHeader(
+    request: Request,
+    response: Response,
+    next: NextFunction,
+  ) {
+    try {
+      const payload = (await request.body) as CreateSurveyHeaderRequest;
+
+      const result = await SurveyService.createSurveyHeader(payload);
+
+      const resp = new CustomResponse(
+        StatusCodes.CREATED,
+        'Survey Header created successfully',
+        result,
+      );
+
+      return response.json(resp.toJSON());
+    } catch (error: any) {
+      next(error);
+    }
+  },
   // async createSurvey(request: Request, response: Response, next: NextFunction) {
   //   try {
   //     const requestBody = request.body as CreateSurveyRequest;

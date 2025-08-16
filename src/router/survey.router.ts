@@ -2,19 +2,25 @@
 /* eslint-disable @typescript-eslint/no-misused-promises */
 /* eslint-disable import/no-default-export */
 import express from 'express';
-//
-// import { SurveyController } from '../controllers';
-// import { validate } from '../middleware';
-// import {
-//   CreateSurveySchema,
-//   CreateNewSurveySchema,
-//   UpdateSurveyHeaderSchema,
-//   UpdateSurveyDetailSchema,
-//   CreateBatchSurveySchema,
-// } from '../validators';
+
+import { SurveyController } from '../controllers';
+import { validate } from '../middleware';
+import {
+  CreateSurveyHeaderSchema,
+  // CreateSurveySchema,
+  // CreateNewSurveySchema,
+  // UpdateSurveyHeaderSchema,
+  // UpdateSurveyDetailSchema,
+  // CreateBatchSurveySchema,
+} from '../validators';
 
 const router = express.Router();
 
+router.post(
+  '/',
+  validate(CreateSurveyHeaderSchema),
+  SurveyController.createSurveyHeader,
+);
 // router.post(
 //   '/create',
 //   validate(CreateSurveySchema),

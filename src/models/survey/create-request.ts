@@ -34,3 +34,8 @@ export interface CreateSurveyRequest {
   id_header: number;
   detail: SurveyDetail;
 }
+
+export type CreateSurveyHeaderRequest = Omit<
+  SurveyHeader,
+  'id_material_konduktor'
+>;

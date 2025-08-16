@@ -4,13 +4,13 @@ import Joi from 'joi';
 
 const SurveyHeaderSchema = Joi.object({
   nama_survey: Joi.string().required(),
+  nama_pekerjaan: Joi.string().required(),
   lokasi: Joi.string().required(),
   user_id: Joi.string().required(),
   status_survey: Joi.string()
     .valid(...Object.values(SurveyStatus))
     .required(),
   id_material_konduktor: Joi.number().integer().positive().required(),
-  nama_pekerjaan: Joi.string().required(),
 });
 
 const SurveyDetailSchema = Joi.object({
@@ -40,3 +40,8 @@ export const CreateSurveySchema = Joi.object({
   id_header: Joi.number().integer().positive().required(),
   detail: SurveyDetailSchema.required(),
 });
+
+export const CreateSurveyHeaderSchema = SurveyHeaderSchema.fork(
+  ['id_material_konduktor'],
+  schema => schema.forbidden(),
+);
