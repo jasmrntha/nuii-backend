@@ -2,7 +2,10 @@ import { StatusCodes } from 'http-status-codes';
 
 import prisma from '../config/prisma';
 import { CustomError } from '../middleware';
-import { type CreateSKTMDetailRequest } from '../models';
+import {
+  type CreateSKTMDetailRequest,
+  type UpdateSKTMDetailRequest,
+} from '../models';
 import {
   SKTMComponent,
   SKTMDetail,
@@ -361,6 +364,53 @@ export const SKTMService = {
       });
 
       return survey;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  async UpdateSKTM(payload: UpdateSKTMDetailRequest) {
+    try {
+      const survey = await SKTMSurvey.getById(payload.id);
+
+      if (!survey) {
+        throw new CustomError(StatusCodes.NOT_FOUND, 'SKTM Survey not found');
+      }
+
+      const { updated } = await prisma.$transaction(async tx => {
+        // --- check for details ---
+        if (payload.details && payload.details.length > 0) {
+          for (const detail of payload.details) {
+            const { id, ...data } = detail;
+
+            await SKTMDetail.updateDetail(id, data, tx);
+          }
+        }
+
+        // --- check for components ---
+        if (payload.components && payload.components.length > 0) {
+          for (const component of payload.components) {
+            const { id, ...data } = component;
+
+            await SKTMComponent.updateComponents(id, data, tx);
+          }
+        }
+
+        // --- check for joints ---
+        if (payload.joints && payload.joints.length > 0) {
+          for (const joint of payload.joints) {
+            const { id, ...data } = joint;
+
+            await SKTMJoint.updateJoint(id, data, tx);
+          }
+        }
+
+        const updated = await SKTMSurvey.getById(payload.id, true);
+
+        return { updated };
+      });
+
+      return updated;
     } catch (error) {
       throw error;
     }

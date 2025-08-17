@@ -43,7 +43,7 @@ export const SKTMDetail = {
   },
   async updateDetail(
     id: number,
-    data: {
+    data: Partial<{
       penyulang: string;
       panjang_jaringan: number;
       diameter_kabel: number; // Decimal maps to number here
@@ -53,7 +53,7 @@ export const SKTMDetail = {
       keterangan: string;
       petugas_survey: string;
       has_arrester?: boolean; // Optional because Boolean? in Prisma
-    },
+    }>,
     tx?: Omit<
       PrismaClient<Prisma.PrismaClientOptions, never, DefaultArgs>,
       '$connect' | '$on' | '$disconnect' | '$use' | '$transaction' | '$extends'
@@ -63,9 +63,7 @@ export const SKTMDetail = {
 
     return await client.sktmDetail.update({
       where: { id },
-      data: {
-        ...data,
-      },
+      data,
     });
   },
   async deleteDetail(

@@ -84,13 +84,13 @@ export const SKTMComponent = {
   },
   async updateComponents(
     id: number,
-    data: {
+    data: Partial<{
       id_sktm_survey: number;
       id_material: number;
       tipe_material: SktmMatType; // enum or string union
       kuantitas: number; // Decimal → number
       keterangan?: string | null; // nullable & optional
-    },
+    }>,
     tx?: Omit<
       PrismaClient<Prisma.PrismaClientOptions, never, DefaultArgs>,
       '$connect' | '$on' | '$disconnect' | '$use' | '$transaction' | '$extends'
@@ -100,9 +100,7 @@ export const SKTMComponent = {
 
     return await client.sktmComponent.update({
       where: { id },
-      data: {
-        ...data,
-      },
+      data,
     });
   },
   async deleteComponents(

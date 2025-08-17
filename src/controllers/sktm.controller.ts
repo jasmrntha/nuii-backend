@@ -1,6 +1,9 @@
 import { type NextFunction, type Request, type Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
-import { type CreateSKTMDetailRequest } from 'models';
+import {
+  type UpdateSKTMDetailRequest,
+  type CreateSKTMDetailRequest,
+} from 'models';
 
 import { CustomResponse } from '../middleware';
 import { SKTMService } from '../services';
@@ -46,6 +49,24 @@ export const SKTMController = {
       const payload = (await request.body) as CreateSKTMDetailRequest;
 
       const result = await SKTMService.createDetail(payload);
+
+      const resp = new CustomResponse(
+        StatusCodes.CREATED,
+        'SKTM Detail created',
+        result,
+      );
+
+      return response.json(resp.toJSON());
+    } catch (error: any) {
+      next(error);
+    }
+  },
+
+  async updateSurvey(request: Request, response: Response, next: NextFunction) {
+    try {
+      const payload = (await request.body) as UpdateSKTMDetailRequest;
+
+      const result = await SKTMService.UpdateSKTM(payload);
 
       const resp = new CustomResponse(
         StatusCodes.CREATED,

@@ -5,7 +5,7 @@ import express from 'express';
 
 import { SKTMController } from '../controllers';
 import { validate } from '../middleware';
-import { CreateSKTMDetailSchema } from '../validators';
+import { UpdateSKTMDetailSchema, CreateSKTMDetailSchema } from '../validators';
 
 const router = express.Router();
 
@@ -13,6 +13,11 @@ router.post(
   '/details',
   validate(CreateSKTMDetailSchema),
   SKTMController.createDetail,
+);
+router.patch(
+  '/',
+  validate(UpdateSKTMDetailSchema),
+  SKTMController.updateSurvey,
 );
 router.get('/', SKTMController.getAll);
 router.get('/:id', SKTMController.getById);

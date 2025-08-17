@@ -47,14 +47,14 @@ export const SKTMJoint = {
   },
   async updateJoint(
     id: number,
-    data: {
+    data: Partial<{
       id_sktm_survey: number;
       id_material_kabel: number;
       id_material_joint: number;
       lat: string;
       long: string;
       urutan: number;
-    },
+    }>,
     tx?: Omit<
       PrismaClient<Prisma.PrismaClientOptions, never, DefaultArgs>,
       '$connect' | '$on' | '$disconnect' | '$use' | '$transaction' | '$extends'
@@ -64,9 +64,7 @@ export const SKTMJoint = {
 
     return await client.sktmJoint.update({
       where: { id },
-      data: {
-        ...data,
-      },
+      data, // only the provided fields will be updated
     });
   },
   async deleteJoint(

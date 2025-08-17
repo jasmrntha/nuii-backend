@@ -6,7 +6,7 @@
 //
 // import prisma from '../config/prisma';
 // import { CustomError } from '../middleware';
-import { CreateSurveyHeaderRequest } from '../models';
+import { type CreateSurveyHeaderRequest } from '../models';
 // import {
 //   type CreateNewSurveyRequest,
 //   type CreateSurveyRequest,
