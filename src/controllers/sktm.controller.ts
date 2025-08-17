@@ -79,4 +79,64 @@ export const SKTMController = {
       next(error);
     }
   },
+
+  async deleteSurvey(request: Request, response: Response, next: NextFunction) {
+    try {
+      const { id } = request.params;
+      await SKTMService.deleteEntity('survey', Number(id));
+
+      const resp = new CustomResponse(StatusCodes.OK, 'Survey deleted');
+
+      return response.json(resp.toJSON());
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async deleteDetail(request: Request, response: Response, next: NextFunction) {
+    try {
+      const { id, detailId } = request.params;
+      await SKTMService.deleteEntity('detail', Number(id), Number(detailId));
+
+      const resp = new CustomResponse(StatusCodes.OK, 'Detail deleted');
+
+      return response.json(resp.toJSON());
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async deleteComponent(
+    request: Request,
+    response: Response,
+    next: NextFunction,
+  ) {
+    try {
+      const { id, componentId } = request.params;
+      await SKTMService.deleteEntity(
+        'component',
+        Number(id),
+        Number(componentId),
+      );
+
+      const resp = new CustomResponse(StatusCodes.OK, 'Component deleted');
+
+      return response.json(resp.toJSON());
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async deleteJoint(request: Request, response: Response, next: NextFunction) {
+    try {
+      const { id, jointId } = request.params;
+      await SKTMService.deleteEntity('joint', Number(id), Number(jointId));
+
+      const resp = new CustomResponse(StatusCodes.OK, 'Joint deleted');
+
+      return response.json(resp.toJSON());
+    } catch (error) {
+      next(error);
+    }
+  },
 };

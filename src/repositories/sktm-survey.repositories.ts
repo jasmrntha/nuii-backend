@@ -95,10 +95,25 @@ export const SKTMSurvey = {
   ) {
     const client = tx || prisma;
 
+    const date = new Date();
+
+    await client.sktmDetail.updateMany({
+      where: { id_sktm_survey: id },
+      data: { deleted_at: date },
+    });
+    await client.sktmComponent.updateMany({
+      where: { id_sktm_survey: id },
+      data: { deleted_at: date },
+    });
+    await client.sktmJoint.updateMany({
+      where: { id_sktm_survey: id },
+      data: { deleted_at: date },
+    });
+
     return await client.sktmSurvey.update({
       where: { id },
       data: {
-        deleted_at: new Date(),
+        deleted_at: date,
       },
     });
   },

@@ -22,4 +22,17 @@ router.patch(
 router.get('/', SKTMController.getAll);
 router.get('/:id', SKTMController.getById);
 
+// --- Delete routes ---
+// Delete whole survey
+router.delete('/:id', SKTMController.deleteSurvey);
+
+// Delete specific detail
+router.delete('/:id/details/:detailId', SKTMController.deleteDetail);
+
+// Delete specific component
+router.delete('/:id/components/:componentId', SKTMController.deleteComponent);
+
+// Delete specific joint
+router.delete('/:id/joints/:jointId', SKTMController.deleteJoint);
+
 export default router;

@@ -416,6 +416,32 @@ export const SKTMService = {
     }
   },
 
+  async deleteEntity(target: string, surveyId: number, entityId?: number) {
+    switch (target) {
+      case 'survey': {
+        return prisma.$transaction(async tx => {
+          await SKTMSurvey.deleteSurvey(surveyId, tx);
+        });
+      }
+
+      case 'detail': {
+        return await SKTMDetail.deleteDetail(entityId);
+      }
+
+      case 'component': {
+        return SKTMComponent.deleteComponents(entityId);
+      }
+
+      case 'joint': {
+        return SKTMJoint.deleteJoint(entityId);
+      }
+
+      default: {
+        throw new Error(`Unsupported delete target: ${target}`);
+      }
+    }
+  },
+
   async getSKTM(id_survey_header: number, details: boolean = false) {
     try {
       const sktm = await SKTMSurvey.getById(id_survey_header, details);
