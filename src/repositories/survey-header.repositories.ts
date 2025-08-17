@@ -53,6 +53,7 @@ export const SurveyHeader = {
       },
     });
   },
+
   async getById(id: number, status?: SurveyStatus, include: boolean = false) {
     return await prisma.surveyHeader.findUnique({
       where: {
@@ -68,6 +69,7 @@ export const SurveyHeader = {
       },
     });
   },
+
   async getSurveyNameList() {
     return await prisma.surveyHeader.findMany({
       where: {
@@ -79,6 +81,7 @@ export const SurveyHeader = {
       },
     });
   },
+
   async getAll(status?: SurveyStatus, include: boolean = false) {
     return await prisma.surveyHeader.findMany({
       where: {
@@ -93,6 +96,7 @@ export const SurveyHeader = {
       },
     });
   },
+
   async getAllReportWithExcel() {
     return await prisma.surveyHeader.findMany({
       where: {
@@ -103,6 +107,7 @@ export const SurveyHeader = {
       },
     });
   },
+
   async createHeaderEstimasi(
     data: {
       nama_survey: string;
@@ -123,6 +128,23 @@ export const SurveyHeader = {
         ...data,
         status_survey: SurveyStatus.Belum_Disetujui,
       },
+    });
+  },
+
+  async deleteSurvey(
+    id: number,
+    tx?: Omit<
+      PrismaClient<Prisma.PrismaClientOptions, never, DefaultArgs>,
+      '$connect' | '$on' | '$disconnect' | '$use' | '$transaction' | '$extends'
+    >,
+  ) {
+    const client = tx || prisma;
+
+    const date = new Date();
+
+    return await client.surveyHeader.update({
+      where: { id },
+      data: { deleted_at: date },
     });
   },
 };

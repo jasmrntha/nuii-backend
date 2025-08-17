@@ -37,6 +37,7 @@ model SurveyHeader {
   user_id        String
   created_at     DateTime     @default(now())
   updated_at     DateTime     @updatedAt
+  deleted_at     DateTime?
 
   // One project can have multiple surveys of different types
   sutm_surveys    SutmSurvey[]

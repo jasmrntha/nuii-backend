@@ -21,6 +21,9 @@ router.post(
   validate(CreateSurveyHeaderSchema),
   SurveyController.createSurveyHeader,
 );
+router.get('/', SurveyController.getAllSurveys);
+router.get('/:id', SurveyController.getSurveyDetails);
+router.get('/reports', SurveyController.getAllReports);
 // router.post(
 //   '/create',
 //   validate(CreateSurveySchema),
@@ -45,9 +48,6 @@ router.post(
 // router.delete('/detail/delete/:id', SurveyController.deleteSurveyDetail);
 // router.delete('/delete/:id', SurveyController.deleteSurvey);
 // router.get('/name-list', SurveyController.getSurveyNameList);
-// router.get('/', SurveyController.getHeaderOnly);
-// router.get('/detail/:id', SurveyController.getSurveyDetail);
-// router.get('/report', SurveyController.getAllReport);
 // router.get('/report/detail/:id', SurveyController.getReportDetail);
 // router.get('/export/excel/:id', SurveyController.exportSurveyToExcel);
 // router.post(

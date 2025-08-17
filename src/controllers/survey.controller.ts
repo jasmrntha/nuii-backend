@@ -182,60 +182,56 @@ export const SurveyController = {
   //     next(error);
   //   }
   // },
-  // async getHeaderOnly(
-  //   request: Request,
-  //   response: Response,
-  //   next: NextFunction,
-  // ) {
-  //   try {
-  //     const result = await SurveyService.getAllSurveyHeader();
-  //
-  //     const resp = new CustomResponse(
-  //       StatusCodes.OK,
-  //       'Survey Header List',
-  //       result,
-  //     );
-  //
-  //     return response.json(resp.toJSON());
-  //   } catch (error: any) {
-  //     next(error);
-  //   }
-  // },
-  // async getSurveyDetail(
-  //   request: Request,
-  //   response: Response,
-  //   next: NextFunction,
-  // ) {
-  //   try {
-  //     const id = request.params.id;
-  //     const result = await SurveyService.getSurveyDetail(Number(id));
-  //
-  //     const resp = new CustomResponse(
-  //       StatusCodes.OK,
-  //       'Survey Detail Fetched',
-  //       result,
-  //     );
-  //
-  //     return response.json(resp.toJSON());
-  //   } catch (error: any) {
-  //     next(error);
-  //   }
-  // },
-  // async getAllReport(request: Request, response: Response, next: NextFunction) {
-  //   try {
-  //     const result = await SurveyService.getAllReport();
-  //
-  //     const resp = new CustomResponse(
-  //       StatusCodes.OK,
-  //       'Report Header List',
-  //       result,
-  //     );
-  //
-  //     return response.json(resp.toJSON());
-  //   } catch (error: any) {
-  //     next(error);
-  //   }
-  // },
+  async getAllSurveys(_: Request, response: Response, next: NextFunction) {
+    try {
+      const result = await SurveyService.getAll('Belum_Disetujui');
+
+      const resp = new CustomResponse(
+        StatusCodes.OK,
+        'Surveys fetched successfully',
+        result,
+      );
+
+      return response.json(resp.toJSON());
+    } catch (error: any) {
+      next(error);
+    }
+  },
+  async getSurveyDetails(
+    request: Request,
+    response: Response,
+    next: NextFunction,
+  ) {
+    try {
+      const id = request.params.id;
+      const result = await SurveyService.getById(Number(id));
+
+      const resp = new CustomResponse(
+        StatusCodes.OK,
+        'Survey fetched successfully',
+        result,
+      );
+
+      return response.json(resp.toJSON());
+    } catch (error: any) {
+      next(error);
+    }
+  },
+  async getAllReports(_: Request, response: Response, next: NextFunction) {
+    try {
+      const result = await SurveyService.getAll('Disetujui');
+
+      const resp = new CustomResponse(
+        StatusCodes.OK,
+        'Report Header List',
+        result,
+      );
+
+      return response.json(resp.toJSON());
+    } catch (error: any) {
+      next(error);
+    }
+  },
   // async getReportDetail(
   //   request: Request,
   //   response: Response,
