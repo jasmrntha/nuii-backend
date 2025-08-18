@@ -159,43 +159,49 @@ export const SUTMRepository = {
     });
   },
 
-  async deleteSutmHeader(id: number) {
-    const deleteDetails = await prisma.sutmDetail.deleteMany({
-      where: {
-        id_sutm_survey: id,
-      },
+  async deleteSutmHeader(
+    id: number,
+    tx?: Omit<
+      PrismaClient<Prisma.PrismaClientOptions, never, DefaultArgs>,
+      '$connect' | '$on' | '$disconnect' | '$use' | '$transaction' | '$extends'
+    >,
+  ) {
+    const client = tx || prisma;
+    const deleteHeader = await client.sutmSurvey.update({
+      where: { id },
+      data: { deleted_at: new Date() },
     });
 
-    return await prisma.sutmSurvey.delete({
-      where: {
-        id,
-      },
+    return await client.sutmDetail.updateMany({
+      where: { id_sutm_survey: id, deleted_at: null },
+      data: { deleted_at: new Date() },
     });
   },
 
   async deleteSutmDetail(id: number) {
-    return await prisma.sutmDetail.delete({
-      where: {
-        id,
-      },
+    return prisma.sutmDetail.update({
+      where: { id },
+      data: { deleted_at: new Date() },
     });
   },
 
   async getSutmHeaderById(id: number) {
-    return await prisma.sutmSurvey.findUnique({
-      where: {
-        id,
+    return prisma.sutmSurvey.findFirst({
+      where: { id, deleted_at: null },
+      include: {
+        // include only alive details
+        sutm_details: { where: { deleted_at: null } },
       },
     });
   },
 
   async getAll() {
-    const headers = await prisma.sutmSurvey.findMany({
+    return prisma.sutmSurvey.findMany({
+      where: { deleted_at: null },
       include: {
-        sutm_details: true,
+        sutm_details: { where: { deleted_at: null } },
       },
+      orderBy: { id: 'desc' }, // optional
     });
-
-    return headers;
   },
 };
