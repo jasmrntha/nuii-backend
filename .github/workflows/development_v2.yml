@@ -24,7 +24,7 @@ jobs:
           script: |
             cd /var/www/nuii/nuii-dev-v2
             git stash
-            git pull origin main
+            git pull origin main-v2
             export NVM_DIR=~/.nvm
             source ~/.nvm/nvm.sh
             git stash apply
