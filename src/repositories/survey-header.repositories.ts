@@ -70,6 +70,52 @@ export const SurveyHeader = {
     });
   },
 
+  async getDeep(id: number, status?: SurveyStatus, include: boolean = false) {
+    return await prisma.surveyHeader.findUnique({
+      where: {
+        id,
+        ...(status ? { status_survey: status } : {}),
+      },
+      include: {
+        SurveySequance: include,
+        sutm_surveys: {
+          include: {
+            sutm_details: {
+              include: {
+                material_tiang: include,
+                konstruksi: {
+                  include: {
+                    konstruksi_materials: { include: { material: include } },
+                  },
+                },
+                pole_supporter: {
+                  include: {
+                    pole_materials: { include: { material: include } },
+                  },
+                },
+                grounding_termination: {
+                  include: {
+                    GroundingMaterial: { include: { material: include } },
+                  },
+                },
+              },
+            },
+            material_konduktor: include,
+          },
+        },
+        sktm_surveys: {
+          include: {
+            sktm_details: include,
+            sktm_components: include,
+            sktm_joints: include,
+          },
+        },
+        cubicle_surveys: include,
+        app_tm_surveys: include,
+      },
+    });
+  },
+
   async getSurveyNameList() {
     return await prisma.surveyHeader.findMany({
       where: {

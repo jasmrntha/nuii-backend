@@ -53,6 +53,13 @@ export const SurveyService = {
       throw error;
     }
   },
+  async deleteSurvey(id: number) {
+    try {
+      return await SurveyHeader.deleteSurvey(id);
+    } catch (error) {
+      throw error;
+    }
+  },
   // async createSurvey(request: CreateSurveyRequest) {
   //   try {
   //     const header = await SurveyHeader.findHeaderById(request.id_header);

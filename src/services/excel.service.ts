@@ -1,70 +1,274 @@
+import path from 'node:path';
+
 import { SurveyStatus } from '@prisma/client';
-// import ExcelJS from 'exceljs';
-// import { StatusCodes } from 'http-status-codes';
+import ExcelJS from 'exceljs';
+import { StatusCodes } from 'http-status-codes';
 
 import prisma from '../config/prisma';
-// import { CustomError } from '../middleware';
+import { CustomError } from '../middleware';
 import { type UploadExcelRequest } from '../models';
-import { ExcelArchive, SurveyHeader } from '../repositories';
+import {
+  PoleRepository,
+  KonstruksiMaterial,
+  Material,
+  ExcelArchive,
+  SurveyHeader,
+} from '../repositories';
 
-// function formatWorksheetRow(
-//   worksheet: ExcelJS.Worksheet,
-//   rowIndex: number,
-//   border?: Partial<ExcelJS.Borders>,
-// ) {
-//   const row = worksheet.getRow(rowIndex);
-//
-//   // Ensure the row has at least one value to be recognized
-//   for (let col = 2; col <= 17; col++) {
-//     // Skipping column 1 (A)
-//     if (!row.getCell(col).value) {
-//       row.getCell(col).value = '-';
-//     } // Set a placeholder value
-//   }
-//
-//   if (!border) {
-//     border = {
-//       top: { style: 'dotted' },
-//       left: { style: 'thin' },
-//       bottom: { style: 'dotted' },
-//       right: { style: 'thin' },
-//     };
-//   }
-//
-//   row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
-//     if (colNumber > 1 && colNumber < 18) {
-//       // Skip column A
-//       cell.border = border;
-//
-//       if (cell.value == '-') {
-//         cell.value = '';
-//       }
-//     }
-//   });
-// }
-//
-// function countDistance(
-//   lat1: number,
-//   lon1: number,
-//   lat2: number,
-//   lon2: number,
-// ): number {
-//   const R = 6371; // Radius of the Earth in km
-//   const rad = Math.PI / 180;
-//
-//   // Haversine formula for distance calculation
-//   const a =
-//     0.5 -
-//     Math.cos((lat2 - lat1) * rad) / 2 +
-//     (Math.cos(lat1 * rad) *
-//       Math.cos(lat2 * rad) *
-//       (1 - Math.cos((lon2 - lon1) * rad))) /
-//       2;
-//
-//   const distance = 2 * R * Math.asin(Math.sqrt(a)) * 1000; // Distance in meters
-//
-//   return distance;
-// }
+function formatWorksheetRow(
+  worksheet: ExcelJS.Worksheet,
+  rowIndex: number,
+  border?: Partial<ExcelJS.Borders>,
+) {
+  const row = worksheet.getRow(rowIndex);
+
+  // Ensure the row has at least one value to be recognized
+  for (let col = 2; col <= 17; col++) {
+    // Skipping column 1 (A)
+    if (!row.getCell(col).value) {
+      row.getCell(col).value = '-';
+    } // Set a placeholder value
+  }
+
+  if (!border) {
+    border = {
+      top: { style: 'dotted' },
+      left: { style: 'thin' },
+      bottom: { style: 'dotted' },
+      right: { style: 'thin' },
+    };
+  }
+
+  row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
+    if (colNumber > 1 && colNumber < 18) {
+      // Skip column A
+      cell.border = border;
+
+      if (cell.value == '-') {
+        cell.value = '';
+      }
+    }
+  });
+}
+
+interface ISutmCounts {
+  konstruksi: Record<number, any>;
+  tiang: Record<number, any>;
+  konduktor: Record<number, any>;
+  pole: Record<number, any>;
+  grounding: Record<number, any>;
+}
+
+async function countSutm(survey: any): Promise<ISutmCounts> {
+  const sutmDetails: {
+    id_konstruksi: number;
+    id_material_tiang: number;
+    id_pole_supporter: number;
+    id_grounding_termination: number;
+    panjang_jaringan: number;
+  }[] = survey.sutm_surveys.flatMap((s: any) => s.sutm_details);
+
+  const konstruksiIds = [
+    ...new Set(sutmDetails.map((d: any) => d.id_konstruksi)),
+  ] as number[];
+  const tiangIds = [
+    ...new Set(sutmDetails.map((d: any) => d.id_material_tiang)),
+  ] as number[];
+  const konduktorIds = [
+    ...new Set(survey.sutm_surveys.map((s: any) => s.id_material_konduktor)),
+  ] as number[];
+  const poleIds = [
+    ...new Set(
+      sutmDetails.map((d: any) => d.id_pole_supporter).filter(Boolean),
+    ),
+  ] as number[];
+  const groundingIds = [
+    ...new Set(
+      sutmDetails.map((d: any) => d.id_grounding_termination).filter(Boolean),
+    ),
+  ] as number[];
+
+  const [konstruksiData, tiangData, konduktorData, poleData, groundingData] =
+    await prisma.$transaction([
+      prisma.konstruksi.findMany({
+        where: { id: { in: konstruksiIds } },
+        include: {
+          konstruksi_materials: {
+            include: { material: true, tipe_pekerjaan: true },
+          },
+        },
+      }),
+      prisma.material.findMany({ where: { id: { in: tiangIds } } }),
+      prisma.material.findMany({ where: { id: { in: konduktorIds } } }),
+      prisma.poleSupporter.findMany({
+        where: { id: { in: poleIds } },
+        include: {
+          pole_materials: { include: { material: true, tipe_pekerjaan: true } },
+        },
+      }),
+      prisma.groundingTermination.findMany({
+        where: { id: { in: groundingIds } },
+        include: {
+          GroundingMaterial: {
+            include: { material: true, tipe_pekerjaan: true },
+          },
+        },
+      }),
+    ]);
+
+  const konstruksiMap = new Map(konstruksiData.map(k => [k.id, k]));
+  const tiangMap = new Map(tiangData.map(t => [t.id, t]));
+  const konduktorMap = new Map(konduktorData.map(k => [k.id, k]));
+  const poleMap = new Map(poleData.map(p => [p.id, p]));
+  const groundingMap = new Map(groundingData.map(g => [g.id, g]));
+
+  const counts: ISutmCounts = {
+    konstruksi: {},
+    tiang: {},
+    konduktor: {},
+    pole: {},
+    grounding: {},
+  };
+
+  for (const detail of sutmDetails) {
+    // Konstruksi
+    if (!counts.konstruksi[detail.id_konstruksi]) {
+      counts.konstruksi[detail.id_konstruksi] = {
+        ...konstruksiMap.get(detail.id_konstruksi),
+        count: 0,
+      };
+    }
+
+    counts.konstruksi[detail.id_konstruksi].count++;
+
+    // Tiang
+    if (!counts.tiang[detail.id_material_tiang]) {
+      counts.tiang[detail.id_material_tiang] = {
+        ...tiangMap.get(detail.id_material_tiang),
+        count: 0,
+      };
+    }
+
+    counts.tiang[detail.id_material_tiang].count++;
+
+    // Pole Supporter
+    if (detail.id_pole_supporter) {
+      if (!counts.pole[detail.id_pole_supporter]) {
+        counts.pole[detail.id_pole_supporter] = {
+          ...poleMap.get(detail.id_pole_supporter),
+          count: 0,
+        };
+      }
+
+      counts.pole[detail.id_pole_supporter].count++;
+    }
+
+    // Grounding
+    if (detail.id_grounding_termination) {
+      if (!counts.grounding[detail.id_grounding_termination]) {
+        counts.grounding[detail.id_grounding_termination] = {
+          ...groundingMap.get(detail.id_grounding_termination),
+          count: 0,
+          konstruksi: {},
+        };
+      }
+
+      counts.grounding[detail.id_grounding_termination].count++;
+
+      if (
+        !counts.grounding[detail.id_grounding_termination].konstruksi[
+          detail.id_konstruksi
+        ]
+      ) {
+        counts.grounding[detail.id_grounding_termination].konstruksi[
+          detail.id_konstruksi
+        ] = 0;
+      }
+
+      counts.grounding[detail.id_grounding_termination].konstruksi[
+        detail.id_konstruksi
+      ]++;
+    }
+  }
+
+  for (const sutmSurvey of survey.sutm_surveys) {
+    if (!counts.konduktor[sutmSurvey.id_material_konduktor]) {
+      counts.konduktor[sutmSurvey.id_material_konduktor] = {
+        ...konduktorMap.get(sutmSurvey.id_material_konduktor),
+        totalPanjang: 0,
+      };
+    }
+
+    counts.konduktor[sutmSurvey.id_material_konduktor].totalPanjang +=
+      sutmSurvey.sutm_details.reduce(
+        (accumulator: number, detail: { panjang_jaringan: number }) =>
+          accumulator + detail.panjang_jaringan,
+        0,
+      );
+  }
+
+  return counts;
+}
+
+function calculateMaterialPrices(
+  material: any,
+  kuantitas: number,
+  count: number,
+) {
+  const totalKuantitas = kuantitas * count;
+  const totalHargaMaterial = material.harga_material * totalKuantitas;
+  const totalPasang = material.pasang_rab * totalKuantitas;
+  const totalBongkar = material.bongkar * count;
+  const totalBerat = (Number(material.berat_material) * totalKuantitas) / 1000;
+
+  return {
+    ...material,
+    total_kuantitas: totalKuantitas,
+    total_berat: totalBerat,
+    total_harga_material: totalHargaMaterial,
+    total_pasang: totalPasang,
+    total_bongkar: totalBongkar,
+  };
+}
+
+interface IMaterialPrice {
+  material: any;
+  total_kuantitas: number;
+  total_berat: number;
+  total_harga_material: number;
+  total_pasang: number;
+  total_bongkar: number;
+}
+
+interface IKonstruksiPrice {
+  id: number;
+  nama_konstruksi: string;
+  materials: IMaterialPrice[];
+}
+
+interface ITiangPrice extends IMaterialPrice {}
+
+interface IPolePrice {
+  id: number;
+  nama_pole: string;
+  materials: IMaterialPrice[];
+}
+
+interface IGroundingPrice {
+  id: number;
+  nama_grounding: string;
+  idKonstruksi: number;
+  materials: IMaterialPrice[];
+}
+
+interface IKonduktorPrice {
+  data_konduktor: any;
+  total_kuantitas: number;
+  total_berat: number;
+  total_harga_material: number;
+  total_pasang: number;
+  total_bongkar: number;
+}
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export const ExcelService = {
@@ -104,1531 +308,1290 @@ export const ExcelService = {
       throw error;
     }
   },
-  // async exportSurveyToExcel(id: number) {
-  //   try {
-  //     // Step 1: Get the survey header and its details
-  //     const survey = await SurveyHeader.getById(id, null, true);
-  //
-  //     if (!survey) {
-  //       throw new CustomError(StatusCodes.NOT_FOUND, 'Survey Not Found');
-  //     }
-  //
-  //     const details = await SurveyDetail.exportDetailByHeaderId(survey.id);
-  //
-  //     if (!details || details.length === 0) {
-  //       throw new CustomError(
-  //         StatusCodes.NOT_FOUND,
-  //         'Survey Details Not Found',
-  //       );
-  //     }
-  //
-  //     let totalAkhirBerat = 0;
-  //
-  //     // Step 2: Count the amount of each unique id_konstruksi and id_material_tiang
-  //     const konstruksiCount: Record<number, number> = {};
-  //     const tiangCount: Record<number, number> = {};
-  //     const konduktorCount: Record<number, number> = {};
-  //     const poleCount: Record<number, number> = {};
-  //     const groundingCount: Record<number, Record<number, number>> = {}; // Fix: Use a nested object
-  //
-  //     for (const detail of details) {
-  //       if (!konstruksiCount[detail.id_konstruksi]) {
-  //         konstruksiCount[detail.id_konstruksi] = 0;
-  //       }
-  //
-  //       konstruksiCount[detail.id_konstruksi]++;
-  //
-  //       if (!tiangCount[detail.id_material_tiang]) {
-  //         tiangCount[detail.id_material_tiang] = 0;
-  //       }
-  //
-  //       tiangCount[detail.id_material_tiang]++;
-  //
-  //       if (!konduktorCount[survey.id_material_konduktor]) {
-  //         konduktorCount[survey.id_material_konduktor] = 0;
-  //       }
-  //
-  //       konduktorCount[survey.id_material_konduktor] += detail.panjang_jaringan;
-  //
-  //       if (detail.id_pole_supporter) {
-  //         if (!poleCount[detail.id_pole_supporter]) {
-  //           poleCount[detail.id_pole_supporter] = 0;
-  //         }
-  //
-  //         poleCount[detail.id_pole_supporter]++;
-  //       }
-  //
-  //       if (detail.id_grounding_termination) {
-  //         if (!groundingCount[detail.id_grounding_termination]) {
-  //           groundingCount[detail.id_grounding_termination] = {}; // Fix: Ensure it's an object
-  //         }
-  //
-  //         if (
-  //           !groundingCount[detail.id_grounding_termination][
-  //             detail.id_konstruksi
-  //           ]
-  //         ) {
-  //           groundingCount[detail.id_grounding_termination][
-  //             detail.id_konstruksi
-  //           ] = 0;
-  //         }
-  //
-  //         groundingCount[detail.id_grounding_termination][
-  //           detail.id_konstruksi
-  //         ]++;
-  //       }
-  //     }
-  //
-  //     // Step 3: Get all materials required and the amount for each unique konstruksi and tiang
-  //     const konstruksiMaterials = await Promise.all(
-  //       Object.keys(konstruksiCount).map(async key => {
-  //         const idKonstruksi = Number(key);
-  //         const materials =
-  //           await KonstruksiMaterial.findMaterialForKonstruksiById(
-  //             idKonstruksi,
-  //           );
-  //
-  //         return { idKonstruksi, materials };
-  //       }),
-  //     );
-  //
-  //     const tiangMaterials = await Promise.all(
-  //       Object.keys(tiangCount).map(async key => {
-  //         const idMaterialTiang = Number(key);
-  //         const materials = await Material.findMaterialById(idMaterialTiang);
-  //
-  //         return { idMaterialTiang, materials };
-  //       }),
-  //     );
-  //
-  //     const konduktorMaterials = await Promise.all(
-  //       Object.keys(konduktorCount).map(async key => {
-  //         const idKonduktor = Number(key);
-  //         const materials = await Material.findMaterialById(idKonduktor);
-  //
-  //         return { idKonduktor, materials };
-  //       }),
-  //     );
-  //
-  //     const poleMaterials = await Promise.all(
-  //       Object.keys(poleCount).map(async key => {
-  //         const idPole = Number(key);
-  //         const materials =
-  //           await PoleMaterialRepository.getPoleMaterialsByPoleId(idPole);
-  //
-  //         return materials.length > 0 ? { idPole, materials } : null;
-  //       }),
-  //     );
-  //
-  //     const filteredPoleMaterials = poleMaterials.filter(Boolean);
-  //
-  //     const groundingMaterials = await Promise.all(
-  //       Object.keys(groundingCount).map(async key => {
-  //         const idGrounding = Number(key);
-  //         const materials =
-  //           await GroundingMaterialRepository.getGroundingMaterialsByGroundingId(
-  //             idGrounding,
-  //           );
-  //
-  //         const idKonstruksi = Object.keys(groundingCount[idGrounding]).map(
-  //           Number,
-  //         );
-  //
-  //         return { idGrounding, idKonstruksi, materials };
-  //       }),
-  //     );
-  //
-  //     // Step 4: Calculate the total price of each material for each unique konstruksi
-  //     const totalPrices = await Promise.all(
-  //       konstruksiMaterials.map(async ({ idKonstruksi, materials }) => {
-  //         const materialPrices = await Promise.all(
-  //           materials.map(async material => {
-  //             const materialData = await Material.findMaterialById(
-  //               material.id_material,
-  //             );
-  //             const tipePekerjaan = await TipePekerjaan.findTipePekerjaanById(
-  //               material.id_tipe_pekerjaan,
-  //             );
-  //             const totalHargaMaterial =
-  //               materialData.harga_material *
-  //               Number(material.kuantitas) *
-  //               konstruksiCount[idKonstruksi];
-  //
-  //             const totalPasang =
-  //               materialData.pasang_rab *
-  //               Number(material.kuantitas) *
-  //               konstruksiCount[idKonstruksi];
-  //
-  //             const totalBongkar =
-  //               materialData.bongkar * konstruksiCount[idKonstruksi];
-  //
-  //             const totalBerat =
-  //               (Number(materialData.berat_material) *
-  //                 Number(material.kuantitas) *
-  //                 konstruksiCount[idKonstruksi]) /
-  //               1000;
-  //
-  //             return {
-  //               data_material: { ...materialData },
-  //               tipe_pekerjaan: tipePekerjaan.tipe_pekerjaan,
-  //               kuantitas: material.kuantitas,
-  //               total_kuantitas:
-  //                 Number(material.kuantitas) * konstruksiCount[idKonstruksi],
-  //               total_berat: totalBerat,
-  //               total_harga_material: totalHargaMaterial,
-  //               total_pasang: totalPasang,
-  //               total_bongkar: totalBongkar,
-  //             };
-  //           }),
-  //         );
-  //
-  //         return {
-  //           idKonstruksi,
-  //           materials: materialPrices,
-  //         };
-  //       }),
-  //     );
-  //
-  //     // Step 5: Calculate the total price of each tiang material
-  //     const tiangPrices = await Promise.all(
-  //       tiangMaterials.map(({ idMaterialTiang, materials }) => {
-  //         const materialData = materials;
-  //         const totalHargaMaterial =
-  //           materialData.harga_material * tiangCount[idMaterialTiang];
-  //
-  //         const totalPasang =
-  //           materialData.pasang_rab * tiangCount[idMaterialTiang];
-  //
-  //         const totalBongkar =
-  //           materialData.bongkar * tiangCount[idMaterialTiang];
-  //
-  //         const totalBerat =
-  //           (Number(materialData.berat_material) *
-  //             tiangCount[idMaterialTiang]) /
-  //           1000;
-  //
-  //         return {
-  //           data_tiang: { ...materialData },
-  //           total_kuantitas: tiangCount[idMaterialTiang],
-  //           total_berat: totalBerat,
-  //           total_harga_material: totalHargaMaterial,
-  //           total_pasang: totalPasang,
-  //           total_bongkar: totalBongkar,
-  //         };
-  //       }),
-  //     );
-  //
-  //     const konduktorPrices = await Promise.all(
-  //       konduktorMaterials.map(({ idKonduktor, materials }) => {
-  //         const materialData = materials;
-  //
-  //         let multiplier = materials.nomor_material === 5 ? 3.045 : 3.06;
-  //
-  //         if (materials.nomor_material === 77) {
-  //           multiplier = 1;
-  //         }
-  //
-  //         const totalConductor = (konduktorCount[idKonduktor] * multiplier) / 1;
-  //
-  //         const totalHargaMaterial =
-  //           materialData.harga_material * totalConductor;
-  //
-  //         const totalPasang = materialData.pasang_rab * totalConductor;
-  //
-  //         const totalBongkar = materialData.bongkar * totalConductor;
-  //
-  //         const totalBerat =
-  //           (Number(materialData.berat_material) * totalConductor) / 1000;
-  //
-  //         return {
-  //           data_konduktor: { ...materialData },
-  //           total_kuantitas: totalConductor,
-  //           total_berat: totalBerat,
-  //           total_harga_material: totalHargaMaterial,
-  //           total_pasang: totalPasang,
-  //           total_bongkar: totalBongkar,
-  //         };
-  //       }),
-  //     );
-  //
-  //     const polePrices = await Promise.all(
-  //       filteredPoleMaterials.map(async ({ idPole, materials }) => {
-  //         const materialPrices = await Promise.all(
-  //           materials.map(async material => {
-  //             const materialData = await Material.findMaterialById(
-  //               material.id_material,
-  //             );
-  //
-  //             let tipePekerjaan = null;
-  //
-  //             if (material.id_tipe_pekerjaan) {
-  //               tipePekerjaan = await TipePekerjaan.findTipePekerjaanById(
-  //                 material.id_tipe_pekerjaan,
-  //               );
-  //             }
-  //
-  //             const totalHargaMaterial =
-  //               materialData.harga_material *
-  //               Number(material.kuantitas) *
-  //               poleCount[idPole];
-  //
-  //             const totalPasang =
-  //               materialData.pasang_rab *
-  //               Number(material.kuantitas) *
-  //               poleCount[idPole];
-  //
-  //             const totalBongkar = materialData.bongkar * poleCount[idPole];
-  //
-  //             const totalBerat =
-  //               (Number(materialData.berat_material) *
-  //                 Number(material.kuantitas) *
-  //                 poleCount[idPole]) /
-  //               1000;
-  //
-  //             return {
-  //               data_material: { ...materialData },
-  //               tipe_pekerjaan: tipePekerjaan
-  //                 ? tipePekerjaan.tipe_pekerjaan
-  //                 : '',
-  //               kuantitas: material.kuantitas,
-  //               total_kuantitas: Number(material.kuantitas) * poleCount[idPole],
-  //               total_berat: totalBerat,
-  //               total_harga_material: totalHargaMaterial,
-  //               total_pasang: totalPasang,
-  //               total_bongkar: totalBongkar,
-  //             };
-  //           }),
-  //         );
-  //
-  //         return {
-  //           idPole,
-  //           materials: materialPrices,
-  //         };
-  //       }),
-  //     );
-  //
-  //     const groundingPrices = await Promise.all(
-  //       groundingMaterials.map(
-  //         async ({ idGrounding, idKonstruksi, materials }) => {
-  //           // Sum all counts for the given `idGrounding`
-  //           const totalGroundingCount = groundingCount[idGrounding]
-  //             ? Object.values(groundingCount[idGrounding]).reduce(
-  //                 (accumulator, count) => accumulator + count,
-  //                 0,
-  //               )
-  //             : 0;
-  //
-  //           const materialPrices = await Promise.all(
-  //             materials.map(async material => {
-  //               const materialData = await Material.findMaterialById(
-  //                 material.id_material,
-  //               );
-  //               const tipePekerjaan = await TipePekerjaan.findTipePekerjaanById(
-  //                 material.id_tipe_pekerjaan,
-  //               );
-  //
-  //               const totalKuantitas =
-  //                 Number(material.kuantitas) * totalGroundingCount;
-  //               const totalHargaMaterial =
-  //                 materialData.harga_material * totalKuantitas;
-  //               const totalPasang = materialData.pasang_rab * totalKuantitas;
-  //               const totalBongkar = materialData.bongkar * totalGroundingCount;
-  //               const totalBerat =
-  //                 (Number(materialData.berat_material) * totalKuantitas) / 1000;
-  //
-  //               return {
-  //                 data_material: { ...materialData },
-  //                 tipe_pekerjaan: tipePekerjaan.tipe_pekerjaan,
-  //                 kuantitas: material.kuantitas,
-  //                 total_kuantitas: totalKuantitas,
-  //                 total_berat: totalBerat,
-  //                 total_harga_material: totalHargaMaterial,
-  //                 total_pasang: totalPasang,
-  //                 total_bongkar: totalBongkar,
-  //               };
-  //             }),
-  //           );
-  //
-  //           return idKonstruksi.map(konstruksiId => ({
-  //             idGrounding,
-  //             idKonstruksi: konstruksiId, // Now explicitly associating each grounding with a konstruksi
-  //             materials: materialPrices,
-  //           }));
-  //         },
-  //       ),
-  //     );
-  //
-  //     // Flatten the nested array to get a single-level list of grounding prices
-  //     const flattenedGroundingPrices = groundingPrices.flat();
-  //
-  //     const workbook = new ExcelJS.Workbook();
-  //     const worksheet = workbook.addWorksheet('Sheet 1');
-  //
-  //     const rowTipePekerjaan = [];
-  //     const rowTitle = [];
-  //     const rowPoleSupport = [];
-  //     const rowKonstruksi = [];
-  //     const rowGrounding = [];
-  //
-  //     // Set column widths
-  //     worksheet.columns = [
-  //       { width: 5 },
-  //       { width: 10 },
-  //       { width: 90 },
-  //       { width: 15 },
-  //       { width: 12 },
-  //       { width: 12 },
-  //       { width: 12 },
-  //       { width: 10 },
-  //       { width: 10 },
-  //       { width: 10 },
-  //       { width: 15 },
-  //       { width: 15 },
-  //       { width: 15 },
-  //       { width: 15 },
-  //       { width: 15 },
-  //       { width: 15 },
-  //       { width: 17 },
-  //     ];
-  //
-  //     // Merging cells for PLN Header
-  //     worksheet.mergeCells('C2:D2');
-  //     worksheet.getCell('C2').value = 'PT PLN (PERSERO)';
-  //
-  //     worksheet.mergeCells('C3:D3');
-  //     worksheet.getCell('C3').value = 'DISTRIBUSI JAWA TIMUR';
-  //
-  //     worksheet.mergeCells('C4:D4');
-  //     worksheet.getCell('C4').value = 'UP3 SURABAYA BARAT';
-  //
-  //     const imagePath = path.resolve(process.cwd(), 'storage/file/image.png');
-  //
-  //     // 📌 Read Image File (Ensure the path is correct)
-  //     const imageId = workbook.addImage({
-  //       filename: imagePath, // Replace with your image path
-  //       extension: 'png',
-  //     });
-  //
-  //     // 📌 Merge Cells in Column B (B2 to B4)
-  //     worksheet.mergeCells('B2:B4');
-  //
-  //     // 📌 Ensure Column B Has a Defined Width
-  //     const column = worksheet.getColumn(2);
-  //     if (!column.width) column.width = 10; // Set a default width if not defined
-  //
-  //     // 📌 Get Column Width in Pixels (Each unit ≈ 7.5 pixels)
-  //     const columnWidthPx = column.width * 7.5;
-  //
-  //     // 📌 Define Image Width in Pixels
-  //     const imageWidthPx = 44.6;
-  //
-  //     // 📌 Calculate Horizontal Offset (Centering)
-  //     const offsetX = (columnWidthPx - imageWidthPx) / 2;
-  //
-  //     // 📌 Position Image in the Worksheet
-  //     worksheet.addImage(imageId, {
-  //       tl: {
-  //         col: 1, // Column B (zero-based index)
-  //         row: 1, // Row 2 (zero-based index)
-  //         nativeCol: 1,
-  //         nativeColOff: offsetX * 9525, // Convert pixels to Excel EMUs
-  //         nativeRow: 1,
-  //         nativeRowOff: 0, // Already centered vertically
-  //       },
-  //       ext: { width: 44.6, height: 61.63 }, // Set image size in pixels
-  //     });
-  //
-  //     // Merge for Title
-  //     worksheet.mergeCells('B6:Q6');
-  //     worksheet.getCell('B6').value = 'RENCANA ANGGARAN BIAYA ESTETIKA';
-  //     worksheet.getCell('B6').alignment = { horizontal: 'center' };
-  //
-  //     // Merging cells and filling job description details
-  //     worksheet.mergeCells('E8:G8');
-  //     worksheet.getCell('E8').value = 'URAIAN PEKERJAAN';
-  //     worksheet.getCell('H8').value = ':';
-  //     worksheet.getCell('H8').alignment = { horizontal: 'center' };
-  //     worksheet.getCell('I8').value = `${survey.nama_survey}`;
-  //
-  //     worksheet.mergeCells('E9:G9');
-  //     worksheet.getCell('E9').value = 'JENIS';
-  //     worksheet.getCell('H9').value = ':';
-  //     worksheet.getCell('H9').alignment = { horizontal: 'center' };
-  //     worksheet.getCell('I9').value = `${survey.nama_pekerjaan}`;
-  //
-  //     worksheet.mergeCells('E10:G10');
-  //     worksheet.getCell('E10').value = 'LOKASI';
-  //     worksheet.getCell('H10').value = ':';
-  //     worksheet.getCell('H10').alignment = { horizontal: 'center' };
-  //     worksheet.getCell('I10').value = '-';
-  //
-  //     worksheet.getCell('H11').value = ':';
-  //     worksheet.getCell('H11').alignment = { horizontal: 'center' };
-  //     worksheet.getCell('I11').value = `${survey.lokasi}`;
-  //
-  //     worksheet.mergeCells('E12:G12');
-  //     worksheet.getCell('E12').value = 'VOLUME';
-  //     worksheet.getCell('H12').value = ':';
-  //     worksheet.getCell('H12').alignment = { horizontal: 'center' };
-  //     worksheet.getCell('I12').value =
-  //       `${konduktorCount[survey.id_material_konduktor]}`;
-  //     worksheet.getCell('I12').alignment = { horizontal: 'center' };
-  //     worksheet.getCell('J12').value = 'MS';
-  //     worksheet.getCell('J12').alignment = { horizontal: 'center' };
-  //
-  //     // Table Headers
-  //     const headers = [
-  //       '',
-  //       'NO. MAT',
-  //       'PEKERJAAN',
-  //       'JENIS MDU',
-  //       'Berat',
-  //       'Sat',
-  //       'Berat Total',
-  //       'Volume',
-  //       '',
-  //       '',
-  //       'Harga Satuan',
-  //       '',
-  //       '',
-  //       'Jumlah Harga',
-  //       '',
-  //       '',
-  //       'JUMLAH',
-  //     ];
-  //
-  //     worksheet.getRow(15).values = headers;
-  //     worksheet.getRow(16).values = [
-  //       '',
-  //       '',
-  //       '',
-  //       '',
-  //       '',
-  //       '',
-  //       '',
-  //       'Material',
-  //       'Pasang',
-  //       'Bongkar',
-  //       'Material',
-  //       'Pasang',
-  //       'Bongkar',
-  //       'Material',
-  //       'Pasang',
-  //       'Bongkar',
-  //       '',
-  //     ];
-  //
-  //     worksheet.mergeCells('B15:B16');
-  //     worksheet.mergeCells('C15:C16');
-  //     worksheet.mergeCells('D15:D16');
-  //     worksheet.mergeCells('E15:E16');
-  //     worksheet.mergeCells('F15:F16');
-  //     worksheet.mergeCells('G15:G16');
-  //     worksheet.mergeCells('H15:J15');
-  //     worksheet.mergeCells('K15:M15');
-  //     worksheet.mergeCells('N15:P15');
-  //     worksheet.mergeCells('Q15:Q16');
-  //
-  //     worksheet.getRow(15).height = 30;
-  //     worksheet.getRow(16).height = 40;
-  //
-  //     // Formatting header row
-  //     for (const rowNumber of [15, 16]) {
-  //       const row = worksheet.getRow(rowNumber);
-  //       row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
-  //         if (colNumber > 1 && colNumber < 18) {
-  //           // Skip column A
-  //           cell.alignment = { horizontal: 'center', vertical: 'middle' };
-  //           cell.border = {
-  //             top: { style: 'thin' },
-  //             left: { style: 'thin' },
-  //             bottom: { style: 'thin' },
-  //             right: { style: 'thin' },
-  //           };
-  //         }
-  //       });
-  //     }
-  //
-  //     formatWorksheetRow(worksheet, 17);
-  //
-  //     let previousRow = 17;
-  //
-  //     previousRow += 1;
-  //     worksheet.getCell(`C${previousRow}`).value = '   TIANG BETON';
-  //
-  //     formatWorksheetRow(worksheet, previousRow);
-  //
-  //     rowTitle.push(previousRow);
-  //
-  //     let totalTiang = 0;
-  //
-  //     for (const tiang of tiangPrices) {
-  //       previousRow += 1;
-  //       worksheet.getCell(`B${previousRow}`).value =
-  //         tiang.data_tiang.nomor_material;
-  //       worksheet.getCell(`C${previousRow}`).value =
-  //         tiang.data_tiang.nama_material;
-  //       worksheet.getCell(`D${previousRow}`).value =
-  //         tiang.data_tiang.jenis_material;
-  //       worksheet.getCell(`D${previousRow}`).alignment = {
-  //         horizontal: 'center',
-  //         vertical: 'middle',
-  //       };
-  //       worksheet.getCell(`E${previousRow}`).value = Number(
-  //         tiang.data_tiang.berat_material,
-  //       );
-  //       worksheet.getCell(`E${previousRow}`).alignment = {
-  //         horizontal: 'center',
-  //         vertical: 'middle',
-  //       };
-  //       worksheet.getCell(`F${previousRow}`).value =
-  //         tiang.data_tiang.satuan_material;
-  //       worksheet.getCell(`F${previousRow}`).alignment = {
-  //         horizontal: 'center',
-  //         vertical: 'middle',
-  //       };
-  //       worksheet.getCell(`G${previousRow}`).value = tiang.total_berat;
-  //
-  //       totalAkhirBerat += tiang.total_berat;
-  //
-  //       worksheet.getCell(`G${previousRow}`).alignment = {
-  //         horizontal: 'center',
-  //         vertical: 'middle',
-  //       };
-  //       worksheet.getCell(`H${previousRow}`).value = tiang.total_kuantitas;
-  //       worksheet.getCell(`H${previousRow}`).alignment = {
-  //         horizontal: 'center',
-  //         vertical: 'middle',
-  //       };
-  //       worksheet.getCell(`I${previousRow}`).value = tiang.total_kuantitas;
-  //       totalTiang += tiang.total_kuantitas;
-  //       worksheet.getCell(`I${previousRow}`).alignment = {
-  //         horizontal: 'center',
-  //         vertical: 'middle',
-  //       };
-  //       worksheet.getCell(`J${previousRow}`).value = {
-  //         formula: '0',
-  //         result: 0,
-  //       };
-  //       worksheet.getCell(`J${previousRow}`).alignment = {
-  //         horizontal: 'center',
-  //         vertical: 'middle',
-  //       };
-  //       worksheet.getCell(`K${previousRow}`).value =
-  //         tiang.data_tiang.harga_material;
-  //       worksheet.getCell(`L${previousRow}`).value =
-  //         tiang.data_tiang.pasang_rab;
-  //       worksheet.getCell(`N${previousRow}`).value = tiang.total_harga_material;
-  //       worksheet.getCell(`O${previousRow}`).value = tiang.total_pasang;
-  //       worksheet.getCell(`Q${previousRow}`).value =
-  //         tiang.total_harga_material + tiang.total_pasang;
-  //
-  //       formatWorksheetRow(worksheet, previousRow);
-  //     }
-  //
-  //     previousRow += 1;
-  //     formatWorksheetRow(worksheet, previousRow);
-  //
-  //     previousRow += 1;
-  //     formatWorksheetRow(worksheet, previousRow);
-  //
-  //     if (polePrices.length > 0) {
-  //       previousRow += 1;
-  //       worksheet.getCell(`C${previousRow}`).value = '   POLE SUPPORTER :';
-  //
-  //       formatWorksheetRow(worksheet, previousRow);
-  //
-  //       rowTitle.push(previousRow);
-  //
-  //       for (const poles of polePrices) {
-  //         const pole = await PoleRepository.getPoleById(poles.idPole);
-  //         previousRow += 1;
-  //         worksheet.getCell(`C${previousRow}`).value =
-  //           `   ${pole.nama_pole.toUpperCase()}`;
-  //         formatWorksheetRow(worksheet, previousRow);
-  //
-  //         rowPoleSupport.push(previousRow);
-  //
-  //         const groupedMaterials: Record<string, typeof poles.materials> = {};
-  //
-  //         for (const item of poles.materials) {
-  //           if (!groupedMaterials[item.tipe_pekerjaan]) {
-  //             groupedMaterials[item.tipe_pekerjaan] = [];
-  //           }
-  //
-  //           groupedMaterials[item.tipe_pekerjaan].push(item);
-  //         }
-  //
-  //         for (const [groupKey, group] of Object.entries(groupedMaterials)) {
-  //           if (groupKey != '') {
-  //             previousRow += 1;
-  //             worksheet.getCell(`C${previousRow}`).value = `   ${groupKey} :`;
-  //             formatWorksheetRow(worksheet, previousRow);
-  //
-  //             rowTipePekerjaan.push(previousRow);
-  //           }
-  //
-  //           // Process each material in the group
-  //           for (const calculatedPole of group) {
-  //             previousRow += 1;
-  //
-  //             totalAkhirBerat += calculatedPole.total_berat;
-  //
-  //             const rowData = [
-  //               {
-  //                 col: 'B',
-  //                 value: calculatedPole.data_material.nomor_material,
-  //               },
-  //               { col: 'C', value: calculatedPole.data_material.nama_material },
-  //               {
-  //                 col: 'D',
-  //                 value: calculatedPole.data_material.jenis_material,
-  //                 isAlign: true,
-  //               },
-  //               {
-  //                 col: 'E',
-  //                 value: Number(calculatedPole.data_material.berat_material),
-  //                 isAlign: true,
-  //               },
-  //               {
-  //                 col: 'F',
-  //                 value: calculatedPole.data_material.satuan_material,
-  //                 isAlign: true,
-  //               },
-  //               { col: 'G', value: calculatedPole.total_berat, isAlign: true },
-  //               {
-  //                 col: 'H',
-  //                 value: calculatedPole.total_kuantitas,
-  //                 isAlign: true,
-  //               },
-  //               {
-  //                 col: 'I',
-  //                 value: calculatedPole.total_kuantitas,
-  //                 isAlign: true,
-  //               },
-  //               { col: 'J', value: { formula: '0', result: 0 }, isAlign: true },
-  //               {
-  //                 col: 'K',
-  //                 value: calculatedPole.data_material.harga_material,
-  //               },
-  //               { col: 'L', value: calculatedPole.data_material.pasang_rab },
-  //               { col: 'N', value: calculatedPole.total_harga_material },
-  //               { col: 'O', value: calculatedPole.total_pasang },
-  //               {
-  //                 col: 'Q',
-  //                 value:
-  //                   calculatedPole.total_harga_material +
-  //                   calculatedPole.total_pasang,
-  //               },
-  //             ];
-  //
-  //             // Apply values and alignments
-  //             for (const { col, value, isAlign } of rowData) {
-  //               worksheet.getCell(`${col}${previousRow}`).value = value;
-  //
-  //               if (isAlign) {
-  //                 worksheet.getCell(`${col}${previousRow}`).alignment = {
-  //                   horizontal: 'center',
-  //                   vertical: 'middle',
-  //                 };
-  //               }
-  //             }
-  //
-  //             formatWorksheetRow(worksheet, previousRow);
-  //           }
-  //         }
-  //
-  //         previousRow += 1;
-  //         formatWorksheetRow(worksheet, previousRow);
-  //       }
-  //
-  //       previousRow += 1;
-  //       formatWorksheetRow(worksheet, previousRow);
-  //     }
-  //
-  //     previousRow += 1;
-  //     worksheet.getCell(`C${previousRow}`).value = '   POLE TOP ARRANGEMENT :';
-  //     formatWorksheetRow(worksheet, previousRow);
-  //
-  //     rowTitle.push(previousRow);
-  //
-  //     for (const calculatedKonstruksi of totalPrices) {
-  //       const konstruksi = await Konstruksi.findKonstruksiById(
-  //         calculatedKonstruksi.idKonstruksi,
-  //       );
-  //
-  //       // Find the corresponding groundingPrices entry
-  //       const groundingPricesForKonstruksi = flattenedGroundingPrices.filter(
-  //         g => g.idKonstruksi === calculatedKonstruksi.idKonstruksi,
-  //       );
-  //
-  //       previousRow += 1;
-  //       worksheet.getCell(`C${previousRow}`).value =
-  //         `   ${konstruksi.nama_konstruksi.toUpperCase()}`;
-  //       formatWorksheetRow(worksheet, previousRow);
-  //
-  //       rowKonstruksi.push(previousRow);
-  //
-  //       const groupedMaterials: Record<
-  //         string,
-  //         typeof calculatedKonstruksi.materials
-  //       > = {};
-  //
-  //       for (const item of calculatedKonstruksi.materials) {
-  //         if (!groupedMaterials[item.tipe_pekerjaan]) {
-  //           groupedMaterials[item.tipe_pekerjaan] = [];
-  //         }
-  //
-  //         groupedMaterials[item.tipe_pekerjaan].push(item);
-  //       }
-  //
-  //       for (const [groupKey, group] of Object.entries(groupedMaterials)) {
-  //         if (groupKey != '') {
-  //           previousRow += 1;
-  //           worksheet.getCell(`C${previousRow}`).value = `   ${groupKey} :`;
-  //           formatWorksheetRow(worksheet, previousRow);
-  //
-  //           rowTipePekerjaan.push(previousRow);
-  //         }
-  //
-  //         // Process each material in the group
-  //         for (const calculatedPole of group) {
-  //           previousRow += 1;
-  //
-  //           totalAkhirBerat += calculatedPole.total_berat;
-  //
-  //           const rowData = [
-  //             { col: 'B', value: calculatedPole.data_material.nomor_material },
-  //             { col: 'C', value: calculatedPole.data_material.nama_material },
-  //             {
-  //               col: 'D',
-  //               value: calculatedPole.data_material.jenis_material,
-  //               isAlign: true,
-  //             },
-  //             {
-  //               col: 'E',
-  //               value: Number(calculatedPole.data_material.berat_material),
-  //               isAlign: true,
-  //             },
-  //             {
-  //               col: 'F',
-  //               value: calculatedPole.data_material.satuan_material,
-  //               isAlign: true,
-  //             },
-  //             { col: 'G', value: calculatedPole.total_berat, isAlign: true },
-  //             {
-  //               col: 'H',
-  //               value: calculatedPole.total_kuantitas,
-  //               isAlign: true,
-  //             },
-  //             {
-  //               col: 'I',
-  //               value: calculatedPole.total_kuantitas,
-  //               isAlign: true,
-  //             },
-  //             { col: 'J', value: { formula: '0', result: 0 }, isAlign: true },
-  //             { col: 'K', value: calculatedPole.data_material.harga_material },
-  //             { col: 'L', value: calculatedPole.data_material.pasang_rab },
-  //             { col: 'N', value: calculatedPole.total_harga_material },
-  //             { col: 'O', value: calculatedPole.total_pasang },
-  //             {
-  //               col: 'Q',
-  //               value:
-  //                 calculatedPole.total_harga_material +
-  //                 calculatedPole.total_pasang,
-  //             },
-  //           ];
-  //
-  //           // Apply values and alignments
-  //           for (const { col, value, isAlign } of rowData) {
-  //             worksheet.getCell(`${col}${previousRow}`).value = value;
-  //
-  //             if (isAlign) {
-  //               worksheet.getCell(`${col}${previousRow}`).alignment = {
-  //                 horizontal: 'center',
-  //                 vertical: 'middle',
-  //               };
-  //             }
-  //           }
-  //
-  //           formatWorksheetRow(worksheet, previousRow);
-  //         }
-  //       }
-  //
-  //       previousRow += 1;
-  //       formatWorksheetRow(worksheet, previousRow);
-  //
-  //       // Example usage of groundingPrice
-  //       if (
-  //         groundingPricesForKonstruksi &&
-  //         groundingPricesForKonstruksi.length > 0
-  //       ) {
-  //         // You can use groundingPrice here however you need
-  //         for (const groundingPrice of groundingPricesForKonstruksi) {
-  //           const grounding = await GroundingRepository.getGroundingById(
-  //             groundingPrice.idGrounding,
-  //           );
-  //
-  //           previousRow += 1;
-  //           worksheet.getCell(`C${previousRow}`).value =
-  //             `   ${grounding.nama_grounding.toUpperCase()}`;
-  //           formatWorksheetRow(worksheet, previousRow);
-  //
-  //           rowGrounding.push(previousRow);
-  //
-  //           const groupedMaterials: Record<
-  //             string,
-  //             typeof groundingPrice.materials
-  //           > = {};
-  //
-  //           for (const item of groundingPrice.materials) {
-  //             if (!groupedMaterials[item.tipe_pekerjaan]) {
-  //               groupedMaterials[item.tipe_pekerjaan] = [];
-  //             }
-  //
-  //             groupedMaterials[item.tipe_pekerjaan].push(item);
-  //           }
-  //
-  //           for (const [groupKey, group] of Object.entries(groupedMaterials)) {
-  //             if (groupKey != '') {
-  //               previousRow += 1;
-  //               worksheet.getCell(`C${previousRow}`).value = `   ${groupKey} :`;
-  //               formatWorksheetRow(worksheet, previousRow);
-  //             }
-  //
-  //             // Process each material in the group
-  //             for (const calculatedGrounding of group) {
-  //               previousRow += 1;
-  //
-  //               totalAkhirBerat += calculatedGrounding.total_berat;
-  //
-  //               const rowData = [
-  //                 {
-  //                   col: 'B',
-  //                   value: calculatedGrounding.data_material.nomor_material,
-  //                 },
-  //                 {
-  //                   col: 'C',
-  //                   value: calculatedGrounding.data_material.nama_material,
-  //                 },
-  //                 {
-  //                   col: 'D',
-  //                   value: calculatedGrounding.data_material.jenis_material,
-  //                   isAlign: true,
-  //                 },
-  //                 {
-  //                   col: 'E',
-  //                   value: Number(
-  //                     calculatedGrounding.data_material.berat_material,
-  //                   ),
-  //                   isAlign: true,
-  //                 },
-  //                 {
-  //                   col: 'F',
-  //                   value: calculatedGrounding.data_material.satuan_material,
-  //                   isAlign: true,
-  //                 },
-  //                 {
-  //                   col: 'G',
-  //                   value: calculatedGrounding.total_berat,
-  //                   isAlign: true,
-  //                 },
-  //                 {
-  //                   col: 'H',
-  //                   value: calculatedGrounding.total_kuantitas,
-  //                   isAlign: true,
-  //                 },
-  //                 {
-  //                   col: 'I',
-  //                   value: calculatedGrounding.total_kuantitas,
-  //                   isAlign: true,
-  //                 },
-  //                 {
-  //                   col: 'J',
-  //                   value: { formula: '0', result: 0 },
-  //                   isAlign: true,
-  //                 },
-  //                 {
-  //                   col: 'K',
-  //                   value: calculatedGrounding.data_material.harga_material,
-  //                 },
-  //                 {
-  //                   col: 'L',
-  //                   value: calculatedGrounding.data_material.pasang_rab,
-  //                 },
-  //                 { col: 'N', value: calculatedGrounding.total_harga_material },
-  //                 { col: 'O', value: calculatedGrounding.total_pasang },
-  //                 {
-  //                   col: 'Q',
-  //                   value:
-  //                     calculatedGrounding.total_harga_material +
-  //                     calculatedGrounding.total_pasang,
-  //                 },
-  //               ];
-  //
-  //               // Apply values and alignments
-  //               for (const { col, value, isAlign } of rowData) {
-  //                 worksheet.getCell(`${col}${previousRow}`).value = value;
-  //
-  //                 if (isAlign) {
-  //                   worksheet.getCell(`${col}${previousRow}`).alignment = {
-  //                     horizontal: 'center',
-  //                     vertical: 'middle',
-  //                   };
-  //                 }
-  //               }
-  //
-  //               formatWorksheetRow(worksheet, previousRow);
-  //             }
-  //           }
-  //         }
-  //       }
-  //
-  //       previousRow += 1;
-  //       formatWorksheetRow(worksheet, previousRow);
-  //     }
-  //
-  //     previousRow += 1;
-  //     worksheet.getCell(`C${previousRow}`).value =
-  //       '   ANTI CLIMBING + DANGER PLATE :';
-  //     formatWorksheetRow(worksheet, previousRow);
-  //
-  //     rowTitle.push(previousRow);
-  //
-  //     const antiClimbing =
-  //       await KonstruksiMaterial.findMaterialForKonstruksiById(38);
-  //
-  //     for (const material of antiClimbing) {
-  //       const data = await Material.findMaterialById(material.id_material);
-  //       previousRow += 1;
-  //
-  //       totalAkhirBerat += (Number(data.berat_material) * totalTiang) / 1000;
-  //
-  //       const rowData = [
-  //         {
-  //           col: 'B',
-  //           value: data.nomor_material,
-  //         },
-  //         {
-  //           col: 'C',
-  //           value: data.nama_material,
-  //         },
-  //         {
-  //           col: 'D',
-  //           value: data.jenis_material,
-  //           isAlign: true,
-  //         },
-  //         {
-  //           col: 'E',
-  //           value: Number(data.berat_material),
-  //           isAlign: true,
-  //         },
-  //         {
-  //           col: 'F',
-  //           value: data.satuan_material,
-  //           isAlign: true,
-  //         },
-  //         {
-  //           col: 'G',
-  //           value: (Number(data.berat_material) * totalTiang) / 1000,
-  //           isAlign: true,
-  //         },
-  //         {
-  //           col: 'H',
-  //           value: Number(material.kuantitas) * totalTiang,
-  //           isAlign: true,
-  //         },
-  //         {
-  //           col: 'I',
-  //           value: Number(material.kuantitas) * totalTiang,
-  //           isAlign: true,
-  //         },
-  //         {
-  //           col: 'J',
-  //           value: { formula: '0', result: 0 },
-  //           isAlign: true,
-  //         },
-  //         {
-  //           col: 'K',
-  //           value: data.harga_material,
-  //         },
-  //         {
-  //           col: 'L',
-  //           value: data.pasang_rab,
-  //         },
-  //         {
-  //           col: 'N',
-  //           value:
-  //             data.harga_material * (Number(material.kuantitas) * totalTiang),
-  //         },
-  //         {
-  //           col: 'O',
-  //           value: data.pasang_rab * (Number(material.kuantitas) * totalTiang),
-  //         },
-  //         {
-  //           col: 'Q',
-  //           value:
-  //             data.harga_material * (Number(material.kuantitas) * totalTiang) +
-  //             data.pasang_rab * (Number(material.kuantitas) * totalTiang),
-  //         },
-  //       ];
-  //
-  //       // Apply values and alignments
-  //       for (const { col, value, isAlign } of rowData) {
-  //         worksheet.getCell(`${col}${previousRow}`).value = value;
-  //
-  //         if (isAlign) {
-  //           worksheet.getCell(`${col}${previousRow}`).alignment = {
-  //             horizontal: 'center',
-  //             vertical: 'middle',
-  //           };
-  //         }
-  //       }
-  //
-  //       formatWorksheetRow(worksheet, previousRow);
-  //     }
-  //
-  //     previousRow += 1;
-  //     formatWorksheetRow(worksheet, previousRow);
-  //
-  //     previousRow += 1;
-  //     worksheet.getCell(`C${previousRow}`).value = '   CONDUCTOR ACCESSORIES :';
-  //     formatWorksheetRow(worksheet, previousRow);
-  //
-  //     rowTitle.push(previousRow);
-  //
-  //     const konduktor = konduktorPrices[0].data_konduktor;
-  //
-  //     previousRow += 1;
-  //
-  //     totalAkhirBerat += konduktorPrices[0].total_berat;
-  //
-  //     const rowData = [
-  //       {
-  //         col: 'B',
-  //         value: konduktor.nomor_material,
-  //       },
-  //       {
-  //         col: 'C',
-  //         value: konduktor.nama_material,
-  //       },
-  //       {
-  //         col: 'D',
-  //         value: konduktor.jenis_material,
-  //         isAlign: true,
-  //       },
-  //       {
-  //         col: 'E',
-  //         value: Number(konduktor.berat_material),
-  //         isAlign: true,
-  //       },
-  //       {
-  //         col: 'F',
-  //         value: konduktor.satuan_material,
-  //         isAlign: true,
-  //       },
-  //       {
-  //         col: 'G',
-  //         value: konduktorPrices[0].total_berat,
-  //         isAlign: true,
-  //       },
-  //       {
-  //         col: 'H',
-  //         value: konduktorPrices[0].total_kuantitas,
-  //         isAlign: true,
-  //       },
-  //       {
-  //         col: 'I',
-  //         value: konduktorPrices[0].total_kuantitas,
-  //         isAlign: true,
-  //       },
-  //       {
-  //         col: 'J',
-  //         value: { formula: '0', result: 0 },
-  //         isAlign: true,
-  //       },
-  //       {
-  //         col: 'K',
-  //         value: konduktor.harga_material,
-  //       },
-  //       {
-  //         col: 'L',
-  //         value: konduktor.pasang_rab,
-  //       },
-  //       {
-  //         col: 'N',
-  //         value: konduktorPrices[0].total_harga_material,
-  //       },
-  //       {
-  //         col: 'O',
-  //         value: konduktorPrices[0].total_pasang,
-  //       },
-  //       {
-  //         col: 'Q',
-  //         value:
-  //           konduktorPrices[0].total_harga_material +
-  //           konduktorPrices[0].total_pasang,
-  //       },
-  //     ];
-  //
-  //     // Apply values and alignments
-  //     for (const { col, value, isAlign } of rowData) {
-  //       worksheet.getCell(`${col}${previousRow}`).value = value;
-  //
-  //       if (isAlign) {
-  //         worksheet.getCell(`${col}${previousRow}`).alignment = {
-  //           horizontal: 'center',
-  //           vertical: 'middle',
-  //         };
-  //       }
-  //     }
-  //
-  //     formatWorksheetRow(worksheet, previousRow);
-  //
-  //     previousRow += 1;
-  //     formatWorksheetRow(worksheet, previousRow);
-  //
-  //     previousRow += 1;
-  //     formatWorksheetRow(worksheet, previousRow);
-  //
-  //     previousRow += 1;
-  //     worksheet.getCell(`C${previousRow}`).value = '   PEKERJAAN PENDUKUNG :';
-  //     formatWorksheetRow(worksheet, previousRow);
-  //
-  //     rowTitle.push(previousRow);
-  //
-  //     const pekerjaanPendukung = [];
-  //
-  //     pekerjaanPendukung.push(
-  //       await Material.findMaterialById(541),
-  //       await Material.findMaterialById(536),
-  //       await Material.findMaterialById(534),
-  //     );
-  //
-  //     let rowAngkutan;
-  //
-  //     for (const material of pekerjaanPendukung) {
-  //       previousRow += 1;
-  //
-  //       let value = 1;
-  //
-  //       if (material.nomor_material === 534) {
-  //         rowAngkutan = previousRow;
-  //         value = Math.ceil(totalAkhirBerat * 100) / 100;
-  //       }
-  //
-  //       const rowData = [
-  //         {
-  //           col: 'B',
-  //           value: material.nomor_material,
-  //         },
-  //         {
-  //           col: 'C',
-  //           value: material.nama_material,
-  //         },
-  //         {
-  //           col: 'D',
-  //           value: material.jenis_material,
-  //           isAlign: true,
-  //         },
-  //         {
-  //           col: 'E',
-  //           value: { formula: '0', result: 0 },
-  //           isAlign: true,
-  //         },
-  //         {
-  //           col: 'F',
-  //           value: material.satuan_material,
-  //           isAlign: true,
-  //         },
-  //         {
-  //           col: 'G',
-  //           value: material.nomor_material === 534 ? totalAkhirBerat : 0,
-  //           isAlign: true,
-  //         },
-  //         {
-  //           col: 'I',
-  //           value: value,
-  //           isAlign: true,
-  //         },
-  //         {
-  //           col: 'L',
-  //           value: material.pasang_rab,
-  //         },
-  //         {
-  //           col: 'O',
-  //           value: Math.ceil(material.pasang_rab * value),
-  //         },
-  //         {
-  //           col: 'Q',
-  //           value: Math.ceil(material.pasang_rab * value),
-  //         },
-  //       ];
-  //
-  //       // Apply values and alignments
-  //       for (const { col, value, isAlign } of rowData) {
-  //         worksheet.getCell(`${col}${previousRow}`).value = value;
-  //
-  //         if (isAlign) {
-  //           worksheet.getCell(`${col}${previousRow}`).alignment = {
-  //             horizontal: 'center',
-  //             vertical: 'middle',
-  //           };
-  //         }
-  //       }
-  //
-  //       formatWorksheetRow(worksheet, previousRow);
-  //     }
-  //
-  //     const lastRow = previousRow;
-  //
-  //     previousRow += 1;
-  //     formatWorksheetRow(worksheet, previousRow);
-  //
-  //     previousRow += 1;
-  //     formatWorksheetRow(worksheet, previousRow);
-  //
-  //     previousRow += 1;
-  //     formatWorksheetRow(worksheet, previousRow);
-  //
-  //     previousRow += 1;
-  //     const totalMaterial = previousRow;
-  //     worksheet.getCell(`C${previousRow}`).value = '   Jumlah Harga Material';
-  //     worksheet.getCell(`N${previousRow}`).value = {
-  //       formula: `SUM(N17:N${lastRow})`,
-  //     };
-  //     formatWorksheetRow(worksheet, previousRow);
-  //
-  //     previousRow += 1;
-  //     const totalJasa = previousRow;
-  //     worksheet.getCell(`C${previousRow}`).value = '   Jumlah Harga Jasa';
-  //     worksheet.getCell(`O${previousRow}`).value = {
-  //       formula: `SUM(O17:O${lastRow})`,
-  //     };
-  //     worksheet.getCell(`P${previousRow}`).value = {
-  //       formula: `SUM(P17:P${lastRow})`,
-  //     };
-  //     formatWorksheetRow(worksheet, previousRow);
-  //
-  //     previousRow += 1;
-  //     const jumlahHarga = previousRow;
-  //     worksheet.getCell(`C${previousRow}`).value = '   Jumlah Harga';
-  //     worksheet.getCell(`Q${previousRow}`).value = {
-  //       formula: `N${totalMaterial} + O${totalJasa} + P${totalJasa}`,
-  //     };
-  //     formatWorksheetRow(worksheet, previousRow);
-  //
-  //     previousRow += 1;
-  //     worksheet.getCell(`C${previousRow}`).value = '   Perkiraan Kerja Tambah';
-  //     formatWorksheetRow(worksheet, previousRow);
-  //
-  //     previousRow += 1;
-  //     const totalRow = previousRow;
-  //     worksheet.getCell(`C${previousRow}`).value = '   T O T A L';
-  //     worksheet.getCell(`Q${previousRow}`).value = {
-  //       formula: `Q${jumlahHarga}`,
-  //     };
-  //     formatWorksheetRow(worksheet, previousRow, {
-  //       top: { style: 'dotted' },
-  //       left: { style: 'thin' },
-  //       bottom: { style: 'thin' },
-  //       right: { style: 'thin' },
-  //     });
-  //
-  //     previousRow += 1;
-  //     previousRow += 1;
-  //     const date = new Date();
-  //     const months = [
-  //       'Januari',
-  //       'Februari',
-  //       'Maret',
-  //       'April',
-  //       'Mei',
-  //       'Juni',
-  //       'Juli',
-  //       'Agustus',
-  //       'September',
-  //       'Oktober',
-  //       'November',
-  //       'Desember',
-  //     ];
-  //
-  //     worksheet.mergeCells(`O${previousRow}:Q${previousRow}`);
-  //     worksheet.getCell(`O${previousRow}`).value =
-  //       `Sidoarjo, ${date.getDate()} ${
-  //         months[date.getMonth()]
-  //       } ${date.getFullYear()}`;
-  //     worksheet.getCell(`O${previousRow}`).alignment = { horizontal: 'center' };
-  //
-  //     previousRow += 1;
-  //     const ttd = [];
-  //     ttd.push(previousRow);
-  //     worksheet.mergeCells(`O${previousRow}:Q${previousRow}`);
-  //     worksheet.getCell(`O${previousRow}`).value = `ASMAN PERENCANAAN`;
-  //     worksheet.getCell(`O${previousRow}`).alignment = { horizontal: 'center' };
-  //
-  //     previousRow += 4;
-  //
-  //     worksheet.mergeCells(`O${ttd[0] + 1}:Q${previousRow - 1}`);
-  //
-  //     ttd.push(previousRow);
-  //     worksheet.mergeCells(`O${previousRow}:Q${previousRow}`);
-  //     worksheet.getCell(`O${previousRow}`).value = `M SYAIFUDIN`;
-  //     worksheet.getCell(`O${previousRow}`).alignment = { horizontal: 'center' };
-  //
-  //     worksheet.eachRow(row => {
-  //       row.eachCell(cell => {
-  //         cell.font = {
-  //           name: 'Arial',
-  //           size: 12,
-  //         };
-  //       });
-  //     });
-  //
-  //     for (let rowIndex = 17; rowIndex <= lastRow; rowIndex++) {
-  //       worksheet.getCell(`B${rowIndex}`).font = {
-  //         name: 'Arial',
-  //         size: 12,
-  //         color: { argb: 'FF0000' },
-  //       };
-  //     }
-  //
-  //     for (const row of rowTipePekerjaan) {
-  //       worksheet.getCell(`C${row}`).font = {
-  //         name: 'Arial',
-  //         size: 12,
-  //         color: { argb: 'FF0000' },
-  //       };
-  //     }
-  //
-  //     for (const row of ttd) {
-  //       worksheet.getCell(`Os${row}`).font = {
-  //         name: 'Arial',
-  //         size: 12,
-  //         bold: true,
-  //       };
-  //     }
-  //
-  //     for (const row of rowTitle) {
-  //       worksheet.getCell(`C${row}`).font = {
-  //         name: 'Arial',
-  //         size: 12,
-  //         bold: true,
-  //       };
-  //
-  //       worksheet.getCell(`C${row}`).fill = {
-  //         type: 'pattern',
-  //         pattern: 'solid',
-  //         fgColor: { argb: 'FDE9D9' },
-  //       };
-  //     }
-  //
-  //     for (const row of rowPoleSupport) {
-  //       worksheet.getCell(`C${row}`).font = {
-  //         name: 'Arial',
-  //         size: 12,
-  //         bold: true,
-  //       };
-  //
-  //       worksheet.getCell(`C${row}`).fill = {
-  //         type: 'pattern',
-  //         pattern: 'solid',
-  //         fgColor: { argb: 'F2F2F2' },
-  //       };
-  //     }
-  //
-  //     for (const row of rowKonstruksi) {
-  //       worksheet.getCell(`C${row}`).font = {
-  //         name: 'Arial',
-  //         size: 12,
-  //         bold: true,
-  //       };
-  //
-  //       worksheet.getCell(`C${row}`).fill = {
-  //         type: 'pattern',
-  //         pattern: 'solid',
-  //         fgColor: { argb: 'EBF1DE' },
-  //       };
-  //     }
-  //
-  //     for (const row of rowGrounding) {
-  //       worksheet.getCell(`C${row}`).font = {
-  //         name: 'Arial',
-  //         size: 12,
-  //         bold: true,
-  //         color: { argb: 'C00000' },
-  //       };
-  //
-  //       worksheet.getCell(`C${row}`).fill = {
-  //         type: 'pattern',
-  //         pattern: 'solid',
-  //         fgColor: { argb: 'FDE9D9' },
-  //       };
-  //     }
-  //
-  //     for (let rowIndex = 17; rowIndex <= lastRow; rowIndex++) {
-  //       for (let colIndex = 11; colIndex <= 17; colIndex++) {
-  //         // Columns K to Q
-  //         worksheet.getCell(rowIndex, colIndex).font = {
-  //           name: 'Arial',
-  //           size: 12,
-  //           color: { argb: '00B0F0' },
-  //         };
-  //
-  //         worksheet.getCell(rowIndex, colIndex).numFmt = '#,##0';
-  //       }
-  //     }
-  //
-  //     for (let rowIndex = 17; rowIndex <= lastRow; rowIndex++) {
-  //       worksheet.getCell(`G${rowIndex}`).numFmt = '0.00';
-  //     }
-  //
-  //     worksheet.getCell(`I${rowAngkutan}`).numFmt = '0.00';
-  //
-  //     for (let rowIndex = totalMaterial; rowIndex <= totalRow; rowIndex++) {
-  //       worksheet.getCell(`C${rowIndex}`).font = {
-  //         name: 'Arial',
-  //         size: 12,
-  //         bold: true,
-  //         color: { argb: '002060' },
-  //       };
-  //     }
-  //
-  //     for (let rowIndex = totalMaterial; rowIndex <= totalRow; rowIndex++) {
-  //       for (let colIndex = 11; colIndex <= 17; colIndex++) {
-  //         worksheet.getCell(rowIndex, colIndex).numFmt = '#,##0';
-  //       }
-  //     }
-  //
-  //     for (let colIndex = 2; colIndex <= 17; colIndex++) {
-  //       worksheet.getCell(15, colIndex).fill = {
-  //         type: 'pattern',
-  //         pattern: 'solid',
-  //         fgColor: { argb: 'DAEEF3' },
-  //       };
-  //       worksheet.getCell(16, colIndex).fill = {
-  //         type: 'pattern',
-  //         pattern: 'solid',
-  //         fgColor: { argb: 'DAEEF3' },
-  //       };
-  //     }
-  //
-  //     worksheet.getCell('D15').font = { name: 'Arial', size: 12, bold: true };
-  //     worksheet.getCell('B6').font = {
-  //       name: 'Arial',
-  //       size: 12,
-  //       bold: true,
-  //       underline: true,
-  //     };
-  //
-  //     const excelBuffer = await workbook.xlsx.writeBuffer();
-  //
-  //     return excelBuffer;
-  //   } catch (error) {
-  //     throw error;
-  //   }
-  // },
-  //
+
+  async exportSurveyToExcel(id: number) {
+    try {
+      // Step 1: Get the survey header and its details
+      const survey = await SurveyHeader.getDeep(id, null, true);
+
+      if (!survey) {
+        throw new CustomError(StatusCodes.NOT_FOUND, 'Survey Not Found');
+      }
+
+      const isCubicle = survey.cubicle_surveys.length > 0 ? true : false;
+      const isSutm = survey.sutm_surveys.length > 0 ? true : false;
+      const isSktm = survey.sktm_surveys.length > 0 ? true : false;
+
+      let totalAkhirBerat = 0;
+
+      const sutmCounts: ISutmCounts = isSutm ? await countSutm(survey) : null;
+
+      const totalPrices: IKonstruksiPrice[] = Object.values(
+        sutmCounts.konstruksi,
+      ).map((konstruksi: any) => ({
+        ...konstruksi,
+        materials: konstruksi.konstruksi_materials.map((material: any) =>
+          calculateMaterialPrices(
+            material.material,
+            Number(material.kuantitas),
+            konstruksi.count,
+          ),
+        ),
+      }));
+
+      const tiangPrices: ITiangPrice[] = Object.values(sutmCounts.tiang).map(
+        (tiang: any) => calculateMaterialPrices(tiang, 1, tiang.count),
+      );
+
+      const konduktorPrices: IKonduktorPrice[] = Object.values(
+        sutmCounts.konduktor,
+      ).map((konduktor: any) => {
+        let multiplier = konduktor.nomor_material === 5 ? 3.045 : 3.06;
+
+        if (konduktor.nomor_material === 77) {
+          multiplier = 1;
+        }
+
+        const totalConductor = (konduktor.totalPanjang * multiplier) / 1;
+        const totalHargaMaterial = konduktor.harga_material * totalConductor;
+        const totalPasang = konduktor.pasang_rab * totalConductor;
+        const totalBongkar = konduktor.bongkar * totalConductor;
+        const totalBerat =
+          (Number(konduktor.berat_material) * totalConductor) / 1000;
+
+        return {
+          data_konduktor: { ...konduktor },
+          total_kuantitas: totalConductor,
+          total_berat: totalBerat,
+          total_harga_material: totalHargaMaterial,
+          total_pasang: totalPasang,
+          total_bongkar: totalBongkar,
+        };
+      });
+
+      const polePrices: IPolePrice[] = Object.values(sutmCounts.pole).map(
+        (pole: any) => ({
+          ...pole,
+          materials: pole.pole_materials.map((material: any) =>
+            calculateMaterialPrices(
+              material.material,
+              Number(material.kuantitas),
+              pole.count,
+            ),
+          ),
+        }),
+      );
+
+      const groundingPrices: IGroundingPrice[] = Object.values(
+        sutmCounts.grounding,
+      ).flatMap((grounding: any) => {
+        const materials = grounding.GroundingMaterial.map((material: any) =>
+          calculateMaterialPrices(
+            material.material,
+            Number(material.kuantitas),
+            grounding.count,
+          ),
+        );
+
+        return Object.keys(grounding.konstruksi).map(konstruksiId => ({
+          ...grounding,
+          idKonstruksi: Number(konstruksiId),
+          materials,
+        }));
+      });
+
+      const flattenedGroundingPrices = groundingPrices.flat();
+
+      // Step 3: Get all materials required and the amount for each unique konstruksi and tiang
+
+      // Step 4: Calculate the total price of each material for each unique konstruksi
+
+      const workbook = new ExcelJS.Workbook();
+      const rekap = workbook.addWorksheet('REKAP');
+      const cubicle = isCubicle ? workbook.addWorksheet('CUBICLE') : null;
+      const sutm = isSutm ? workbook.addWorksheet('SUTM') : null;
+      const sktm = isSktm ? workbook.addWorksheet('SKTM') : null;
+      const appTm = isCubicle ? workbook.addWorksheet('APP TM') : null;
+
+      const rowTipePekerjaan = [];
+      const rowTitle = [];
+      const rowPoleSupport = [];
+      const rowKonstruksi = [];
+      const rowGrounding = [];
+
+      // Set column widths
+      if (sutm) {
+        sutm.columns = [
+          { width: 5 },
+          { width: 10 },
+          { width: 90 },
+          { width: 15 },
+          { width: 12 },
+          { width: 12 },
+          { width: 12 },
+          { width: 10 },
+          { width: 10 },
+          { width: 10 },
+          { width: 15 },
+          { width: 15 },
+          { width: 15 },
+          { width: 15 },
+          { width: 15 },
+          { width: 15 },
+          { width: 17 },
+        ];
+
+        // Merging cells for PLN Header
+        sutm.mergeCells('C2:D2');
+        sutm.getCell('C2').value = 'PT PLN (PERSERO)';
+
+        sutm.mergeCells('C3:D3');
+        sutm.getCell('C3').value = 'DISTRIBUSI JAWA TIMUR';
+
+        sutm.mergeCells('C4:D4');
+        sutm.getCell('C4').value = 'UP3 SURABAYA BARAT';
+
+        const imagePath = path.resolve(process.cwd(), 'storage/file/image.png');
+
+        // 📌 Read Image File (Ensure the path is correct)
+        const imageId = workbook.addImage({
+          filename: imagePath, // Replace with your image path
+          extension: 'png',
+        });
+
+        // 📌 Merge Cells in Column B (B2 to B4)
+        sutm.mergeCells('B2:B4');
+
+        // 📌 Ensure Column B Has a Defined Width
+        const column = sutm.getColumn(2);
+        if (!column.width) column.width = 10; // Set a default width if not defined
+
+        // 📌 Get Column Width in Pixels (Each unit ≈ 7.5 pixels)
+        const columnWidthPx = column.width * 7.5;
+
+        // 📌 Define Image Width in Pixels
+        const imageWidthPx = 44.6;
+
+        // 📌 Calculate Horizontal Offset (Centering)
+        const offsetX = (columnWidthPx - imageWidthPx) / 2;
+
+        // 📌 Position Image in the sutm
+        sutm.addImage(imageId, {
+          tl: {
+            col: 1, // Column B (zero-based index)
+            row: 1, // Row 2 (zero-based index)
+            nativeCol: 1,
+            nativeColOff: offsetX * 9525, // Convert pixels to Excel EMUs
+            nativeRow: 1,
+            nativeRowOff: 0, // Already centered vertically
+          },
+          ext: { width: 44.6, height: 61.63 }, // Set image size in pixels
+        });
+
+        // Merge for Title
+        sutm.mergeCells('B6:Q6');
+        sutm.getCell('B6').value = 'RENCANA ANGGARAN BIAYA ESTETIKA';
+        sutm.getCell('B6').alignment = { horizontal: 'center' };
+
+        // Merging cells and filling job description details
+        sutm.mergeCells('E8:G8');
+        sutm.getCell('E8').value = 'URAIAN PEKERJAAN';
+        sutm.getCell('H8').value = ':';
+        sutm.getCell('H8').alignment = { horizontal: 'center' };
+        sutm.getCell('I8').value = `${survey.nama_survey}`;
+
+        sutm.mergeCells('E9:G9');
+        sutm.getCell('E9').value = 'JENIS';
+        sutm.getCell('H9').value = ':';
+        sutm.getCell('H9').alignment = { horizontal: 'center' };
+        sutm.getCell('I9').value = `${survey.nama_pekerjaan}`;
+
+        sutm.mergeCells('E10:G10');
+        sutm.getCell('E10').value = 'LOKASI';
+        sutm.getCell('H10').value = ':';
+        sutm.getCell('H10').alignment = { horizontal: 'center' };
+        sutm.getCell('I10').value = '-';
+
+        sutm.getCell('H11').value = ':';
+        sutm.getCell('H11').alignment = { horizontal: 'center' };
+        sutm.getCell('I11').value = `${survey.lokasi}`;
+
+        sutm.mergeCells('E12:G12');
+        sutm.getCell('E12').value = 'VOLUME';
+        sutm.getCell('H12').value = ':';
+        sutm.getCell('H12').alignment = { horizontal: 'center' };
+        sutm.getCell('I12').value = `${konduktorPrices[0].total_kuantitas}`;
+        sutm.getCell('I12').alignment = { horizontal: 'center' };
+        sutm.getCell('J12').value = 'MS';
+        sutm.getCell('J12').alignment = { horizontal: 'center' };
+
+        // Table Headers
+        const headers = [
+          '',
+          'NO. MAT',
+          'PEKERJAAN',
+          'JENIS MDU',
+          'Berat',
+          'Sat',
+          'Berat Total',
+          'Volume',
+          '',
+          '',
+          'Harga Satuan',
+          '',
+          '',
+          'Jumlah Harga',
+          '',
+          '',
+          'JUMLAH',
+        ];
+
+        sutm.getRow(15).values = headers;
+        sutm.getRow(16).values = [
+          '',
+          '',
+          '',
+          '',
+          '',
+          '',
+          '',
+          'Material',
+          'Pasang',
+          'Bongkar',
+          'Material',
+          'Pasang',
+          'Bongkar',
+          'Material',
+          'Pasang',
+          'Bongkar',
+          '',
+        ];
+
+        sutm.mergeCells('B15:B16');
+        sutm.mergeCells('C15:C16');
+        sutm.mergeCells('D15:D16');
+        sutm.mergeCells('E15:E16');
+        sutm.mergeCells('F15:F16');
+        sutm.mergeCells('G15:G16');
+        sutm.mergeCells('H15:J15');
+        sutm.mergeCells('K15:M15');
+        sutm.mergeCells('N15:P15');
+        sutm.mergeCells('Q15:Q16');
+
+        sutm.getRow(15).height = 30;
+        sutm.getRow(16).height = 40;
+
+        // Formatting header row
+        for (const rowNumber of [15, 16]) {
+          const row = sutm.getRow(rowNumber);
+          row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
+            if (colNumber > 1 && colNumber < 18) {
+              // Skip column A
+              cell.alignment = { horizontal: 'center', vertical: 'middle' };
+              cell.border = {
+                top: { style: 'thin' },
+                left: { style: 'thin' },
+                bottom: { style: 'thin' },
+                right: { style: 'thin' },
+              };
+            }
+          });
+        }
+
+        formatWorksheetRow(sutm, 17);
+
+        let previousRow = 17;
+
+        previousRow += 1;
+        sutm.getCell(`C${previousRow}`).value = '   TIANG BETON';
+        formatWorksheetRow(sutm, previousRow);
+
+        rowTitle.push(previousRow);
+
+        let totalTiang = 0;
+
+        for (const tiang of tiangPrices) {
+          previousRow += 1;
+          sutm.getCell(`B${previousRow}`).value = tiang.material.nomor_material;
+          sutm.getCell(`C${previousRow}`).value = tiang.material.nama_material;
+          sutm.getCell(`D${previousRow}`).value = tiang.material.jenis_material;
+          sutm.getCell(`D${previousRow}`).alignment = {
+            horizontal: 'center',
+            vertical: 'middle',
+          };
+          sutm.getCell(`E${previousRow}`).value = Number(
+            tiang.material.berat_material,
+          );
+          sutm.getCell(`E${previousRow}`).alignment = {
+            horizontal: 'center',
+            vertical: 'middle',
+          };
+          sutm.getCell(`F${previousRow}`).value =
+            tiang.material.satuan_material;
+          sutm.getCell(`F${previousRow}`).alignment = {
+            horizontal: 'center',
+            vertical: 'middle',
+          };
+          sutm.getCell(`G${previousRow}`).value = tiang.total_berat;
+
+          totalAkhirBerat += tiang.total_berat;
+
+          sutm.getCell(`G${previousRow}`).alignment = {
+            horizontal: 'center',
+            vertical: 'middle',
+          };
+          sutm.getCell(`H${previousRow}`).value = tiang.total_kuantitas;
+          sutm.getCell(`H${previousRow}`).alignment = {
+            horizontal: 'center',
+            vertical: 'middle',
+          };
+          sutm.getCell(`I${previousRow}`).value = tiang.total_kuantitas;
+          totalTiang += tiang.total_kuantitas;
+          sutm.getCell(`I${previousRow}`).alignment = {
+            horizontal: 'center',
+            vertical: 'middle',
+          };
+          sutm.getCell(`J${previousRow}`).value = {
+            formula: '0',
+            result: 0,
+          };
+          sutm.getCell(`J${previousRow}`).alignment = {
+            horizontal: 'center',
+            vertical: 'middle',
+          };
+          sutm.getCell(`K${previousRow}`).value = tiang.material.harga_material;
+          sutm.getCell(`L${previousRow}`).value = tiang.material.pasang_rab;
+          sutm.getCell(`N${previousRow}`).value = tiang.total_harga_material;
+          sutm.getCell(`O${previousRow}`).value = tiang.total_pasang;
+          sutm.getCell(`Q${previousRow}`).value =
+            tiang.total_harga_material + tiang.total_pasang;
+
+          formatWorksheetRow(sutm, previousRow);
+        }
+
+        previousRow += 1;
+        formatWorksheetRow(sutm, previousRow);
+
+        previousRow += 1;
+        formatWorksheetRow(sutm, previousRow);
+
+        if (polePrices.length > 0) {
+          previousRow += 1;
+          sutm.getCell(`C${previousRow}`).value = '   POLE SUPPORTER :';
+
+          formatWorksheetRow(sutm, previousRow);
+
+          rowTitle.push(previousRow);
+
+          for (const poles of polePrices) {
+            const pole = await PoleRepository.getPoleById(poles.id);
+            previousRow += 1;
+            sutm.getCell(`C${previousRow}`).value =
+              `   ${pole.nama_pole.toUpperCase()}`;
+            formatWorksheetRow(sutm, previousRow);
+
+            rowPoleSupport.push(previousRow);
+
+            const groupedMaterials: Record<string, typeof poles.materials> = {};
+
+            for (const item of poles.materials) {
+              const tipePekerjaan =
+                item.material.tipe_pekerjaan?.tipe_pekerjaan || '';
+
+              if (!groupedMaterials[tipePekerjaan]) {
+                groupedMaterials[tipePekerjaan] = [];
+              }
+
+              groupedMaterials[tipePekerjaan].push(item);
+            }
+
+            for (const [groupKey, group] of Object.entries(groupedMaterials)) {
+              if (groupKey != '') {
+                previousRow += 1;
+                sutm.getCell(`C${previousRow}`).value = `   ${groupKey} :`;
+                formatWorksheetRow(sutm, previousRow);
+
+                rowTipePekerjaan.push(previousRow);
+              }
+
+              // Process each material in the group
+              for (const calculatedPole of group) {
+                previousRow += 1;
+
+                totalAkhirBerat += calculatedPole.total_berat;
+
+                const rowData = [
+                  {
+                    col: 'B',
+                    value: calculatedPole.material.nomor_material,
+                  },
+                  { col: 'C', value: calculatedPole.material.nama_material },
+                  {
+                    col: 'D',
+                    value: calculatedPole.material.jenis_material,
+                    isAlign: true,
+                  },
+                  {
+                    col: 'E',
+                    value: Number(calculatedPole.material.berat_material),
+                    isAlign: true,
+                  },
+                  {
+                    col: 'F',
+                    value: calculatedPole.material.satuan_material,
+                    isAlign: true,
+                  },
+                  {
+                    col: 'G',
+                    value: calculatedPole.total_berat,
+                    isAlign: true,
+                  },
+                  {
+                    col: 'H',
+                    value: calculatedPole.total_kuantitas,
+                    isAlign: true,
+                  },
+                  {
+                    col: 'I',
+                    value: calculatedPole.total_kuantitas,
+                    isAlign: true,
+                  },
+                  {
+                    col: 'J',
+                    value: { formula: '0', result: 0 },
+                    isAlign: true,
+                  },
+                  {
+                    col: 'K',
+                    value: calculatedPole.material.harga_material,
+                  },
+                  { col: 'L', value: calculatedPole.material.pasang_rab },
+                  { col: 'N', value: calculatedPole.total_harga_material },
+                  { col: 'O', value: calculatedPole.total_pasang },
+                  {
+                    col: 'Q',
+                    value:
+                      calculatedPole.total_harga_material +
+                      calculatedPole.total_pasang,
+                  },
+                ];
+
+                // Apply values and alignments
+                for (const { col, value, isAlign } of rowData) {
+                  sutm.getCell(`${col}${previousRow}`).value = value;
+
+                  if (isAlign) {
+                    sutm.getCell(`${col}${previousRow}`).alignment = {
+                      horizontal: 'center',
+                      vertical: 'middle',
+                    };
+                  }
+                }
+
+                formatWorksheetRow(sutm, previousRow);
+              }
+            }
+
+            previousRow += 1;
+            formatWorksheetRow(sutm, previousRow);
+          }
+
+          previousRow += 1;
+          formatWorksheetRow(sutm, previousRow);
+        }
+
+        previousRow += 1;
+        sutm.getCell(`C${previousRow}`).value = '   POLE TOP ARRANGEMENT :';
+        formatWorksheetRow(sutm, previousRow);
+
+        rowTitle.push(previousRow);
+
+        for (const calculatedKonstruksi of totalPrices) {
+          const konstruksi = calculatedKonstruksi;
+
+          // Find the corresponding groundingPrices entry
+          const groundingPricesForKonstruksi = flattenedGroundingPrices.filter(
+            g => g.idKonstruksi === calculatedKonstruksi.id,
+          );
+
+          previousRow += 1;
+          sutm.getCell(`C${previousRow}`).value =
+            `   ${konstruksi.nama_konstruksi.toUpperCase()}`;
+          formatWorksheetRow(sutm, previousRow);
+
+          rowKonstruksi.push(previousRow);
+
+          const groupedMaterials: Record<
+            string,
+            typeof calculatedKonstruksi.materials
+          > = {};
+
+          for (const item of calculatedKonstruksi.materials) {
+            const tipePekerjaan =
+              item.material.tipe_pekerjaan?.tipe_pekerjaan || '';
+
+            if (!groupedMaterials[tipePekerjaan]) {
+              groupedMaterials[tipePekerjaan] = [];
+            }
+
+            groupedMaterials[tipePekerjaan].push(item);
+          }
+
+          for (const [groupKey, group] of Object.entries(groupedMaterials)) {
+            if (groupKey != '') {
+              previousRow += 1;
+              sutm.getCell(`C${previousRow}`).value = `   ${groupKey} :`;
+              formatWorksheetRow(sutm, previousRow);
+
+              rowTipePekerjaan.push(previousRow);
+            }
+
+            // Process each material in the group
+            for (const calculatedPole of group) {
+              previousRow += 1;
+
+              totalAkhirBerat += calculatedPole.total_berat;
+
+              const rowData = [
+                { col: 'B', value: calculatedPole.material.nomor_material },
+                { col: 'C', value: calculatedPole.material.nama_material },
+                {
+                  col: 'D',
+                  value: calculatedPole.material.jenis_material,
+                  isAlign: true,
+                },
+                {
+                  col: 'E',
+                  value: Number(calculatedPole.material.berat_material),
+                  isAlign: true,
+                },
+                {
+                  col: 'F',
+                  value: calculatedPole.material.satuan_material,
+                  isAlign: true,
+                },
+                { col: 'G', value: calculatedPole.total_berat, isAlign: true },
+                {
+                  col: 'H',
+                  value: calculatedPole.total_kuantitas,
+                  isAlign: true,
+                },
+                {
+                  col: 'I',
+                  value: calculatedPole.total_kuantitas,
+                  isAlign: true,
+                },
+                { col: 'J', value: { formula: '0', result: 0 }, isAlign: true },
+                { col: 'K', value: calculatedPole.material.harga_material },
+                { col: 'L', value: calculatedPole.material.pasang_rab },
+                { col: 'N', value: calculatedPole.total_harga_material },
+                { col: 'O', value: calculatedPole.total_pasang },
+                {
+                  col: 'Q',
+                  value:
+                    calculatedPole.total_harga_material +
+                    calculatedPole.total_pasang,
+                },
+              ];
+
+              // Apply values and alignments
+              for (const { col, value, isAlign } of rowData) {
+                sutm.getCell(`${col}${previousRow}`).value = value;
+
+                if (isAlign) {
+                  sutm.getCell(`${col}${previousRow}`).alignment = {
+                    horizontal: 'center',
+                    vertical: 'middle',
+                  };
+                }
+              }
+
+              formatWorksheetRow(sutm, previousRow);
+            }
+          }
+
+          previousRow += 1;
+          formatWorksheetRow(sutm, previousRow);
+
+          // Example usage of groundingPrice
+          if (
+            groundingPricesForKonstruksi &&
+            groundingPricesForKonstruksi.length > 0
+          ) {
+            // You can use groundingPrice here however you need
+            for (const groundingPrice of groundingPricesForKonstruksi) {
+              const grounding = groundingPrice;
+
+              previousRow += 1;
+              sutm.getCell(`C${previousRow}`).value =
+                `   ${grounding.nama_grounding.toUpperCase()}`;
+              formatWorksheetRow(sutm, previousRow);
+
+              rowGrounding.push(previousRow);
+
+              const groupedMaterials: Record<
+                string,
+                typeof groundingPrice.materials
+              > = {};
+
+              for (const item of groundingPrice.materials) {
+                const tipePekerjaan =
+                  item.material.tipe_pekerjaan?.tipe_pekerjaan || '';
+
+                if (!groupedMaterials[tipePekerjaan]) {
+                  groupedMaterials[tipePekerjaan] = [];
+                }
+
+                groupedMaterials[tipePekerjaan].push(item);
+              }
+
+              for (const [groupKey, group] of Object.entries(
+                groupedMaterials,
+              )) {
+                if (groupKey != '') {
+                  previousRow += 1;
+                  sutm.getCell(`C${previousRow}`).value = `   ${groupKey} :`;
+                  formatWorksheetRow(sutm, previousRow);
+                }
+
+                // Process each material in the group
+                for (const calculatedGrounding of group) {
+                  previousRow += 1;
+
+                  totalAkhirBerat += calculatedGrounding.total_berat;
+
+                  const rowData = [
+                    {
+                      col: 'B',
+                      value: calculatedGrounding.material.nomor_material,
+                    },
+                    {
+                      col: 'C',
+                      value: calculatedGrounding.material.nama_material,
+                    },
+                    {
+                      col: 'D',
+                      value: calculatedGrounding.material.jenis_material,
+                      isAlign: true,
+                    },
+                    {
+                      col: 'E',
+                      value: Number(
+                        calculatedGrounding.material.berat_material,
+                      ),
+                      isAlign: true,
+                    },
+                    {
+                      col: 'F',
+                      value: calculatedGrounding.material.satuan_material,
+                      isAlign: true,
+                    },
+                    {
+                      col: 'G',
+                      value: calculatedGrounding.total_berat,
+                      isAlign: true,
+                    },
+                    {
+                      col: 'H',
+                      value: calculatedGrounding.total_kuantitas,
+                      isAlign: true,
+                    },
+                    {
+                      col: 'I',
+                      value: calculatedGrounding.total_kuantitas,
+                      isAlign: true,
+                    },
+                    {
+                      col: 'J',
+                      value: { formula: '0', result: 0 },
+                      isAlign: true,
+                    },
+                    {
+                      col: 'K',
+                      value: calculatedGrounding.material.harga_material,
+                    },
+                    {
+                      col: 'L',
+                      value: calculatedGrounding.material.pasang_rab,
+                    },
+                    {
+                      col: 'N',
+                      value: calculatedGrounding.total_harga_material,
+                    },
+                    { col: 'O', value: calculatedGrounding.total_pasang },
+                    {
+                      col: 'Q',
+                      value:
+                        calculatedGrounding.total_harga_material +
+                        calculatedGrounding.total_pasang,
+                    },
+                  ];
+
+                  // Apply values and alignments
+                  for (const { col, value, isAlign } of rowData) {
+                    sutm.getCell(`${col}${previousRow}`).value = value;
+
+                    if (isAlign) {
+                      sutm.getCell(`${col}${previousRow}`).alignment = {
+                        horizontal: 'center',
+                        vertical: 'middle',
+                      };
+                    }
+                  }
+
+                  formatWorksheetRow(sutm, previousRow);
+                }
+              }
+            }
+          }
+
+          previousRow += 1;
+          formatWorksheetRow(sutm, previousRow);
+        }
+
+        previousRow += 1;
+        sutm.getCell(`C${previousRow}`).value =
+          '   ANTI CLIMBING + DANGER PLATE :';
+        formatWorksheetRow(sutm, previousRow);
+
+        rowTitle.push(previousRow);
+
+        const antiClimbing =
+          await KonstruksiMaterial.findMaterialForKonstruksiById(38);
+
+        for (const material of antiClimbing) {
+          const data = await Material.findMaterialById(material.id_material);
+          previousRow += 1;
+
+          totalAkhirBerat += (Number(data.berat_material) * totalTiang) / 1000;
+
+          const rowData = [
+            {
+              col: 'B',
+              value: data.nomor_material,
+            },
+            {
+              col: 'C',
+              value: data.nama_material,
+            },
+            {
+              col: 'D',
+              value: data.jenis_material,
+              isAlign: true,
+            },
+            {
+              col: 'E',
+              value: Number(data.berat_material),
+              isAlign: true,
+            },
+            {
+              col: 'F',
+              value: data.satuan_material,
+              isAlign: true,
+            },
+            {
+              col: 'G',
+              value: (Number(data.berat_material) * totalTiang) / 1000,
+              isAlign: true,
+            },
+            {
+              col: 'H',
+              value: Number(material.kuantitas) * totalTiang,
+              isAlign: true,
+            },
+            {
+              col: 'I',
+              value: Number(material.kuantitas) * totalTiang,
+              isAlign: true,
+            },
+            {
+              col: 'J',
+              value: { formula: '0', result: 0 },
+              isAlign: true,
+            },
+            {
+              col: 'K',
+              value: data.harga_material,
+            },
+            {
+              col: 'L',
+              value: data.pasang_rab,
+            },
+            {
+              col: 'N',
+              value:
+                data.harga_material * (Number(material.kuantitas) * totalTiang),
+            },
+            {
+              col: 'O',
+              value:
+                data.pasang_rab * (Number(material.kuantitas) * totalTiang),
+            },
+            {
+              col: 'Q',
+              value:
+                data.harga_material *
+                  (Number(material.kuantitas) * totalTiang) +
+                data.pasang_rab * (Number(material.kuantitas) * totalTiang),
+            },
+          ];
+
+          // Apply values and alignments
+          for (const { col, value, isAlign } of rowData) {
+            sutm.getCell(`${col}${previousRow}`).value = value;
+
+            if (isAlign) {
+              sutm.getCell(`${col}${previousRow}`).alignment = {
+                horizontal: 'center',
+                vertical: 'middle',
+              };
+            }
+          }
+
+          formatWorksheetRow(sutm, previousRow);
+        }
+
+        previousRow += 1;
+        formatWorksheetRow(sutm, previousRow);
+
+        previousRow += 1;
+        sutm.getCell(`C${previousRow}`).value = '   CONDUCTOR ACCESSORIES :';
+        formatWorksheetRow(sutm, previousRow);
+
+        rowTitle.push(previousRow);
+
+        const konduktor = konduktorPrices[0].data_konduktor;
+
+        previousRow += 1;
+
+        totalAkhirBerat += konduktorPrices[0].total_berat;
+
+        const rowData = [
+          {
+            col: 'B',
+            value: konduktor.nomor_material,
+          },
+          {
+            col: 'C',
+            value: konduktor.nama_material,
+          },
+          {
+            col: 'D',
+            value: konduktor.jenis_material,
+            isAlign: true,
+          },
+          {
+            col: 'E',
+            value: Number(konduktor.berat_material),
+            isAlign: true,
+          },
+          {
+            col: 'F',
+            value: konduktor.satuan_material,
+            isAlign: true,
+          },
+          {
+            col: 'G',
+            value: konduktorPrices[0].total_berat,
+            isAlign: true,
+          },
+          {
+            col: 'H',
+            value: konduktorPrices[0].total_kuantitas,
+            isAlign: true,
+          },
+          {
+            col: 'I',
+            value: konduktorPrices[0].total_kuantitas,
+            isAlign: true,
+          },
+          {
+            col: 'J',
+            value: { formula: '0', result: 0 },
+            isAlign: true,
+          },
+          {
+            col: 'K',
+            value: konduktor.harga_material,
+          },
+          {
+            col: 'L',
+            value: konduktor.pasang_rab,
+          },
+          {
+            col: 'N',
+            value: konduktorPrices[0].total_harga_material,
+          },
+          {
+            col: 'O',
+            value: konduktorPrices[0].total_pasang,
+          },
+          {
+            col: 'Q',
+            value:
+              konduktorPrices[0].total_harga_material +
+              konduktorPrices[0].total_pasang,
+          },
+        ];
+
+        // Apply values and alignments
+        for (const { col, value, isAlign } of rowData) {
+          sutm.getCell(`${col}${previousRow}`).value = value;
+
+          if (isAlign) {
+            sutm.getCell(`${col}${previousRow}`).alignment = {
+              horizontal: 'center',
+              vertical: 'middle',
+            };
+          }
+        }
+
+        formatWorksheetRow(sutm, previousRow);
+
+        previousRow += 1;
+        formatWorksheetRow(sutm, previousRow);
+
+        previousRow += 1;
+        formatWorksheetRow(sutm, previousRow);
+
+        previousRow += 1;
+        sutm.getCell(`C${previousRow}`).value = '   PEKERJAAN PENDUKUNG :';
+        formatWorksheetRow(sutm, previousRow);
+
+        rowTitle.push(previousRow);
+
+        const pekerjaanPendukung = [];
+
+        pekerjaanPendukung.push(
+          await Material.findMaterialById(541),
+          await Material.findMaterialById(536),
+          await Material.findMaterialById(534),
+        );
+
+        let rowAngkutan;
+
+        for (const material of pekerjaanPendukung) {
+          previousRow += 1;
+
+          let value = 1;
+
+          if (material.nomor_material === 534) {
+            rowAngkutan = previousRow;
+            value = Math.ceil(totalAkhirBerat * 100) / 100;
+          }
+
+          const rowData = [
+            {
+              col: 'B',
+              value: material.nomor_material,
+            },
+            {
+              col: 'C',
+              value: material.nama_material,
+            },
+            {
+              col: 'D',
+              value: material.jenis_material,
+              isAlign: true,
+            },
+            {
+              col: 'E',
+              value: { formula: '0', result: 0 },
+              isAlign: true,
+            },
+            {
+              col: 'F',
+              value: material.satuan_material,
+              isAlign: true,
+            },
+            {
+              col: 'G',
+              value: material.nomor_material === 534 ? totalAkhirBerat : 0,
+              isAlign: true,
+            },
+            {
+              col: 'I',
+              value: value,
+              isAlign: true,
+            },
+            {
+              col: 'L',
+              value: material.pasang_rab,
+            },
+            {
+              col: 'O',
+              value: Math.ceil(material.pasang_rab * value),
+            },
+            {
+              col: 'Q',
+              value: Math.ceil(material.pasang_rab * value),
+            },
+          ];
+
+          // Apply values and alignments
+          for (const { col, value, isAlign } of rowData) {
+            sutm.getCell(`${col}${previousRow}`).value = value;
+
+            if (isAlign) {
+              sutm.getCell(`${col}${previousRow}`).alignment = {
+                horizontal: 'center',
+                vertical: 'middle',
+              };
+            }
+          }
+
+          formatWorksheetRow(sutm, previousRow);
+        }
+
+        const lastRow = previousRow;
+
+        previousRow += 1;
+        formatWorksheetRow(sutm, previousRow);
+
+        previousRow += 1;
+        formatWorksheetRow(sutm, previousRow);
+
+        previousRow += 1;
+        formatWorksheetRow(sutm, previousRow);
+
+        previousRow += 1;
+        const totalMaterial = previousRow;
+        sutm.getCell(`C${previousRow}`).value = '   Jumlah Harga Material';
+        sutm.getCell(`N${previousRow}`).value = {
+          formula: `SUM(N17:N${lastRow})`,
+        };
+        formatWorksheetRow(sutm, previousRow);
+
+        previousRow += 1;
+        const totalJasa = previousRow;
+        sutm.getCell(`C${previousRow}`).value = '   Jumlah Harga Jasa';
+        sutm.getCell(`O${previousRow}`).value = {
+          formula: `SUM(O17:O${lastRow})`,
+        };
+        sutm.getCell(`P${previousRow}`).value = {
+          formula: `SUM(P17:P${lastRow})`,
+        };
+        formatWorksheetRow(sutm, previousRow);
+
+        previousRow += 1;
+        const jumlahHarga = previousRow;
+        sutm.getCell(`C${previousRow}`).value = '   Jumlah Harga';
+        sutm.getCell(`Q${previousRow}`).value = {
+          formula: `N${totalMaterial} + O${totalJasa} + P${totalJasa}`,
+        };
+        formatWorksheetRow(sutm, previousRow);
+
+        previousRow += 1;
+        sutm.getCell(`C${previousRow}`).value = '   Perkiraan Kerja Tambah';
+        formatWorksheetRow(sutm, previousRow);
+
+        previousRow += 1;
+        const totalRow = previousRow;
+        sutm.getCell(`C${previousRow}`).value = '   T O T A L';
+        sutm.getCell(`Q${previousRow}`).value = {
+          formula: `Q${jumlahHarga}`,
+        };
+        formatWorksheetRow(sutm, previousRow, {
+          top: { style: 'dotted' },
+          left: { style: 'thin' },
+          bottom: { style: 'thin' },
+          right: { style: 'thin' },
+        });
+
+        previousRow += 1;
+        previousRow += 1;
+        const date = new Date();
+        const months = [
+          'Januari',
+          'Februari',
+          'Maret',
+          'April',
+          'Mei',
+          'Juni',
+          'Juli',
+          'Agustus',
+          'September',
+          'Oktober',
+          'November',
+          'Desember',
+        ];
+
+        sutm.mergeCells(`O${previousRow}:Q${previousRow}`);
+        sutm.getCell(`O${previousRow}`).value = `Sidoarjo, ${date.getDate()} ${
+          months[date.getMonth()]
+        } ${date.getFullYear()}`;
+        sutm.getCell(`O${previousRow}`).alignment = { horizontal: 'center' };
+
+        previousRow += 1;
+        const ttd = [];
+        ttd.push(previousRow);
+        sutm.mergeCells(`O${previousRow}:Q${previousRow}`);
+        sutm.getCell(`O${previousRow}`).value = `ASMAN PERENCANAAN`;
+        sutm.getCell(`O${previousRow}`).alignment = { horizontal: 'center' };
+
+        previousRow += 4;
+
+        sutm.mergeCells(`O${ttd[0] + 1}:Q${previousRow - 1}`);
+
+        ttd.push(previousRow);
+        sutm.mergeCells(`O${previousRow}:Q${previousRow}`);
+        sutm.getCell(`O${previousRow}`).value = `M SYAIFUDIN`;
+        sutm.getCell(`O${previousRow}`).alignment = { horizontal: 'center' };
+
+        sutm.eachRow(row => {
+          row.eachCell(cell => {
+            cell.font = {
+              name: 'Arial',
+              size: 12,
+            };
+          });
+        });
+
+        for (let rowIndex = 17; rowIndex <= lastRow; rowIndex++) {
+          sutm.getCell(`B${rowIndex}`).font = {
+            name: 'Arial',
+            size: 12,
+            color: { argb: 'FF0000' },
+          };
+        }
+
+        for (const row of rowTipePekerjaan) {
+          sutm.getCell(`C${row}`).font = {
+            name: 'Arial',
+            size: 12,
+            color: { argb: 'FF0000' },
+          };
+        }
+
+        for (const row of ttd) {
+          sutm.getCell(`Os${row}`).font = {
+            name: 'Arial',
+            size: 12,
+            bold: true,
+          };
+        }
+
+        for (const row of rowTitle) {
+          sutm.getCell(`C${row}`).font = {
+            name: 'Arial',
+            size: 12,
+            bold: true,
+          };
+
+          sutm.getCell(`C${row}`).fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FDE9D9' },
+          };
+        }
+
+        for (const row of rowPoleSupport) {
+          sutm.getCell(`C${row}`).font = {
+            name: 'Arial',
+            size: 12,
+            bold: true,
+          };
+
+          sutm.getCell(`C${row}`).fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'F2F2F2' },
+          };
+        }
+
+        for (const row of rowKonstruksi) {
+          sutm.getCell(`C${row}`).font = {
+            name: 'Arial',
+            size: 12,
+            bold: true,
+          };
+
+          sutm.getCell(`C${row}`).fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'EBF1DE' },
+          };
+        }
+
+        for (const row of rowGrounding) {
+          sutm.getCell(`C${row}`).font = {
+            name: 'Arial',
+            size: 12,
+            bold: true,
+            color: { argb: 'C00000' },
+          };
+
+          sutm.getCell(`C${row}`).fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FDE9D9' },
+          };
+        }
+
+        for (let rowIndex = 17; rowIndex <= lastRow; rowIndex++) {
+          for (let colIndex = 11; colIndex <= 17; colIndex++) {
+            // Columns K to Q
+            sutm.getCell(rowIndex, colIndex).font = {
+              name: 'Arial',
+              size: 12,
+              color: { argb: '00B0F0' },
+            };
+
+            sutm.getCell(rowIndex, colIndex).numFmt = '#,##0';
+          }
+        }
+
+        for (let rowIndex = 17; rowIndex <= lastRow; rowIndex++) {
+          sutm.getCell(`G${rowIndex}`).numFmt = '0.00';
+        }
+
+        sutm.getCell(`I${rowAngkutan}`).numFmt = '0.00';
+
+        for (let rowIndex = totalMaterial; rowIndex <= totalRow; rowIndex++) {
+          sutm.getCell(`C${rowIndex}`).font = {
+            name: 'Arial',
+            size: 12,
+            bold: true,
+            color: { argb: '002060' },
+          };
+        }
+
+        for (let rowIndex = totalMaterial; rowIndex <= totalRow; rowIndex++) {
+          for (let colIndex = 11; colIndex <= 17; colIndex++) {
+            sutm.getCell(rowIndex, colIndex).numFmt = '#,##0';
+          }
+        }
+
+        for (let colIndex = 2; colIndex <= 17; colIndex++) {
+          sutm.getCell(15, colIndex).fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'DAEEF3' },
+          };
+          sutm.getCell(16, colIndex).fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'DAEEF3' },
+          };
+        }
+
+        sutm.getCell('D15').font = { name: 'Arial', size: 12, bold: true };
+        sutm.getCell('B6').font = {
+          name: 'Arial',
+          size: 12,
+          bold: true,
+          underline: true,
+        };
+      }
+
+      const excelBuffer = await workbook.xlsx.writeBuffer();
+
+      return excelBuffer;
+    } catch (error) {
+      throw error;
+    }
+  },
+
   // async createSurveyBatch(request: CreateNewSurveyBatchRequest) {
   //   try {
   //     const konstruksi = await Konstruksi.findKonstruksiById(
