@@ -8,3 +8,4 @@ export * from './grounding.service';
 export * from './estimasi.service';
 export * from './excel.service';
 export * from './sktm.service';
+export * from './sutm.service';

@@ -13,6 +13,7 @@ import PoleRoutes from './pole.router';
 import SendStorageRoutes from './send-storage.router';
 import SKTMRoutes from './sktm.router';
 import SurveyRoutes from './survey.router';
+import SUTMRoutes from './sutm.router';
 import UploadFileRoutes from './upload-file.router';
 import UploadImageRoutes from './upload-image.router';
 
@@ -32,6 +33,7 @@ router.use('/estimasi', EstimasiRoutes);
 router.use('/excel-archive', ExcelRoutes);
 
 router.use('/sktm', SKTMRoutes);
+router.use('/sutm', SUTMRoutes);
 
 router.use('/upload-file', UploadFileRoutes);
 router.use('/upload-image', UploadImageRoutes);

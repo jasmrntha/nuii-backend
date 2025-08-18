@@ -147,4 +147,10 @@ export const SurveyHeader = {
       data: { deleted_at: date },
     });
   },
+
+  async checkIfHeaderExist(id: number) {
+    return await prisma.surveyHeader.findUnique({
+      where: { id },
+    });
+  },
 };

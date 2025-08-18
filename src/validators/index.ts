@@ -4,3 +4,4 @@ export * from './material';
 export * from './survey';
 export * from './excel';
 export * from './sktm';
+export * from './sutm';

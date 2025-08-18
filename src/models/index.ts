@@ -4,3 +4,4 @@ export * from './survey';
 export * from './estimasi';
 export * from './excel';
 export * from './sktm';
+export * from './sutm';
