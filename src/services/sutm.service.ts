@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/naming-convention */
+import { type SurveyType } from '@prisma/client';
 import { StatusCodes } from 'http-status-codes';
 
 import { CustomError } from '../middleware';
@@ -9,7 +10,7 @@ import {
   type UpdateSUTMHeaderRRequest,
   type UpdateSUTMDetailRRequest,
 } from '../models/sutm';
-import { SUTMRepository, SurveyHeader } from '../repositories';
+import { SUTMRepository, SurveyHeader, SurveySequance } from '../repositories';
 
 export const SUTMService = {
   async createSutm(request: CreateSUTMDetailRRequest) {
@@ -34,6 +35,23 @@ export const SUTMService = {
         });
 
         request.id_sutm_survey = sutmHeader.id;
+
+        const checkSequence = await SurveySequance.getAllSequanceByHeader(
+          request.id_survey_header,
+        );
+        const sequenceData = {
+          survey_header_id: request.id_survey_header,
+          survey_detail_id: request.id_sutm_survey,
+          urutan: checkSequence.length + 1,
+          keterangan: 'SUTM',
+        };
+
+        if (checkSequence.length === 0) {
+          await SurveySequance.createSequance('SUTM' as SurveyType, {
+            ...sequenceData,
+            created_at: new Date(),
+          });
+        }
       }
 
       const createdDetail = await SUTMRepository.creatSutmDetail({
