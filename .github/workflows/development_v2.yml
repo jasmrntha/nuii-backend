@@ -3,7 +3,7 @@ name: Deploy Backend Development
 on:
   push:
     branches:
-      - dev-sktm-cubicle
+      - main-v2
 
 jobs:
   deploy:
