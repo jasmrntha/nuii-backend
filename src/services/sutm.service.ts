@@ -46,12 +46,10 @@ export const SUTMService = {
           keterangan: 'SUTM',
         };
 
-        if (checkSequence.length === 0) {
-          await SurveySequance.createSequance('SUTM' as SurveyType, {
-            ...sequenceData,
-            created_at: new Date(),
-          });
-        }
+        await SurveySequance.createSequance('SUTM' as SurveyType, {
+          ...sequenceData,
+          created_at: new Date(),
+        });
       }
 
       const createdDetail = await SUTMRepository.creatSutmDetail({
@@ -69,6 +67,13 @@ export const SUTMService = {
         id_sutm_survey: request.id_sutm_survey,
       });
 
+      if (!createdDetail) {
+        throw new CustomError(
+          StatusCodes.BAD_REQUEST,
+          'Failed to create SUTM detail',
+        );
+      }
+
       const header = {
         id_survey_header: request.id_survey_header,
         id_sutm_header: request.id_sutm_survey,
@@ -83,7 +88,16 @@ export const SUTMService = {
 
   async updateSutmHeader(request: UpdateSUTMHeaderRRequest, id: number) {
     try {
-      return await SUTMRepository.updateSutmHeader(id, request);
+      const update = await SUTMRepository.updateSutmHeader(id, request);
+
+      if (!update) {
+        throw new CustomError(
+          StatusCodes.BAD_REQUEST,
+          'Failed to update SUTM header',
+        );
+      }
+
+      return update;
     } catch (error) {
       throw error;
     }
@@ -91,7 +105,16 @@ export const SUTMService = {
 
   async updateSutmDetail(request: UpdateSUTMDetailRRequest, id: number) {
     try {
-      return await SUTMRepository.updateSutmDetail(id, request);
+      const update = await SUTMRepository.updateSutmDetail(id, request);
+
+      if (!update) {
+        throw new CustomError(
+          StatusCodes.BAD_REQUEST,
+          'Failed to update SUTM detail',
+        );
+      }
+
+      return update;
     } catch (error) {
       throw error;
     }
@@ -99,7 +122,16 @@ export const SUTMService = {
 
   async deleteSutmDetail(id: number) {
     try {
-      return await SUTMRepository.deleteSutmDetail(id);
+      const deleted = await SUTMRepository.deleteSutmDetail(id);
+
+      if (!deleted) {
+        throw new CustomError(
+          StatusCodes.BAD_REQUEST,
+          'Failed to delete SUTM detail',
+        );
+      }
+
+      return deleted;
     } catch (error) {
       throw error;
     }
@@ -107,7 +139,16 @@ export const SUTMService = {
 
   async deleteSutmHeader(id: number) {
     try {
-      return await SUTMRepository.deleteSutmHeader(id);
+      const deleted = await SUTMRepository.deleteSutmHeader(id);
+
+      if (!deleted) {
+        throw new CustomError(
+          StatusCodes.BAD_REQUEST,
+          'Failed to delete SUTM header',
+        );
+      }
+
+      return deleted;
     } catch (error) {
       throw error;
     }
@@ -115,7 +156,13 @@ export const SUTMService = {
 
   async getSutmDetailById(id: number) {
     try {
-      return await SUTMRepository.getSutmDetailById(id);
+      const getDetail = await SUTMRepository.getSutmDetailById(id);
+
+      if (!getDetail) {
+        throw new CustomError(StatusCodes.NOT_FOUND, 'SUTM detail not found');
+      }
+
+      return getDetail;
     } catch (error) {
       throw error;
     }
@@ -125,6 +172,10 @@ export const SUTMService = {
     try {
       const header = await SUTMRepository.getSutmHeaderById(id);
       const detail = await SUTMRepository.getSutmDetailBySurveyId(header.id);
+
+      if (!header || detail.length === 0) {
+        throw new CustomError(StatusCodes.NOT_FOUND, 'SUTM not found');
+      }
 
       return { header, detail };
     } catch (error) {

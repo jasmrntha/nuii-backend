@@ -18,3 +18,5 @@ export * from './sktm-joint.repositories';
 export * from './sktm-component.repositories';
 export * from './survey-sequance.repositories';
 export * from './sutm.repositories';
+export * from './cubicle.repositories';
+export * from './app-tm.repositories';

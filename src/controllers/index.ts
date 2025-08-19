@@ -9,3 +9,4 @@ export * from './estimasi.controller';
 export * from './excel.controller';
 export * from './sktm.controller';
 export * from './sutm.controller';
+export * from './cubicle.controller';

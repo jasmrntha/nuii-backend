@@ -26,6 +26,12 @@ enum LogType {
   Delete
 }
 
+enum CubicleType {
+  Incoming
+  Outgoing
+  Metering
+}
+
 // --- Main Project and Material Models ---
 
 model SurveyHeader {
@@ -230,6 +236,8 @@ model SktmJoint {
 model CubicleSurvey {
   id               Int       @id @default(autoincrement())
   id_survey_header Int
+  id_cubicle_material Int
+  cubicle_type     CubicleType
   has_grounding    Boolean?
   penyulang        String
   long             String
