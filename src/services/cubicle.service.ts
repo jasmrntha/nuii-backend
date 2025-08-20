@@ -16,6 +16,10 @@ import {
 export const CubicleService = {
   async createCubicle(data: CreateCubicle) {
     try {
+      if (!data.keterangan) {
+        data.keterangan = 'Tidak ada keterangan';
+      }
+
       const createCubicle = await CubicleRepository.createCubicle({
         ...data,
       });
@@ -45,6 +49,11 @@ export const CubicleService = {
 
       const createAppTm = await AppTmRepository.createAppTm({
         id_survey_header: data.id_survey_header,
+        keterangan: data.keterangan,
+        penyulang: data.penyulang,
+        lat: data.lat,
+        long: data.long,
+        foto: data.foto,
       });
 
       if (!createAppTm) {

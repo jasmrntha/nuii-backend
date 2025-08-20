@@ -30,6 +30,11 @@ export const AppTmRepository = {
   async createAppTm(
     data: {
       id_survey_header: number;
+      keterangan?: string;
+      penyulang?: string;
+      lat?: string;
+      long?: string;
+      foto?: string;
       components?: ComponentItem[]; // optional; uses APP_METER_COMPONENTS if omitted
     },
     tx?: Omit<
@@ -54,7 +59,14 @@ export const AppTmRepository = {
     const result = await client.$transaction(async trx => {
       // 1) Header
       const header = await trx.appTmSurvey.create({
-        data: { id_survey_header: data.id_survey_header },
+        data: {
+          id_survey_header: data.id_survey_header,
+          keterangan: data.keterangan,
+          penyulang: data.penyulang,
+          lat: data.lat,
+          long: data.long,
+          foto: data.foto,
+        },
         select: { id: true, id_survey_header: true },
       });
 

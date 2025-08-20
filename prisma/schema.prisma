@@ -250,8 +250,6 @@ model CubicleSurvey {
   deleted_at       DateTime?
 
   survey_header SurveyHeader @relation(fields: [id_survey_header], references: [id])
-
-  AppTmComponent AppTmComponent[]
 }
 
 // --- APP TM (Alat Pengukur Tegangan Menengah) ---
@@ -260,11 +258,17 @@ model AppTmSurvey {
   id               Int       @id @default(autoincrement())
   id_survey_header Int
   keterangan       String?
+  penyulang        String
+  long             String
+  lat              String
+  foto             String
   created_at       DateTime  @default(now())
   updated_at       DateTime  @updatedAt
   deleted_at       DateTime?
 
   survey_header SurveyHeader @relation(fields: [id_survey_header], references: [id])
+
+  AppTmComponent AppTmComponent[]
 }
 
 model AppTmComponent {
@@ -277,7 +281,7 @@ model AppTmComponent {
   updated_at      DateTime  @updatedAt
   deleted_at      DateTime?
 
-  cubicle_survey CubicleSurvey @relation(fields: [id_apptm_survey], references: [id])
+  app_tm_survey   AppTmSurvey @relation(fields: [id_apptm_survey], references: [id])
   material       Material      @relation(fields: [id_material], references: [id])
 }
 
