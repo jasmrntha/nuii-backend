@@ -553,22 +553,53 @@ async function accessory_mat() {
   }
 }
 
+async function terminasi_mat() {
+  try {
+    const dataTerminasiMat = await csv().fromFile(
+      __dirname + '/data/terminasi_material.csv',
+    );
+
+    let terminasiMats = dataTerminasiMat.map(data => ({
+      nomor_material: parseInt(data.nomor_material),
+      nama_material: data.nama_material,
+      kuantitas: data.kuantitas,
+      tipe_survey: data.tipe_survey,
+    }));
+
+    for (const terminasiMat of terminasiMats) {
+      await prisma.terminasiMaterial.create({
+        data: {
+          id_material: terminasiMat.nomor_material,
+          nama_material: terminasiMat.nama_material,
+          kuantitas: terminasiMat.kuantitas,
+          tipe_survey: terminasiMat.tipe_survey,
+        },
+      });
+    }
+
+    console.log('Terminasi Material data inserted successfully!');
+  } catch (error) {
+    console.error('Error inserting terminasi material data, ', error);
+  }
+}
+
 const main = async () => {
-  // await users();
-  await tipe_material();
-  // await kategori_material();
-  await tipe_pekerjaan();
-  await konstruksi();
-  await material();
-  await material_konstruksi();
-  // await survey();
-  await grounding();
-  await pole();
-  await grounding_mat();
-  await pole_mat();
-  await jointing_mat();
-  await kabel_mat();
-  await accessory_mat();
+  // // await users();
+  // await tipe_material();
+  // // await kategori_material();
+  // await tipe_pekerjaan();
+  // await konstruksi();
+  // await material();
+  // await material_konstruksi();
+  // // await survey();
+  // await grounding();
+  // await pole();
+  // await grounding_mat();
+  // await pole_mat();
+  // await jointing_mat();
+  // await kabel_mat();
+  // await accessory_mat();
+  await terminasi_mat();
 };
 
 main()
