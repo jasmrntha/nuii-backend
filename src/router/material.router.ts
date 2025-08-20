@@ -5,11 +5,7 @@ import express from 'express';
 
 import { MaterialController } from '../controllers';
 import { validate } from '../middleware';
-import {
-  CreateMaterialSchema,
-  UpdateMaterialSchema,
-  GetSurveyMaterialSchema,
-} from '../validators';
+import { CreateMaterialSchema, UpdateMaterialSchema } from '../validators';
 
 const router = express.Router();
 
@@ -27,10 +23,6 @@ router.delete('/delete/:id', MaterialController.deleteMaterial);
 router.get('/list/tiang', MaterialController.getTiang);
 router.get('/list/konduktor', MaterialController.getKonduktor);
 router.get('/list', MaterialController.getAllMaterial);
-router.get(
-  '/survey',
-  validate(GetSurveyMaterialSchema),
-  MaterialController.getSurveyMaterial,
-);
+router.get('/survey', MaterialController.getSurveyMaterial);
 
 export default router;

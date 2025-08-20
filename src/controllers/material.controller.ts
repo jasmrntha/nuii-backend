@@ -144,11 +144,11 @@ export const MaterialController = {
     next: NextFunction,
   ) {
     try {
-      const { table, survey } = await request.body;
+      const { table, survey } = request.query;
 
       const result = await MaterialService.getSurveyMaterials(
-        table as MaterialTables,
-        survey as SurveyType,
+        String(table),
+        String(survey),
       );
 
       const resp = new CustomResponse(
