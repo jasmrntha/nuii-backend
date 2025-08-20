@@ -3,6 +3,8 @@ import express from 'express';
 const router = express.Router();
 
 import { AuthMiddleware } from '../middleware';
+import ApptmRoutes from './app-tm.router';
+import CubicleRoutes from './cubicle.router';
 import EstimasiRoutes from './estimasi.router';
 import ExcelRoutes from './excel.router';
 import GroundingRoutes from './grounding.router';
@@ -34,6 +36,8 @@ router.use('/excel-archive', ExcelRoutes);
 
 router.use('/sktm', SKTMRoutes);
 router.use('/sutm', SUTMRoutes);
+router.use('/cubicle', CubicleRoutes);
+router.use('/app-tm', ApptmRoutes);
 
 router.use('/upload-file', UploadFileRoutes);
 router.use('/upload-image', UploadImageRoutes);
