@@ -234,20 +234,20 @@ model SktmJoint {
 // --- CUBICLE ---
 
 model CubicleSurvey {
-  id               Int       @id @default(autoincrement())
-  id_survey_header Int
+  id                  Int         @id @default(autoincrement())
+  id_survey_header    Int
   id_cubicle_material Int
-  cubicle_type     CubicleType
-  has_grounding    Boolean?
-  penyulang        String
-  long             String
-  lat              String
-  foto             String
-  keterangan       String
-  petugas_survey   String
-  created_at       DateTime  @default(now())
-  updated_at       DateTime  @updatedAt
-  deleted_at       DateTime?
+  cubicle_type        CubicleType
+  has_grounding       Boolean?
+  penyulang           String
+  long                String
+  lat                 String
+  foto                String
+  keterangan          String
+  petugas_survey      String
+  created_at          DateTime    @default(now())
+  updated_at          DateTime    @updatedAt
+  deleted_at          DateTime?
 
   survey_header SurveyHeader @relation(fields: [id_survey_header], references: [id])
 }

@@ -85,17 +85,23 @@ export const SurveyHeader = {
                 material_tiang: include,
                 konstruksi: {
                   include: {
-                    konstruksi_materials: { include: { material: include } },
+                    konstruksi_materials: {
+                      include: { material: include, tipe_pekerjaan: include },
+                    },
                   },
                 },
                 pole_supporter: {
                   include: {
-                    pole_materials: { include: { material: include } },
+                    pole_materials: {
+                      include: { material: include, tipe_pekerjaan: include },
+                    },
                   },
                 },
                 grounding_termination: {
                   include: {
-                    GroundingMaterial: { include: { material: include } },
+                    GroundingMaterial: {
+                      include: { material: include, tipe_pekerjaan: include },
+                    },
                   },
                 },
               },
@@ -106,11 +112,15 @@ export const SurveyHeader = {
         sktm_surveys: {
           include: {
             sktm_details: include,
-            sktm_components: include,
-            sktm_joints: include,
+            sktm_components: { include: { material: include } },
+            sktm_joints: {
+              include: { material_joint: include, material_kabel: include },
+            },
           },
         },
-        cubicle_surveys: include,
+        cubicle_surveys: {
+          include: { AppTmComponent: { include: { material: include } } },
+        },
         app_tm_surveys: include,
       },
     });
