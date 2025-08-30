@@ -1,4 +1,4 @@
-import { LogType, type SurveyType } from '@prisma/client';
+import { LogType, SurveyType } from '@prisma/client';
 import { StatusCodes } from 'http-status-codes';
 
 import prisma from '../config/prisma';
@@ -194,8 +194,25 @@ export const MaterialService = {
     }
   },
 
-  async getSurveyMaterials(table: MaterialTables, tipe_survey: SurveyType) {
-    const material = await Material.getSurveyMaterials(table, tipe_survey);
+  async getSurveyMaterials(table: string, tipe_survey: string) {
+    if (!Object.values(MaterialTables).includes(table as MaterialTables)) {
+      throw new CustomError(
+        StatusCodes.BAD_REQUEST,
+        `\'${table} is not a valid MaterialTables\'`,
+      );
+    }
+
+    if (!Object.values(SurveyType).includes(tipe_survey as SurveyType)) {
+      throw new CustomError(
+        StatusCodes.BAD_REQUEST,
+        `\'${tipe_survey} is not a valid SurveyType\'`,
+      );
+    }
+
+    const material = await Material.getSurveyMaterials(
+      table as MaterialTables,
+      tipe_survey as SurveyType,
+    );
 
     if (!material[0]) {
       throw new CustomError(StatusCodes.NOT_FOUND, 'Material not found');
