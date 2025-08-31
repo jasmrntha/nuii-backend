@@ -10,5 +10,6 @@ import { UploadExcelSchema } from '../validators';
 const router = express.Router();
 
 router.post('/', validate(UploadExcelSchema), ExcelController.uploadExcel);
+router.get('/export/:id', ExcelController.exportSurveyToExcel);
 
 export default router;

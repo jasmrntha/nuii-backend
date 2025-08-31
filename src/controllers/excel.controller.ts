@@ -1,3 +1,5 @@
+import { Readable } from 'node:stream';
+
 import { type NextFunction, type Request, type Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
@@ -19,6 +21,34 @@ export const ExcelController = {
       );
 
       return response.json(resp.toJSON());
+    } catch (error: any) {
+      next(error);
+    }
+  },
+  async exportSurveyToExcel(
+    request: Request,
+    response: Response,
+    next: NextFunction,
+  ) {
+    try {
+      const id = request.params.id;
+      const excelBuffer = await ExcelService.exportSurveyToExcel(Number(id));
+      const fileName = 'Survey.xlsx';
+
+      const stream = Readable.from([excelBuffer]);
+
+      response.setHeader(
+        'Content-Type',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      );
+      response.setHeader(
+        'Content-Disposition',
+        `attachment; filename=${fileName}.xlsx`,
+      );
+      response.status(StatusCodes.OK);
+
+      // return response.send(excelBuffer);
+      return stream.pipe(response);
     } catch (error: any) {
       next(error);
     }

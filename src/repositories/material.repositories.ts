@@ -103,6 +103,12 @@ export const Material = {
     });
   },
 
+  async findManyByIds(ids: number[]) {
+    return prisma.material.findMany({
+      where: { id: { in: ids }, deleted_at: null },
+    });
+  },
+
   async getSelectedMaterial(id_tipe: number) {
     return await prisma.material.findMany({
       where: {

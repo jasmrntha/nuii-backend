@@ -118,10 +118,10 @@ export const SurveyHeader = {
             },
           },
         },
-        cubicle_surveys: {
+        cubicle_surveys: include,
+        app_tm_surveys: {
           include: { AppTmComponent: { include: { material: include } } },
         },
-        app_tm_surveys: include,
       },
     });
   },

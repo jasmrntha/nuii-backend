@@ -15,7 +15,8 @@ import {
   type ITiangPrice,
 } from '../middleware';
 import { type UploadExcelRequest } from '../models';
-import { ExcelArchive, SurveyHeader } from '../repositories';
+import { ExcelArchive, Material, SurveyHeader } from '../repositories';
+import { warn } from 'node:console';
 
 interface ISutmCounts {
   konstruksi: Record<number, any>;
@@ -25,68 +26,8 @@ interface ISutmCounts {
   grounding: Record<number, any>;
 }
 
-async function countSutm(survey: any): Promise<ISutmCounts> {
-  const sutmDetails: {
-    id_konstruksi: number;
-    id_material_tiang: number;
-    id_pole_supporter: number;
-    id_grounding_termination: number;
-    panjang_jaringan: number;
-  }[] = survey.sutm_surveys.flatMap((s: any) => s.sutm_details);
-
-  const konstruksiIds = [
-    ...new Set(sutmDetails.map((d: any) => d.id_konstruksi)),
-  ] as number[];
-  const tiangIds = [
-    ...new Set(sutmDetails.map((d: any) => d.id_material_tiang)),
-  ] as number[];
-  const konduktorIds = [
-    ...new Set(survey.sutm_surveys.map((s: any) => s.id_material_konduktor)),
-  ] as number[];
-  const poleIds = [
-    ...new Set(
-      sutmDetails.map((d: any) => d.id_pole_supporter).filter(Boolean),
-    ),
-  ] as number[];
-  const groundingIds = [
-    ...new Set(
-      sutmDetails.map((d: any) => d.id_grounding_termination).filter(Boolean),
-    ),
-  ] as number[];
-
-  const [konstruksiData, tiangData, konduktorData, poleData, groundingData] =
-    await prisma.$transaction([
-      prisma.konstruksi.findMany({
-        where: { id: { in: konstruksiIds } },
-        include: {
-          konstruksi_materials: {
-            include: { material: true, tipe_pekerjaan: true },
-          },
-        },
-      }),
-      prisma.material.findMany({ where: { id: { in: tiangIds } } }),
-      prisma.material.findMany({ where: { id: { in: konduktorIds } } }),
-      prisma.poleSupporter.findMany({
-        where: { id: { in: poleIds } },
-        include: {
-          pole_materials: { include: { material: true, tipe_pekerjaan: true } },
-        },
-      }),
-      prisma.groundingTermination.findMany({
-        where: { id: { in: groundingIds } },
-        include: {
-          GroundingMaterial: {
-            include: { material: true, tipe_pekerjaan: true },
-          },
-        },
-      }),
-    ]);
-
-  const konstruksiMap = new Map(konstruksiData.map(k => [k.id, k]));
-  const tiangMap = new Map(tiangData.map(t => [t.id, t]));
-  const konduktorMap = new Map(konduktorData.map(k => [k.id, k]));
-  const poleMap = new Map(poleData.map(p => [p.id, p]));
-  const groundingMap = new Map(groundingData.map(g => [g.id, g]));
+function countSutm(survey: any): ISutmCounts {
+  const sutmDetails = survey.sutm_surveys.flatMap((s: any) => s.sutm_details);
 
   const counts: ISutmCounts = {
     konstruksi: {},
@@ -97,31 +38,31 @@ async function countSutm(survey: any): Promise<ISutmCounts> {
   };
 
   for (const detail of sutmDetails) {
-    // Konstruksi
+    // Konstruksi (already included via detail.konstruksi)
     if (!counts.konstruksi[detail.id_konstruksi]) {
       counts.konstruksi[detail.id_konstruksi] = {
-        ...konstruksiMap.get(detail.id_konstruksi),
+        ...detail.konstruksi,
         count: 0,
       };
     }
 
     counts.konstruksi[detail.id_konstruksi].count++;
 
-    // Tiang
+    // Tiang (already included via detail.material_tiang)
     if (!counts.tiang[detail.id_material_tiang]) {
       counts.tiang[detail.id_material_tiang] = {
-        ...tiangMap.get(detail.id_material_tiang),
+        ...detail.material_tiang,
         count: 0,
       };
     }
 
     counts.tiang[detail.id_material_tiang].count++;
 
-    // Pole Supporter
+    // Pole Supporter (optional)
     if (detail.id_pole_supporter) {
       if (!counts.pole[detail.id_pole_supporter]) {
         counts.pole[detail.id_pole_supporter] = {
-          ...poleMap.get(detail.id_pole_supporter),
+          ...detail.pole_supporter,
           count: 0,
         };
       }
@@ -129,11 +70,11 @@ async function countSutm(survey: any): Promise<ISutmCounts> {
       counts.pole[detail.id_pole_supporter].count++;
     }
 
-    // Grounding
+    // Grounding (optional)
     if (detail.id_grounding_termination) {
       if (!counts.grounding[detail.id_grounding_termination]) {
         counts.grounding[detail.id_grounding_termination] = {
-          ...groundingMap.get(detail.id_grounding_termination),
+          ...detail.grounding_termination,
           count: 0,
           konstruksi: {},
         };
@@ -157,10 +98,11 @@ async function countSutm(survey: any): Promise<ISutmCounts> {
     }
   }
 
+  // Konduktor (already included via survey.material_konduktor)
   for (const sutmSurvey of survey.sutm_surveys) {
     if (!counts.konduktor[sutmSurvey.id_material_konduktor]) {
       counts.konduktor[sutmSurvey.id_material_konduktor] = {
-        ...konduktorMap.get(sutmSurvey.id_material_konduktor),
+        ...sutmSurvey.material_konduktor,
         totalPanjang: 0,
       };
     }
@@ -184,11 +126,11 @@ function calculateMaterialPrices(
   const totalKuantitas = kuantitas * count;
   const totalHargaMaterial = material.harga_material * totalKuantitas;
   const totalPasang = material.pasang_rab * totalKuantitas;
-  const totalBongkar = material.bongkar * count;
+  const totalBongkar = material.bongkar * totalKuantitas;
   const totalBerat = (Number(material.berat_material) * totalKuantitas) / 1000;
 
   return {
-    ...material,
+    material: material,
     total_kuantitas: totalKuantitas,
     total_berat: totalBerat,
     total_harga_material: totalHargaMaterial,
@@ -197,53 +139,56 @@ function calculateMaterialPrices(
   };
 }
 
-async function countCubicle(survey: any) {
-  const cubicleDetails: {
-    id: number;
-    id_cubicle_material: number;
-    cubicle_type: string;
-    AppTmComponent: any[];
-  }[] = survey.cubicle_surveys;
+async function countCubicle(surveys: any[]) {
+  if (!Array.isArray(surveys) || surveys.length === 0) return [];
 
-  const cubicleIds = [
-    ...new Set(cubicleDetails.map((d: any) => d.id_cubicle_material)),
-  ] as number[];
+  // Count occurrences without reduce()
+  const cubicleCounts: Record<number, number> = {};
+  const groundingCounts: Record<number, number> = {};
 
-  const cubicleData = await prisma.material.findMany({
-    where: { id: { in: cubicleIds } },
-  });
+  for (const survey of surveys) {
+    const id = survey.id_cubicle_material;
+    const hasGrounding = survey.has_grounding;
 
-  const cubicleMap = new Map(cubicleData.map(c => [c.id, c]));
-
-  const counts: Record<string, any> = {};
-
-  for (const detail of cubicleDetails) {
-    if (!counts[detail.id_cubicle_material]) {
-      counts[detail.id_cubicle_material] = {
-        ...cubicleMap.get(detail.id_cubicle_material),
-        count: 0,
-        materials: {},
-      };
+    if (!cubicleCounts[id]) {
+      cubicleCounts[id] = 0;
     }
 
-    counts[detail.id_cubicle_material].count++;
+    if (!groundingCounts[id] && hasGrounding) {
+      groundingCounts[id] = 0;
+    }
 
-    for (const component of detail.AppTmComponent) {
-      if (
-        !counts[detail.id_cubicle_material].materials[component.id_material]
-      ) {
-        counts[detail.id_cubicle_material].materials[component.id_material] = {
-          ...component.material,
-          count: 0,
-        };
-      }
+    cubicleCounts[id]++;
 
-      counts[detail.id_cubicle_material].materials[component.id_material]
-        .count++;
+    if (hasGrounding) {
+      groundingCounts[id]++;
     }
   }
 
-  return counts;
+  // Get material details from DB
+  const materialIds = Object.keys(cubicleCounts).map(Number);
+  const materials = await prisma.material.findMany({
+    where: { id: { in: materialIds } },
+  });
+
+  // Map into desired result format
+  const results: any[] = [];
+
+  for (const material of materials) {
+    const count = cubicleCounts[material.id];
+    const grounding = groundingCounts[material.id];
+    const calc = calculateMaterialPrices(material, 1, count);
+
+    results.push({
+      id: material.id,
+      nama_cubicle: material.nama_material,
+      count,
+      grounding: grounding || 0,
+      materials: [calc], // one material per cubicle
+    });
+  }
+
+  return results;
 }
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -298,7 +243,7 @@ export const ExcelService = {
       const isSutm = survey.sutm_surveys.length > 0 ? true : false;
       const isSktm = survey.sktm_surveys.length > 0 ? true : false;
 
-      const sutmCounts: ISutmCounts = isSutm ? await countSutm(survey) : null;
+      const sutmCounts: ISutmCounts = isSutm ? countSutm(survey) : null;
 
       const totalPrices: IKonstruksiPrice[] = Object.values(
         sutmCounts.konstruksi,
@@ -362,7 +307,7 @@ export const ExcelService = {
         const materials = grounding.GroundingMaterial.map((material: any) =>
           calculateMaterialPrices(
             material.material,
-            Number(material.kuantitas),
+            Number(grounding.count),
             grounding.count,
           ),
         );
@@ -376,16 +321,48 @@ export const ExcelService = {
 
       const flattenedGroundingPrices = groundingPrices.flat();
 
-      const cubicleCounts = isCubicle ? await countCubicle(survey) : null;
+      const cubiclePrices = isCubicle
+        ? await countCubicle(survey.cubicle_surveys)
+        : null;
 
-      const cubiclePrices: ICubiclePrice[] = Object.values(cubicleCounts).map(
-        (cubicle: any) => ({
-          ...cubicle,
-          materials: Object.values(cubicle.materials).map((material: any) =>
-            calculateMaterialPrices(material, 1, material.count),
-          ),
-        }),
+      let totalCubicleGrounding = 0;
+
+      for (const cube of cubiclePrices) {
+        totalCubicleGrounding += cube.grounding;
+      }
+
+      console.log(totalCubicleGrounding);
+
+      // Define order and kuantitas
+      const cubicleGroundingConfig = [
+        { id: 73, kuantitas: 2 },
+        { id: 17, kuantitas: 10 },
+        { id: 229, kuantitas: 4 },
+      ];
+
+      // Fetch all materials
+      const cubicleGroundingMaterials = await Material.findManyByIds(
+        cubicleGroundingConfig.map(cfg => cfg.id),
       );
+
+      // Map by ID for quick lookup
+      const materialMap = new Map(
+        cubicleGroundingMaterials.map(mat => [mat.id, mat]),
+      );
+
+      // Build result in fixed order
+      const cubicleGroundingPrices = cubicleGroundingConfig.map(
+        ({ id, kuantitas }) =>
+          calculateMaterialPrices(
+            materialMap.get(id),
+            kuantitas,
+            totalCubicleGrounding, // count from your countCubicle function
+          ),
+      );
+
+      console.log(cubicleGroundingPrices);
+
+      // console.log(sutmCounts.grounding);
 
       // Step 3: Get all materials required and the amount for each unique konstruksi and tiang
 
@@ -412,7 +389,7 @@ export const ExcelService = {
       }
 
       if (cubicle) {
-        await writeCubicleSheet(cubicle, survey, cubiclePrices, workbook);
+        writeCubicleSheet(cubicle, survey, cubiclePrices, workbook);
       }
 
       const excelBuffer = await workbook.xlsx.writeBuffer();

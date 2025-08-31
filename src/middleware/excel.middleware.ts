@@ -65,6 +65,7 @@ export interface IPolePrice {
 
 export interface IGroundingPrice {
   id: number;
+  GroundingMaterial: any;
   nama_grounding: string;
   idKonstruksi: number;
   materials: IMaterialPrice[];
@@ -82,7 +83,8 @@ export interface IKonduktorPrice {
 export interface ICubiclePrice {
   id: number;
   nama_cubicle: string;
-  materials: IMaterialPrice[];
+  count: number; // how many cubicles of this type
+  materials: IMaterialPrice[]; // calculated prices for all materials in this cubicle
 }
 
 export async function writeSutmSheet(
@@ -630,6 +632,9 @@ export async function writeSutmSheet(
             formatWorksheetRow(sutm, previousRow);
           }
 
+          // console.log('Grounding');
+          // console.log(group);
+
           // Process each material in the group
           for (const calculatedGrounding of group) {
             previousRow += 1;
@@ -978,7 +983,10 @@ export async function writeSutmSheet(
       },
       {
         col: 'G',
-        value: material.nomor_material === 534 ? totalAkhirBerat : 0,
+        value:
+          material.nomor_material === 534
+            ? totalAkhirBerat
+            : { formula: '0', result: 0 },
         isAlign: true,
       },
       {
@@ -1448,7 +1456,7 @@ export function writeCubicleSheet(
 
   for (const price of cubiclePrices) {
     previousRow += 1;
-    cubicle.getCell(`C${previousRow}`).value = price.nama_material;
+    cubicle.getCell(`C${previousRow}`).value = '   CT TM';
     formatWorksheetRow(cubicle, previousRow);
 
     for (const material of price.materials) {
@@ -1511,6 +1519,13 @@ export function writeCubicleSheet(
       formatWorksheetRow(cubicle, previousRow);
     }
   }
+
+  previousRow += 1;
+  formatWorksheetRow(cubicle, previousRow);
+
+  previousRow += 1;
+  cubicle.getCell(`C${previousRow}`).value = '   GROUNDING';
+  formatWorksheetRow(cubicle, previousRow);
 
   const lastRow = previousRow;
 
