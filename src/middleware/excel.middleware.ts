@@ -87,6 +87,13 @@ export interface ICubiclePrice {
   materials: IMaterialPrice[]; // calculated prices for all materials in this cubicle
 }
 
+export interface IAppTmPrice {
+  id: number;
+  nama_material: string;
+  count: number; // how many cubicles of this type
+  materials: IMaterialPrice[]; // calculated prices for all materials in this cubicle
+}
+
 function setupCommonHeader(
   sheet: ExcelJS.Worksheet,
   workbook: ExcelJS.Workbook,
@@ -1090,7 +1097,7 @@ export async function writeAppTmSheet(
   apptm: ExcelJS.Worksheet,
   survey: any,
   workbook: ExcelJS.Workbook,
-  appTmPrices?: IMaterialPrice[],
+  appTmPrices: IMaterialPrice[],
 ) {
   const totalAkhirBeratRef = { value: 0 };
   const trackingArrays = {
@@ -1116,15 +1123,13 @@ export async function writeAppTmSheet(
 
   let currentRow = 17;
 
-  const prices = appTmPrices || [];
-
   // APP TM section
   currentRow = writeGroupedMaterialsWithHeaders(
     apptm,
     currentRow,
-    prices,
+    appTmPrices,
     totalAkhirBeratRef,
-    'APP TM',
+    'APP & METER',
     'main',
     { rowTitle: trackingArrays.rowTitle },
   );

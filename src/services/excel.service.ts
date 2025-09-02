@@ -197,6 +197,48 @@ async function countCubicle(surveys: any[]) {
   return results;
 }
 
+function countAppTm(surveys: any[]) {
+  if (!Array.isArray(surveys) || surveys.length === 0) return [];
+
+  // Count occurrences without reduce()
+  const appTmCounts: Record<number, number> = {};
+
+  for (const survey of surveys) {
+    for (const component of survey.AppTmComponent) {
+      const id = component.id_material;
+
+      if (!appTmCounts[id]) {
+        appTmCounts[id] = 0;
+      }
+
+      appTmCounts[id]++;
+    }
+  }
+
+  // Map into desired result format
+  const results: any[] = [];
+
+  const components = surveys[0].AppTmComponent;
+
+  for (const component of components) {
+    const count = appTmCounts[component.id_material];
+    const calc = calculateMaterialPrices(
+      component.material,
+      component.kuantitas,
+      count,
+    );
+
+    results.push({
+      id: component.material.id,
+      nama_material: component.material.nama_material,
+      count,
+      materials: [calc], // one material per cubicle
+    });
+  }
+
+  return results;
+}
+
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export const ExcelService = {
   async uploadExcel(request: UploadExcelRequest) {
@@ -388,7 +430,15 @@ export const ExcelService = {
           workbook,
         );
 
-        await writeAppTmSheet(appTm, survey, workbook);
+        const appTmPrice = countAppTm(survey.app_tm_surveys);
+        const appTmMaterials = appTmPrice.flatMap(
+          component => component.materials,
+        );
+
+        // console.dir(appTmPrice, { depth: 2, colors: true });
+        // console.log(appTmMaterials);
+
+        await writeAppTmSheet(appTm, survey, workbook, appTmMaterials);
       }
 
       if (isSktm) {
