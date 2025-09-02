@@ -1,4 +1,4 @@
-import { type SurveyType } from '@prisma/client';
+// import { type SurveyType } from '@prisma/client';
 import { type NextFunction, type Request, type Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
@@ -11,12 +11,12 @@ import { MaterialService } from '../services';
 // import { tokenDecode } from '../utils/JwtToken';
 // import { storageQueryValidate } from '../validators';
 
-enum MaterialTables {
-  CABLE = 'kabelMaterial',
-  ACCESSORY = 'accessoryMaterial',
-  TERMINATION = 'terminasiMaterial',
-  JOINTING = 'jointingMaterial',
-}
+// enum MaterialTables {
+//   CABLE = 'kabelMaterial',
+//   ACCESSORY = 'accessoryMaterial',
+//   TERMINATION = 'terminasiMaterial',
+//   JOINTING = 'jointingMaterial',
+// }
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export const MaterialController = {

@@ -13,13 +13,13 @@ interface ComponentItem {
 // Default APP & METER components (you can pass your own via args)
 const APP_METER_COMPONENTS: ComponentItem[] = [
   { nomor_material: 153, kuantitas: 1, keterangan: '-' },
-  { nomor_material: 288, kuantitas: 1, keterangan: '-' },
-  { nomor_material: 181, kuantitas: 1, keterangan: '-' },
-  { nomor_material: 112, kuantitas: 2, keterangan: '-' },
-  { nomor_material: 457, kuantitas: 0, keterangan: '-' },
-  { nomor_material: 386, kuantitas: 0, keterangan: '-' },
-  { nomor_material: 456, kuantitas: 0, keterangan: '-' },
-  { nomor_material: 126, kuantitas: 0, keterangan: '-' },
+  { nomor_material: 280, kuantitas: 2, keterangan: '-' },
+  { nomor_material: 181, kuantitas: 0.5, keterangan: '-' },
+  { nomor_material: 112, kuantitas: 1, keterangan: '-' },
+  { nomor_material: 457, kuantitas: 10, keterangan: '-' },
+  { nomor_material: 458, kuantitas: 10, keterangan: '-' },
+  { nomor_material: 456, kuantitas: 2, keterangan: '-' },
+  { nomor_material: 136, kuantitas: 1, keterangan: '-' },
 ];
 
 export const AppTmRepository = {

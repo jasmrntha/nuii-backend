@@ -87,6 +87,594 @@ export interface ICubiclePrice {
   materials: IMaterialPrice[]; // calculated prices for all materials in this cubicle
 }
 
+function setupCommonHeader(
+  sheet: ExcelJS.Worksheet,
+  workbook: ExcelJS.Workbook,
+  survey: any,
+  title: string,
+) {
+  // Column widths
+  sheet.columns = [
+    { width: 5 },
+    { width: 10 },
+    { width: 90 },
+    { width: 15 },
+    { width: 12 },
+    { width: 12 },
+    { width: 12 },
+    { width: 10 },
+    { width: 10 },
+    { width: 10 },
+    { width: 15 },
+    { width: 15 },
+    { width: 15 },
+    { width: 15 },
+    { width: 15 },
+    { width: 15 },
+    { width: 17 },
+  ];
+
+  // PLN header
+  sheet.mergeCells('C2:D2');
+  sheet.getCell('C2').value = 'PT PLN (PERSERO)';
+  sheet.mergeCells('C3:D3');
+  sheet.getCell('C3').value = 'DISTRIBUSI JAWA TIMUR';
+  sheet.mergeCells('C4:D4');
+  sheet.getCell('C4').value = 'UP3 SURABAYA BARAT';
+
+  // Image
+  const imagePath = path.resolve(process.cwd(), 'storage/file/image.png');
+  const imageId = workbook.addImage({ filename: imagePath, extension: 'png' });
+  sheet.mergeCells('B2:B4');
+  const column = sheet.getColumn(2);
+  if (!column.width) column.width = 10;
+  const columnWidthPx = column.width * 7.5;
+  const imageWidthPx = 44.6;
+  const offsetX = (columnWidthPx - imageWidthPx) / 2;
+  sheet.addImage(imageId, {
+    tl: { col: 1, row: 1, nativeCol: 1, nativeColOff: offsetX * 9525 },
+    ext: { width: 44.6, height: 61.63 },
+  });
+
+  // Title
+  sheet.mergeCells('B6:Q6');
+  sheet.getCell('B6').value = title;
+  sheet.getCell('B6').alignment = { horizontal: 'center' };
+
+  // Job description section
+  sheet.mergeCells('E8:G8');
+  sheet.getCell('E8').value = 'URAIAN PEKERJAAN';
+  sheet.getCell('H8').value = ':';
+  sheet.getCell('H8').alignment = { horizontal: 'center' };
+  sheet.getCell('I8').value = `${survey.nama_survey}`;
+
+  sheet.mergeCells('E9:G9');
+  sheet.getCell('E9').value = 'JENIS';
+  sheet.getCell('H9').value = ':';
+  sheet.getCell('H9').alignment = { horizontal: 'center' };
+  sheet.getCell('I9').value = `${survey.nama_pekerjaan}`;
+
+  sheet.mergeCells('E10:G10');
+  sheet.getCell('E10').value = 'LOKASI';
+  sheet.getCell('H10').value = ':';
+  sheet.getCell('H10').alignment = { horizontal: 'center' };
+  sheet.getCell('I10').value = '-';
+  sheet.getCell('H11').value = ':';
+  sheet.getCell('H11').alignment = { horizontal: 'center' };
+  sheet.getCell('I11').value = `${survey.lokasi}`;
+}
+
+function setupTableHeader(sheet: ExcelJS.Worksheet) {
+  const headers = [
+    '',
+    'NO. MAT',
+    'PEKERJAAN',
+    'JENIS MDU',
+    'Berat',
+    'Sat',
+    'Berat Total',
+    'Volume',
+    '',
+    '',
+    'Harga Satuan',
+    '',
+    '',
+    'Jumlah Harga',
+    '',
+    '',
+    'JUMLAH',
+  ];
+
+  sheet.getRow(15).values = headers;
+  sheet.getRow(16).values = [
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    'Material',
+    'Pasang',
+    'Bongkar',
+    'Material',
+    'Pasang',
+    'Bongkar',
+    'Material',
+    'Pasang',
+    'Bongkar',
+    '',
+  ];
+
+  sheet.mergeCells('B15:B16');
+  sheet.mergeCells('C15:C16');
+  sheet.mergeCells('D15:D16');
+  sheet.mergeCells('E15:E16');
+  sheet.mergeCells('F15:F16');
+  sheet.mergeCells('G15:G16');
+  sheet.mergeCells('H15:J15');
+  sheet.mergeCells('K15:M15');
+  sheet.mergeCells('N15:P15');
+  sheet.mergeCells('Q15:Q16');
+
+  sheet.getRow(15).height = 30;
+  sheet.getRow(16).height = 40;
+
+  for (const rowNumber of [15, 16]) {
+    const row = sheet.getRow(rowNumber);
+    row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
+      if (colNumber > 1 && colNumber < 18) {
+        cell.alignment = { horizontal: 'center', vertical: 'middle' };
+        cell.border = {
+          top: { style: 'thin' },
+          left: { style: 'thin' },
+          bottom: { style: 'thin' },
+          right: { style: 'thin' },
+        };
+      }
+    });
+  }
+}
+
+function writeMaterialRow(
+  sheet: ExcelJS.Worksheet,
+  rowIndex: number,
+  rowData: { col: string; value: any; isAlign?: boolean }[],
+  border?: Partial<ExcelJS.Borders>,
+) {
+  for (const { col, value, isAlign } of rowData) {
+    const cell = sheet.getCell(`${col}${rowIndex}`);
+    cell.value = value;
+
+    if (isAlign) {
+      cell.alignment = { horizontal: 'center', vertical: 'middle' };
+    }
+  }
+
+  formatWorksheetRow(sheet, rowIndex, border);
+}
+
+// Enhanced and new helper functions
+export function writeMaterialRows(
+  sheet: ExcelJS.Worksheet,
+  startRow: number,
+  materials: IMaterialPrice[],
+  totalBeratRef: { value: number },
+  options: {
+    includeFormula?: boolean;
+    multiplier?: number;
+  } = {},
+): number {
+  let currentRow = startRow;
+  const { includeFormula = true, multiplier = 1 } = options;
+
+  for (const material of materials) {
+    currentRow++;
+    totalBeratRef.value += material.total_berat * multiplier;
+
+    const rowData = [
+      { col: 'B', value: material.material.nomor_material },
+      { col: 'C', value: material.material.nama_material },
+      { col: 'D', value: material.material.jenis_material, isAlign: true },
+      {
+        col: 'E',
+        value: Number(material.material.berat_material),
+        isAlign: true,
+      },
+      { col: 'F', value: material.material.satuan_material, isAlign: true },
+      { col: 'G', value: material.total_berat * multiplier, isAlign: true },
+      { col: 'H', value: material.total_kuantitas * multiplier, isAlign: true },
+      { col: 'I', value: material.total_kuantitas * multiplier, isAlign: true },
+      {
+        col: 'J',
+        value: includeFormula ? { formula: '0', result: 0 } : 0,
+        isAlign: true,
+      },
+      { col: 'K', value: material.material.harga_material },
+      { col: 'L', value: material.material.pasang_rab },
+      { col: 'N', value: material.total_harga_material * multiplier },
+      { col: 'O', value: material.total_pasang * multiplier },
+      {
+        col: 'Q',
+        value:
+          (material.total_harga_material + material.total_pasang) * multiplier,
+      },
+    ];
+
+    writeMaterialRow(sheet, currentRow, rowData);
+  }
+
+  return currentRow;
+}
+
+export function writeSectionHeader(
+  sheet: ExcelJS.Worksheet,
+  row: number,
+  title: string,
+  level: 'main' | 'sub' | 'group' = 'main',
+): void {
+  const prefix = '   ';
+  const displayTitle = ['main', 'sub'].includes(level)
+    ? title.toUpperCase()
+    : `${title} :`;
+
+  console.log(displayTitle);
+
+  sheet.getCell(`C${row}`).value = `${prefix}${displayTitle}`;
+  formatWorksheetRow(sheet, row);
+}
+
+export function writeGroupedMaterialsWithHeaders(
+  sheet: ExcelJS.Worksheet,
+  startRow: number,
+  materials: IMaterialPrice[],
+  totalBeratRef: { value: number },
+  sectionTitle: string,
+  sectionType: 'sub' | 'main' | 'group' = 'main',
+  trackingArrays: {
+    rowTitle?: number[];
+    rowSection?: number[];
+    rowTipePekerjaan?: number[];
+  } = {},
+): number {
+  let currentRow = startRow;
+
+  // // Write main section header
+  currentRow++;
+  writeSectionHeader(sheet, currentRow, sectionTitle, sectionType);
+  trackingArrays.rowTitle?.push(currentRow);
+
+  // Group materials by tipe_pekerjaan
+  const groupedMaterials: Record<string, IMaterialPrice[]> = {};
+
+  for (const material of materials) {
+    const tipePekerjaan =
+      material.material.tipe_pekerjaan?.tipe_pekerjaan || '';
+
+    if (!groupedMaterials[tipePekerjaan]) {
+      groupedMaterials[tipePekerjaan] = [];
+    }
+
+    groupedMaterials[tipePekerjaan].push(material);
+  }
+
+  // Write grouped materials
+  for (const [groupKey, group] of Object.entries(groupedMaterials)) {
+    if (groupKey) {
+      currentRow++;
+      writeSectionHeader(sheet, currentRow, groupKey, 'group');
+      trackingArrays.rowTipePekerjaan?.push(currentRow);
+    }
+
+    currentRow = writeMaterialRows(sheet, currentRow, group, totalBeratRef);
+  }
+
+  // Add spacing
+  currentRow++;
+  formatWorksheetRow(sheet, currentRow);
+
+  return currentRow;
+}
+
+export function writeSummarySection(
+  sheet: ExcelJS.Worksheet,
+  startRow: number,
+  lastDataRow: number,
+): {
+  lastRow: number;
+  totalRows: { material: number; jasa: number; jumlah: number; total: number };
+} {
+  let row = startRow;
+
+  // Empty rows
+  for (let i = 0; i < 3; i++) {
+    row++;
+    formatWorksheetRow(sheet, row);
+  }
+
+  // Total Material
+  row++;
+  const totalMaterialRow = row;
+  sheet.getCell(`C${row}`).value = '   Jumlah Harga Material';
+  sheet.getCell(`N${row}`).value = { formula: `SUM(N17:N${lastDataRow})` };
+  formatWorksheetRow(sheet, row);
+
+  // Total Jasa
+  row++;
+  const totalJasaRow = row;
+  sheet.getCell(`C${row}`).value = '   Jumlah Harga Jasa';
+  sheet.getCell(`O${row}`).value = { formula: `SUM(O17:O${lastDataRow})` };
+  sheet.getCell(`P${row}`).value = { formula: `SUM(P17:P${lastDataRow})` };
+  formatWorksheetRow(sheet, row);
+
+  // Jumlah Harga
+  row++;
+  const jumlahHargaRow = row;
+  sheet.getCell(`C${row}`).value = '   Jumlah Harga';
+  sheet.getCell(`Q${row}`).value = {
+    formula: `N${totalMaterialRow} + O${totalJasaRow} + P${totalJasaRow}`,
+  };
+  formatWorksheetRow(sheet, row);
+
+  // Perkiraan Kerja Tambah
+  row++;
+  sheet.getCell(`C${row}`).value = '   Perkiraan Kerja Tambah';
+  formatWorksheetRow(sheet, row);
+
+  // Total
+  row++;
+  const totalRow = row;
+  sheet.getCell(`C${row}`).value = '   T O T A L';
+  sheet.getCell(`Q${row}`).value = { formula: `Q${jumlahHargaRow}` };
+  formatWorksheetRow(sheet, row, {
+    top: { style: 'dotted' },
+    left: { style: 'thin' },
+    bottom: { style: 'thin' },
+    right: { style: 'thin' },
+  });
+
+  return {
+    lastRow: row,
+    totalRows: {
+      material: totalMaterialRow,
+      jasa: totalJasaRow,
+      jumlah: jumlahHargaRow,
+      total: totalRow,
+    },
+  };
+}
+
+export function writeSignatureSection(
+  sheet: ExcelJS.Worksheet,
+  startRow: number,
+): number[] {
+  let row = startRow + 2;
+  const date = new Date();
+  const months = [
+    'Januari',
+    'Februari',
+    'Maret',
+    'April',
+    'Mei',
+    'Juni',
+    'Juli',
+    'Agustus',
+    'September',
+    'Oktober',
+    'November',
+    'Desember',
+  ];
+
+  // Date
+  sheet.mergeCells(`O${row}:Q${row}`);
+  sheet.getCell(`O${row}`).value =
+    `Sidoarjo, ${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
+  sheet.getCell(`O${row}`).alignment = { horizontal: 'center' };
+
+  // Title
+  row++;
+  const ttdRows = [row];
+  sheet.mergeCells(`O${row}:Q${row}`);
+  sheet.getCell(`O${row}`).value = 'ASMAN PERENCANAAN';
+  sheet.getCell(`O${row}`).alignment = { horizontal: 'center' };
+
+  // Empty space for signature
+  row += 4;
+  sheet.mergeCells(`O${ttdRows[0] + 1}:Q${row - 1}`);
+
+  // Name
+  ttdRows.push(row);
+  sheet.mergeCells(`O${row}:Q${row}`);
+  sheet.getCell(`O${row}`).value = 'M SYAIFUDIN';
+  sheet.getCell(`O${row}`).alignment = { horizontal: 'center' };
+
+  return ttdRows;
+}
+
+export async function writeSupportingMaterials(
+  sheet: ExcelJS.Worksheet,
+  startRow: number,
+  totalWeight: number,
+  materialIds: number[] = [541, 536, 534],
+): Promise<{ lastRow: number; transportRow?: number }> {
+  const materials =
+    materialIds.length > 1
+      ? await Material.findManyByIds(materialIds)
+      : [await Material.findMaterialById(materialIds[0])];
+
+  let row = startRow;
+  let transportRow: number | undefined;
+
+  for (const material of materials) {
+    row++;
+    let quantity = 1;
+
+    if (material.nomor_material === 534) {
+      transportRow = row;
+      quantity = Math.ceil(totalWeight * 100) / 100;
+    }
+
+    const rowData = [
+      { col: 'B', value: material.nomor_material },
+      { col: 'C', value: material.nama_material },
+      { col: 'D', value: material.jenis_material, isAlign: true },
+      { col: 'E', value: { formula: '0', result: 0 }, isAlign: true },
+      { col: 'F', value: material.satuan_material, isAlign: true },
+      {
+        col: 'G',
+        value:
+          material.nomor_material === 534
+            ? totalWeight
+            : { formula: '0', result: 0 },
+        isAlign: true,
+      },
+      { col: 'I', value: quantity, isAlign: true },
+      { col: 'L', value: material.pasang_rab },
+      { col: 'O', value: Math.ceil(material.pasang_rab * quantity) },
+      { col: 'Q', value: Math.ceil(material.pasang_rab * quantity) },
+    ];
+
+    writeMaterialRow(sheet, row, rowData);
+  }
+
+  return { lastRow: row, transportRow };
+}
+
+// Enhanced styling helper
+interface IStyleConfig {
+  rowTitle?: number[];
+  rowPoleSupport?: number[];
+  rowKonstruksi?: number[];
+  rowGrounding?: number[];
+  rowTipePekerjaan?: number[];
+  ttdRows?: number[];
+  lastDataRow: number;
+  totalStartRow: number;
+  totalEndRow: number;
+  transportRow?: number;
+}
+
+export function applySheetStyling(
+  sheet: ExcelJS.Worksheet,
+  config: IStyleConfig,
+): void {
+  // Base font for all cells
+  sheet.eachRow(row => {
+    row.eachCell(cell => {
+      cell.font = { name: 'Arial', size: 12 };
+    });
+  });
+
+  // Material numbers in red
+  for (let rowIndex = 17; rowIndex <= config.lastDataRow; rowIndex++) {
+    sheet.getCell(`B${rowIndex}`).font = {
+      name: 'Arial',
+      size: 12,
+      color: { argb: 'FF0000' },
+    };
+  }
+
+  // Work type sections in red
+  config.rowTipePekerjaan?.forEach(row => {
+    sheet.getCell(`C${row}`).font = {
+      name: 'Arial',
+      size: 12,
+      color: { argb: 'FF0000' },
+    };
+  });
+
+  // Apply specific section styling
+  const sectionStyles = [
+    { rows: config.rowTitle, color: 'FDE9D9', bold: true },
+    { rows: config.rowPoleSupport, color: 'F2F2F2', bold: true },
+    { rows: config.rowKonstruksi, color: 'EBF1DE', bold: true },
+    {
+      rows: config.rowGrounding,
+      color: 'FDE9D9',
+      bold: true,
+      textColor: 'C00000',
+    },
+  ];
+
+  sectionStyles.forEach(({ rows, color, bold, textColor }) => {
+    rows?.forEach(row => {
+      const cell = sheet.getCell(`C${row}`);
+      cell.font = {
+        name: 'Arial',
+        size: 12,
+        bold,
+        ...(textColor && { color: { argb: textColor } }),
+      };
+      cell.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: color },
+      };
+    });
+  });
+
+  // Price columns styling and formatting
+  for (let rowIndex = 17; rowIndex <= config.lastDataRow; rowIndex++) {
+    for (let colIndex = 11; colIndex <= 17; colIndex++) {
+      const cell = sheet.getCell(rowIndex, colIndex);
+      cell.font = { name: 'Arial', size: 12, color: { argb: '00B0F0' } };
+      cell.numFmt = '#,##0';
+    }
+
+    // Weight column formatting
+    sheet.getCell(`G${rowIndex}`).numFmt = '0.00';
+  }
+
+  // Special formatting for transport row
+  if (config.transportRow) {
+    sheet.getCell(`I${config.transportRow}`).numFmt = '0.00';
+  }
+
+  // Total section styling
+  for (
+    let rowIndex = config.totalStartRow;
+    rowIndex <= config.totalEndRow;
+    rowIndex++
+  ) {
+    sheet.getCell(`C${rowIndex}`).font = {
+      name: 'Arial',
+      size: 12,
+      bold: true,
+      color: { argb: '002060' },
+    };
+
+    for (let colIndex = 11; colIndex <= 17; colIndex++) {
+      sheet.getCell(rowIndex, colIndex).numFmt = '#,##0';
+    }
+  }
+
+  // Header styling
+  for (let colIndex = 2; colIndex <= 17; colIndex++) {
+    [15, 16].forEach(rowIndex => {
+      sheet.getCell(rowIndex, colIndex).fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'DAEEF3' },
+      };
+    });
+  }
+
+  // Special header cells
+  sheet.getCell('D15').font = { name: 'Arial', size: 12, bold: true };
+  sheet.getCell('B6').font = {
+    name: 'Arial',
+    size: 12,
+    bold: true,
+    underline: true,
+  };
+
+  // Signature styling
+  config.ttdRows?.forEach(row => {
+    sheet.getCell(`O${row}`).font = { name: 'Arial', size: 12, bold: true };
+  });
+}
+
+// REFACTORED writeSutmSheet function
 export async function writeSutmSheet(
   sutm: ExcelJS.Worksheet,
   survey: any,
@@ -97,108 +685,17 @@ export async function writeSutmSheet(
   konduktorPrices: IKonduktorPrice[],
   workbook: ExcelJS.Workbook,
 ) {
-  let totalAkhirBerat = 0;
-  const rowTipePekerjaan = [];
-  const rowTitle = [];
-  const rowPoleSupport = [];
-  const rowKonstruksi = [];
-  const rowGrounding = [];
+  const totalAkhirBeratRef = { value: 0 };
+  const trackingArrays = {
+    rowTitle: [] as number[],
+    rowPoleSupport: [] as number[],
+    rowKonstruksi: [] as number[],
+    rowGrounding: [] as number[],
+    rowTipePekerjaan: [] as number[],
+  };
 
-  // Set column widths
-  sutm.columns = [
-    { width: 5 },
-    { width: 10 },
-    { width: 90 },
-    { width: 15 },
-    { width: 12 },
-    { width: 12 },
-    { width: 12 },
-    { width: 10 },
-    { width: 10 },
-    { width: 10 },
-    { width: 15 },
-    { width: 15 },
-    { width: 15 },
-    { width: 15 },
-    { width: 15 },
-    { width: 15 },
-    { width: 17 },
-  ];
-
-  // Merging cells for PLN Header
-  sutm.mergeCells('C2:D2');
-  sutm.getCell('C2').value = 'PT PLN (PERSERO)';
-
-  sutm.mergeCells('C3:D3');
-  sutm.getCell('C3').value = 'DISTRIBUSI JAWA TIMUR';
-
-  sutm.mergeCells('C4:D4');
-  sutm.getCell('C4').value = 'UP3 SURABAYA BARAT';
-
-  const imagePath = path.resolve(process.cwd(), 'storage/file/image.png');
-
-  // 📌 Read Image File (Ensure the path is correct)
-  const imageId = workbook.addImage({
-    filename: imagePath, // Replace with your image path
-    extension: 'png',
-  });
-
-  // 📌 Merge Cells in Column B (B2 to B4)
-  sutm.mergeCells('B2:B4');
-
-  // 📌 Ensure Column B Has a Defined Width
-  const column = sutm.getColumn(2);
-  if (!column.width) column.width = 10; // Set a default width if not defined
-
-  // 📌 Get Column Width in Pixels (Each unit ≈ 7.5 pixels)
-  const columnWidthPx = column.width * 7.5;
-
-  // 📌 Define Image Width in Pixels
-  const imageWidthPx = 44.6;
-
-  // 📌 Calculate Horizontal Offset (Centering)
-  const offsetX = (columnWidthPx - imageWidthPx) / 2;
-
-  // 📌 Position Image in the sutm
-  sutm.addImage(imageId, {
-    tl: {
-      col: 1, // Column B (zero-based index)
-      row: 1, // Row 2 (zero-based index)
-      nativeCol: 1,
-      nativeColOff: offsetX * 9525, // Convert pixels to Excel EMUs
-      nativeRow: 1,
-      nativeRowOff: 0, // Already centered vertically
-    },
-    ext: { width: 44.6, height: 61.63 }, // Set image size in pixels
-  });
-
-  // Merge for Title
-  sutm.mergeCells('B6:Q6');
-  sutm.getCell('B6').value = 'RENCANA ANGGARAN BIAYA ESTETIKA';
-  sutm.getCell('B6').alignment = { horizontal: 'center' };
-
-  // Merging cells and filling job description details
-  sutm.mergeCells('E8:G8');
-  sutm.getCell('E8').value = 'URAIAN PEKERJAAN';
-  sutm.getCell('H8').value = ':';
-  sutm.getCell('H8').alignment = { horizontal: 'center' };
-  sutm.getCell('I8').value = `${survey.nama_survey}`;
-
-  sutm.mergeCells('E9:G9');
-  sutm.getCell('E9').value = 'JENIS';
-  sutm.getCell('H9').value = ':';
-  sutm.getCell('H9').alignment = { horizontal: 'center' };
-  sutm.getCell('I9').value = `${survey.nama_pekerjaan}`;
-
-  sutm.mergeCells('E10:G10');
-  sutm.getCell('E10').value = 'LOKASI';
-  sutm.getCell('H10').value = ':';
-  sutm.getCell('H10').alignment = { horizontal: 'center' };
-  sutm.getCell('I10').value = '-';
-
-  sutm.getCell('H11').value = ':';
-  sutm.getCell('H11').alignment = { horizontal: 'center' };
-  sutm.getCell('I11').value = `${survey.lokasi}`;
+  // Setup header and basic info
+  setupCommonHeader(sutm, workbook, survey, 'RENCANA ANGGARAN BIAYA');
 
   sutm.mergeCells('E12:G12');
   sutm.getCell('E12').value = 'VOLUME';
@@ -209,1063 +706,195 @@ export async function writeSutmSheet(
   sutm.getCell('J12').value = 'MS';
   sutm.getCell('J12').alignment = { horizontal: 'center' };
 
-  // Table Headers
-  const headers = [
-    '',
-    'NO. MAT',
-    'PEKERJAAN',
-    'JENIS MDU',
-    'Berat',
-    'Sat',
-    'Berat Total',
-    'Volume',
-    '',
-    '',
-    'Harga Satuan',
-    '',
-    '',
-    'Jumlah Harga',
-    '',
-    '',
-    'JUMLAH',
-  ];
-
-  sutm.getRow(15).values = headers;
-  sutm.getRow(16).values = [
-    '',
-    '',
-    '',
-    '',
-    '',
-    '',
-    '',
-    'Material',
-    'Pasang',
-    'Bongkar',
-    'Material',
-    'Pasang',
-    'Bongkar',
-    'Material',
-    'Pasang',
-    'Bongkar',
-    '',
-  ];
-
-  sutm.mergeCells('B15:B16');
-  sutm.mergeCells('C15:C16');
-  sutm.mergeCells('D15:D16');
-  sutm.mergeCells('E15:E16');
-  sutm.mergeCells('F15:F16');
-  sutm.mergeCells('G15:G16');
-  sutm.mergeCells('H15:J15');
-  sutm.mergeCells('K15:M15');
-  sutm.mergeCells('N15:P15');
-  sutm.mergeCells('Q15:Q16');
-
-  sutm.getRow(15).height = 30;
-  sutm.getRow(16).height = 40;
-
-  // Formatting header row
-  for (const rowNumber of [15, 16]) {
-    const row = sutm.getRow(rowNumber);
-    row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
-      if (colNumber > 1 && colNumber < 18) {
-        // Skip column A
-        cell.alignment = { horizontal: 'center', vertical: 'middle' };
-        cell.border = {
-          top: { style: 'thin' },
-          left: { style: 'thin' },
-          bottom: { style: 'thin' },
-          right: { style: 'thin' },
-        };
-      }
-    });
-  }
-
+  setupTableHeader(sutm);
   formatWorksheetRow(sutm, 17);
 
-  let previousRow = 17;
+  let currentRow = 17;
 
-  previousRow += 1;
-  sutm.getCell(`C${previousRow}`).value = '   TIANG BETON';
-  formatWorksheetRow(sutm, previousRow);
-
-  rowTitle.push(previousRow);
+  // TIANG BETON section
+  currentRow++;
+  writeSectionHeader(sutm, currentRow, 'TIANG BETON', 'main');
+  trackingArrays.rowTitle.push(currentRow);
 
   let totalTiang = 0;
 
   for (const tiang of tiangPrices) {
-    previousRow += 1;
-    sutm.getCell(`B${previousRow}`).value = tiang.material.nomor_material;
-    sutm.getCell(`C${previousRow}`).value = tiang.material.nama_material;
-    sutm.getCell(`D${previousRow}`).value = tiang.material.jenis_material;
-    sutm.getCell(`D${previousRow}`).alignment = {
-      horizontal: 'center',
-      vertical: 'middle',
-    };
-    sutm.getCell(`E${previousRow}`).value = Number(
-      tiang.material.berat_material,
-    );
-    sutm.getCell(`E${previousRow}`).alignment = {
-      horizontal: 'center',
-      vertical: 'middle',
-    };
-    sutm.getCell(`F${previousRow}`).value = tiang.material.satuan_material;
-    sutm.getCell(`F${previousRow}`).alignment = {
-      horizontal: 'center',
-      vertical: 'middle',
-    };
-    sutm.getCell(`G${previousRow}`).value = tiang.total_berat;
-
-    totalAkhirBerat += tiang.total_berat;
-
-    sutm.getCell(`G${previousRow}`).alignment = {
-      horizontal: 'center',
-      vertical: 'middle',
-    };
-    sutm.getCell(`H${previousRow}`).value = tiang.total_kuantitas;
-    sutm.getCell(`H${previousRow}`).alignment = {
-      horizontal: 'center',
-      vertical: 'middle',
-    };
-    sutm.getCell(`I${previousRow}`).value = tiang.total_kuantitas;
     totalTiang += tiang.total_kuantitas;
-    sutm.getCell(`I${previousRow}`).alignment = {
-      horizontal: 'center',
-      vertical: 'middle',
-    };
-    sutm.getCell(`J${previousRow}`).value = {
-      formula: '0',
-      result: 0,
-    };
-    sutm.getCell(`J${previousRow}`).alignment = {
-      horizontal: 'center',
-      vertical: 'middle',
-    };
-    sutm.getCell(`K${previousRow}`).value = tiang.material.harga_material;
-    sutm.getCell(`L${previousRow}`).value = tiang.material.pasang_rab;
-    sutm.getCell(`N${previousRow}`).value = tiang.total_harga_material;
-    sutm.getCell(`O${previousRow}`).value = tiang.total_pasang;
-    sutm.getCell(`Q${previousRow}`).value =
-      tiang.total_harga_material + tiang.total_pasang;
-
-    formatWorksheetRow(sutm, previousRow);
   }
 
-  previousRow += 1;
-  formatWorksheetRow(sutm, previousRow);
+  currentRow = writeMaterialRows(
+    sutm,
+    currentRow,
+    tiangPrices,
+    totalAkhirBeratRef,
+  );
 
-  previousRow += 1;
-  formatWorksheetRow(sutm, previousRow);
+  // Add spacing
+  currentRow++;
+  formatWorksheetRow(sutm, currentRow);
+  currentRow++;
+  formatWorksheetRow(sutm, currentRow);
 
+  // POLE SUPPORTER section
   if (polePrices.length > 0) {
-    previousRow += 1;
-    sutm.getCell(`C${previousRow}`).value = '   POLE SUPPORTER :';
+    currentRow++;
+    writeSectionHeader(sutm, currentRow, 'POLE SUPPORTER', 'main');
+    trackingArrays.rowTitle.push(currentRow);
 
-    formatWorksheetRow(sutm, previousRow);
+    for (const pole of polePrices) {
+      currentRow++;
+      trackingArrays.rowPoleSupport.push(currentRow);
 
-    rowTitle.push(previousRow);
-
-    for (const poles of polePrices) {
-      previousRow += 1;
-      sutm.getCell(`C${previousRow}`).value =
-        `   ${poles.nama_pole.toUpperCase()}`;
-      formatWorksheetRow(sutm, previousRow);
-
-      rowPoleSupport.push(previousRow);
-
-      const groupedMaterials: Record<string, typeof poles.materials> = {};
-
-      for (const item of poles.materials) {
-        const tipePekerjaan =
-          item.material.tipe_pekerjaan?.tipe_pekerjaan || '';
-
-        if (!groupedMaterials[tipePekerjaan]) {
-          groupedMaterials[tipePekerjaan] = [];
-        }
-
-        groupedMaterials[tipePekerjaan].push(item);
-      }
-
-      for (const [groupKey, group] of Object.entries(groupedMaterials)) {
-        if (groupKey != '') {
-          previousRow += 1;
-          sutm.getCell(`C${previousRow}`).value = `   ${groupKey} :`;
-          formatWorksheetRow(sutm, previousRow);
-
-          rowTipePekerjaan.push(previousRow);
-        }
-
-        // Process each material in the group
-        for (const calculatedPole of group) {
-          previousRow += 1;
-
-          totalAkhirBerat += calculatedPole.total_berat;
-
-          const rowData = [
-            {
-              col: 'B',
-              value: calculatedPole.material.nomor_material,
-            },
-            { col: 'C', value: calculatedPole.material.nama_material },
-            {
-              col: 'D',
-              value: calculatedPole.material.jenis_material,
-              isAlign: true,
-            },
-            {
-              col: 'E',
-              value: Number(calculatedPole.material.berat_material),
-              isAlign: true,
-            },
-            {
-              col: 'F',
-              value: calculatedPole.material.satuan_material,
-              isAlign: true,
-            },
-            {
-              col: 'G',
-              value: calculatedPole.total_berat,
-              isAlign: true,
-            },
-            {
-              col: 'H',
-              value: calculatedPole.total_kuantitas,
-              isAlign: true,
-            },
-            {
-              col: 'I',
-              value: calculatedPole.total_kuantitas,
-              isAlign: true,
-            },
-            {
-              col: 'J',
-              value: { formula: '0', result: 0 },
-              isAlign: true,
-            },
-            {
-              col: 'K',
-              value: calculatedPole.material.harga_material,
-            },
-            { col: 'L', value: calculatedPole.material.pasang_rab },
-            { col: 'N', value: calculatedPole.total_harga_material },
-            { col: 'O', value: calculatedPole.total_pasang },
-            {
-              col: 'Q',
-              value:
-                calculatedPole.total_harga_material +
-                calculatedPole.total_pasang,
-            },
-          ];
-
-          // Apply values and alignments
-          for (const { col, value, isAlign } of rowData) {
-            sutm.getCell(`${col}${previousRow}`).value = value;
-
-            if (isAlign) {
-              sutm.getCell(`${col}${previousRow}`).alignment = {
-                horizontal: 'center',
-                vertical: 'middle',
-              };
-            }
-          }
-
-          formatWorksheetRow(sutm, previousRow);
-        }
-      }
-
-      previousRow += 1;
-      formatWorksheetRow(sutm, previousRow);
+      currentRow = writeGroupedMaterialsWithHeaders(
+        sutm,
+        currentRow - 1,
+        pole.materials,
+        totalAkhirBeratRef,
+        pole.nama_pole, // No title needed as we already wrote it
+        'sub',
+        { rowTipePekerjaan: trackingArrays.rowTipePekerjaan },
+      );
     }
 
-    previousRow += 1;
-    formatWorksheetRow(sutm, previousRow);
+    currentRow++;
+    formatWorksheetRow(sutm, currentRow);
   }
 
-  previousRow += 1;
-  sutm.getCell(`C${previousRow}`).value = '   POLE TOP ARRANGEMENT :';
-  formatWorksheetRow(sutm, previousRow);
+  // POLE TOP ARRANGEMENT section
+  currentRow++;
+  writeSectionHeader(sutm, currentRow, 'POLE TOP ARRANGEMENT', 'main');
+  trackingArrays.rowTitle.push(currentRow);
 
-  rowTitle.push(previousRow);
+  for (const konstruksi of totalPrices) {
+    currentRow++;
+    trackingArrays.rowKonstruksi.push(currentRow);
 
-  for (const calculatedKonstruksi of totalPrices) {
-    const konstruksi = calculatedKonstruksi;
-
-    // Find the corresponding groundingPrices entry
-    const groundingPricesForKonstruksi = flattenedGroundingPrices.filter(
-      g => g.idKonstruksi === calculatedKonstruksi.id,
+    currentRow = writeGroupedMaterialsWithHeaders(
+      sutm,
+      currentRow - 1,
+      konstruksi.materials,
+      totalAkhirBeratRef,
+      konstruksi.nama_konstruksi, // No title needed
+      'sub',
+      { rowTipePekerjaan: trackingArrays.rowTipePekerjaan },
     );
 
-    previousRow += 1;
-    sutm.getCell(`C${previousRow}`).value =
-      `   ${konstruksi.nama_konstruksi.toUpperCase()}`;
-    formatWorksheetRow(sutm, previousRow);
+    // Handle grounding for this konstruksi
+    const groundingForKonstruksi = flattenedGroundingPrices.filter(
+      g => g.idKonstruksi === konstruksi.id,
+    );
 
-    rowKonstruksi.push(previousRow);
+    for (const grounding of groundingForKonstruksi) {
+      currentRow++;
+      trackingArrays.rowGrounding.push(currentRow);
 
-    const groupedMaterials: Record<
-      string,
-      typeof calculatedKonstruksi.materials
-    > = {};
-
-    for (const item of calculatedKonstruksi.materials) {
-      const tipePekerjaan = item.material.tipe_pekerjaan?.tipe_pekerjaan || '';
-
-      if (!groupedMaterials[tipePekerjaan]) {
-        groupedMaterials[tipePekerjaan] = [];
-      }
-
-      groupedMaterials[tipePekerjaan].push(item);
+      currentRow = writeGroupedMaterialsWithHeaders(
+        sutm,
+        currentRow - 1,
+        grounding.materials,
+        totalAkhirBeratRef,
+        grounding.nama_grounding, // No title needed
+        'sub',
+        { rowTipePekerjaan: trackingArrays.rowTipePekerjaan },
+      );
     }
 
-    for (const [groupKey, group] of Object.entries(groupedMaterials)) {
-      if (groupKey != '') {
-        previousRow += 1;
-        sutm.getCell(`C${previousRow}`).value = `   ${groupKey} :`;
-        formatWorksheetRow(sutm, previousRow);
-
-        rowTipePekerjaan.push(previousRow);
-      }
-
-      // Process each material in the group
-      for (const calculatedPole of group) {
-        previousRow += 1;
-
-        totalAkhirBerat += calculatedPole.total_berat;
-
-        const rowData = [
-          { col: 'B', value: calculatedPole.material.nomor_material },
-          { col: 'C', value: calculatedPole.material.nama_material },
-          {
-            col: 'D',
-            value: calculatedPole.material.jenis_material,
-            isAlign: true,
-          },
-          {
-            col: 'E',
-            value: Number(calculatedPole.material.berat_material),
-            isAlign: true,
-          },
-          {
-            col: 'F',
-            value: calculatedPole.material.satuan_material,
-            isAlign: true,
-          },
-          { col: 'G', value: calculatedPole.total_berat, isAlign: true },
-          {
-            col: 'H',
-            value: calculatedPole.total_kuantitas,
-            isAlign: true,
-          },
-          {
-            col: 'I',
-            value: calculatedPole.total_kuantitas,
-            isAlign: true,
-          },
-          { col: 'J', value: { formula: '0', result: 0 }, isAlign: true },
-          { col: 'K', value: calculatedPole.material.harga_material },
-          { col: 'L', value: calculatedPole.material.pasang_rab },
-          { col: 'N', value: calculatedPole.total_harga_material },
-          { col: 'O', value: calculatedPole.total_pasang },
-          {
-            col: 'Q',
-            value:
-              calculatedPole.total_harga_material + calculatedPole.total_pasang,
-          },
-        ];
-
-        // Apply values and alignments
-        for (const { col, value, isAlign } of rowData) {
-          sutm.getCell(`${col}${previousRow}`).value = value;
-
-          if (isAlign) {
-            sutm.getCell(`${col}${previousRow}`).alignment = {
-              horizontal: 'center',
-              vertical: 'middle',
-            };
-          }
-        }
-
-        formatWorksheetRow(sutm, previousRow);
-      }
-    }
-
-    previousRow += 1;
-    formatWorksheetRow(sutm, previousRow);
-
-    // Example usage of groundingPrice
-    if (
-      groundingPricesForKonstruksi &&
-      groundingPricesForKonstruksi.length > 0
-    ) {
-      // You can use groundingPrice here however you need
-      for (const groundingPrice of groundingPricesForKonstruksi) {
-        const grounding = groundingPrice;
-
-        previousRow += 1;
-        sutm.getCell(`C${previousRow}`).value =
-          `   ${grounding.nama_grounding.toUpperCase()}`;
-        formatWorksheetRow(sutm, previousRow);
-
-        rowGrounding.push(previousRow);
-
-        const groupedMaterials: Record<
-          string,
-          typeof groundingPrice.materials
-        > = {};
-
-        for (const item of groundingPrice.materials) {
-          const tipePekerjaan =
-            item.material.tipe_pekerjaan?.tipe_pekerjaan || '';
-
-          if (!groupedMaterials[tipePekerjaan]) {
-            groupedMaterials[tipePekerjaan] = [];
-          }
-
-          groupedMaterials[tipePekerjaan].push(item);
-        }
-
-        for (const [groupKey, group] of Object.entries(groupedMaterials)) {
-          if (groupKey != '') {
-            previousRow += 1;
-            sutm.getCell(`C${previousRow}`).value = `   ${groupKey} :`;
-            formatWorksheetRow(sutm, previousRow);
-          }
-
-          // console.log('Grounding');
-          // console.log(group);
-
-          // Process each material in the group
-          for (const calculatedGrounding of group) {
-            previousRow += 1;
-
-            totalAkhirBerat += calculatedGrounding.total_berat;
-
-            const rowData = [
-              {
-                col: 'B',
-                value: calculatedGrounding.material.nomor_material,
-              },
-              {
-                col: 'C',
-                value: calculatedGrounding.material.nama_material,
-              },
-              {
-                col: 'D',
-                value: calculatedGrounding.material.jenis_material,
-                isAlign: true,
-              },
-              {
-                col: 'E',
-                value: Number(calculatedGrounding.material.berat_material),
-                isAlign: true,
-              },
-              {
-                col: 'F',
-                value: calculatedGrounding.material.satuan_material,
-                isAlign: true,
-              },
-              {
-                col: 'G',
-                value: calculatedGrounding.total_berat,
-                isAlign: true,
-              },
-              {
-                col: 'H',
-                value: calculatedGrounding.total_kuantitas,
-                isAlign: true,
-              },
-              {
-                col: 'I',
-                value: calculatedGrounding.total_kuantitas,
-                isAlign: true,
-              },
-              {
-                col: 'J',
-                value: { formula: '0', result: 0 },
-                isAlign: true,
-              },
-              {
-                col: 'K',
-                value: calculatedGrounding.material.harga_material,
-              },
-              {
-                col: 'L',
-                value: calculatedGrounding.material.pasang_rab,
-              },
-              {
-                col: 'N',
-                value: calculatedGrounding.total_harga_material,
-              },
-              { col: 'O', value: calculatedGrounding.total_pasang },
-              {
-                col: 'Q',
-                value:
-                  calculatedGrounding.total_harga_material +
-                  calculatedGrounding.total_pasang,
-              },
-            ];
-
-            // Apply values and alignments
-            for (const { col, value, isAlign } of rowData) {
-              sutm.getCell(`${col}${previousRow}`).value = value;
-
-              if (isAlign) {
-                sutm.getCell(`${col}${previousRow}`).alignment = {
-                  horizontal: 'center',
-                  vertical: 'middle',
-                };
-              }
-            }
-
-            formatWorksheetRow(sutm, previousRow);
-          }
-        }
-      }
-    }
-
-    previousRow += 1;
-    formatWorksheetRow(sutm, previousRow);
+    currentRow++;
+    formatWorksheetRow(sutm, currentRow);
   }
 
-  previousRow += 1;
-  sutm.getCell(`C${previousRow}`).value = '   ANTI CLIMBING + DANGER PLATE :';
-  formatWorksheetRow(sutm, previousRow);
-
-  rowTitle.push(previousRow);
+  // ANTI CLIMBING + DANGER PLATE section
+  currentRow++;
+  writeSectionHeader(sutm, currentRow, 'ANTI CLIMBING + DANGER PLATE', 'main');
+  trackingArrays.rowTitle.push(currentRow);
 
   const antiClimbing = await KonstruksiMaterial.findMaterialForKonstruksiById(
     38,
     true,
   );
+  const antiClimbingPrices: IMaterialPrice[] = antiClimbing.map(item => ({
+    material: item.material,
+    total_kuantitas: Number(item.kuantitas) * totalTiang,
+    total_berat: (Number(item.material.berat_material) * totalTiang) / 1000,
+    total_harga_material:
+      item.material.harga_material * (Number(item.kuantitas) * totalTiang),
+    total_pasang:
+      item.material.pasang_rab * (Number(item.kuantitas) * totalTiang),
+    total_bongkar: 0,
+  }));
 
-  for (const material of antiClimbing) {
-    const data = material.material;
-    previousRow += 1;
-
-    totalAkhirBerat += (Number(data.berat_material) * totalTiang) / 1000;
-
-    const rowData = [
-      {
-        col: 'B',
-        value: data.nomor_material,
-      },
-      {
-        col: 'C',
-        value: data.nama_material,
-      },
-      {
-        col: 'D',
-        value: data.jenis_material,
-        isAlign: true,
-      },
-      {
-        col: 'E',
-        value: Number(data.berat_material),
-        isAlign: true,
-      },
-      {
-        col: 'F',
-        value: data.satuan_material,
-        isAlign: true,
-      },
-      {
-        col: 'G',
-        value: (Number(data.berat_material) * totalTiang) / 1000,
-        isAlign: true,
-      },
-      {
-        col: 'H',
-        value: Number(material.kuantitas) * totalTiang,
-        isAlign: true,
-      },
-      {
-        col: 'I',
-        value: Number(material.kuantitas) * totalTiang,
-        isAlign: true,
-      },
-      {
-        col: 'J',
-        value: { formula: '0', result: 0 },
-        isAlign: true,
-      },
-      {
-        col: 'K',
-        value: data.harga_material,
-      },
-      {
-        col: 'L',
-        value: data.pasang_rab,
-      },
-      {
-        col: 'N',
-        value: data.harga_material * (Number(material.kuantitas) * totalTiang),
-      },
-      {
-        col: 'O',
-        value: data.pasang_rab * (Number(material.kuantitas) * totalTiang),
-      },
-      {
-        col: 'Q',
-        value:
-          data.harga_material * (Number(material.kuantitas) * totalTiang) +
-          data.pasang_rab * (Number(material.kuantitas) * totalTiang),
-      },
-    ];
-
-    // Apply values and alignments
-    for (const { col, value, isAlign } of rowData) {
-      sutm.getCell(`${col}${previousRow}`).value = value;
-
-      if (isAlign) {
-        sutm.getCell(`${col}${previousRow}`).alignment = {
-          horizontal: 'center',
-          vertical: 'middle',
-        };
-      }
-    }
-
-    formatWorksheetRow(sutm, previousRow);
-  }
-
-  previousRow += 1;
-  formatWorksheetRow(sutm, previousRow);
-
-  previousRow += 1;
-  sutm.getCell(`C${previousRow}`).value = '   CONDUCTOR ACCESSORIES :';
-  formatWorksheetRow(sutm, previousRow);
-
-  rowTitle.push(previousRow);
-
-  const konduktor = konduktorPrices[0].data_konduktor;
-
-  previousRow += 1;
-
-  totalAkhirBerat += konduktorPrices[0].total_berat;
-
-  const rowData = [
-    {
-      col: 'B',
-      value: konduktor.nomor_material,
-    },
-    {
-      col: 'C',
-      value: konduktor.nama_material,
-    },
-    {
-      col: 'D',
-      value: konduktor.jenis_material,
-      isAlign: true,
-    },
-    {
-      col: 'E',
-      value: Number(konduktor.berat_material),
-      isAlign: true,
-    },
-    {
-      col: 'F',
-      value: konduktor.satuan_material,
-      isAlign: true,
-    },
-    {
-      col: 'G',
-      value: konduktorPrices[0].total_berat,
-      isAlign: true,
-    },
-    {
-      col: 'H',
-      value: konduktorPrices[0].total_kuantitas,
-      isAlign: true,
-    },
-    {
-      col: 'I',
-      value: konduktorPrices[0].total_kuantitas,
-      isAlign: true,
-    },
-    {
-      col: 'J',
-      value: { formula: '0', result: 0 },
-      isAlign: true,
-    },
-    {
-      col: 'K',
-      value: konduktor.harga_material,
-    },
-    {
-      col: 'L',
-      value: konduktor.pasang_rab,
-    },
-    {
-      col: 'N',
-      value: konduktorPrices[0].total_harga_material,
-    },
-    {
-      col: 'O',
-      value: konduktorPrices[0].total_pasang,
-    },
-    {
-      col: 'Q',
-      value:
-        konduktorPrices[0].total_harga_material +
-        konduktorPrices[0].total_pasang,
-    },
-  ];
-
-  // Apply values and alignments
-  for (const { col, value, isAlign } of rowData) {
-    sutm.getCell(`${col}${previousRow}`).value = value;
-
-    if (isAlign) {
-      sutm.getCell(`${col}${previousRow}`).alignment = {
-        horizontal: 'center',
-        vertical: 'middle',
-      };
-    }
-  }
-
-  formatWorksheetRow(sutm, previousRow);
-
-  previousRow += 1;
-  formatWorksheetRow(sutm, previousRow);
-
-  previousRow += 1;
-  formatWorksheetRow(sutm, previousRow);
-
-  previousRow += 1;
-  sutm.getCell(`C${previousRow}`).value = '   PEKERJAAN PENDUKUNG :';
-  formatWorksheetRow(sutm, previousRow);
-
-  rowTitle.push(previousRow);
-
-  const pekerjaanPendukung = [];
-
-  pekerjaanPendukung.push(
-    await Material.findMaterialById(541),
-    await Material.findMaterialById(536),
-    await Material.findMaterialById(534),
+  currentRow = writeMaterialRows(
+    sutm,
+    currentRow,
+    antiClimbingPrices,
+    totalAkhirBeratRef,
   );
 
-  let rowAngkutan;
+  currentRow++;
+  formatWorksheetRow(sutm, currentRow);
 
-  for (const material of pekerjaanPendukung) {
-    previousRow += 1;
+  // CONDUCTOR ACCESSORIES section
+  currentRow++;
+  writeSectionHeader(sutm, currentRow, 'CONDUCTOR ACCESSORIES', 'main');
+  trackingArrays.rowTitle.push(currentRow);
 
-    let value = 1;
-
-    if (material.nomor_material === 534) {
-      rowAngkutan = previousRow;
-      value = Math.ceil(totalAkhirBerat * 100) / 100;
-    }
-
-    const rowData = [
-      {
-        col: 'B',
-        value: material.nomor_material,
-      },
-      {
-        col: 'C',
-        value: material.nama_material,
-      },
-      {
-        col: 'D',
-        value: material.jenis_material,
-        isAlign: true,
-      },
-      {
-        col: 'E',
-        value: { formula: '0', result: 0 },
-        isAlign: true,
-      },
-      {
-        col: 'F',
-        value: material.satuan_material,
-        isAlign: true,
-      },
-      {
-        col: 'G',
-        value:
-          material.nomor_material === 534
-            ? totalAkhirBerat
-            : { formula: '0', result: 0 },
-        isAlign: true,
-      },
-      {
-        col: 'I',
-        value: value,
-        isAlign: true,
-      },
-      {
-        col: 'L',
-        value: material.pasang_rab,
-      },
-      {
-        col: 'O',
-        value: Math.ceil(material.pasang_rab * value),
-      },
-      {
-        col: 'Q',
-        value: Math.ceil(material.pasang_rab * value),
-      },
-    ];
-
-    // Apply values and alignments
-    for (const { col, value, isAlign } of rowData) {
-      sutm.getCell(`${col}${previousRow}`).value = value;
-
-      if (isAlign) {
-        sutm.getCell(`${col}${previousRow}`).alignment = {
-          horizontal: 'center',
-          vertical: 'middle',
-        };
-      }
-    }
-
-    formatWorksheetRow(sutm, previousRow);
-  }
-
-  const lastRow = previousRow;
-
-  previousRow += 1;
-  formatWorksheetRow(sutm, previousRow);
-
-  previousRow += 1;
-  formatWorksheetRow(sutm, previousRow);
-
-  previousRow += 1;
-  formatWorksheetRow(sutm, previousRow);
-
-  previousRow += 1;
-  const totalMaterial = previousRow;
-  sutm.getCell(`C${previousRow}`).value = '   Jumlah Harga Material';
-  sutm.getCell(`N${previousRow}`).value = {
-    formula: `SUM(N17:N${lastRow})`,
-  };
-  formatWorksheetRow(sutm, previousRow);
-
-  previousRow += 1;
-  const totalJasa = previousRow;
-  sutm.getCell(`C${previousRow}`).value = '   Jumlah Harga Jasa';
-  sutm.getCell(`O${previousRow}`).value = {
-    formula: `SUM(O17:O${lastRow})`,
-  };
-  sutm.getCell(`P${previousRow}`).value = {
-    formula: `SUM(P17:P${lastRow})`,
-  };
-  formatWorksheetRow(sutm, previousRow);
-
-  previousRow += 1;
-  const jumlahHarga = previousRow;
-  sutm.getCell(`C${previousRow}`).value = '   Jumlah Harga';
-  sutm.getCell(`Q${previousRow}`).value = {
-    formula: `N${totalMaterial} + O${totalJasa} + P${totalJasa}`,
-  };
-  formatWorksheetRow(sutm, previousRow);
-
-  previousRow += 1;
-  sutm.getCell(`C${previousRow}`).value = '   Perkiraan Kerja Tambah';
-  formatWorksheetRow(sutm, previousRow);
-
-  previousRow += 1;
-  const totalRow = previousRow;
-  sutm.getCell(`C${previousRow}`).value = '   T O T A L';
-  sutm.getCell(`Q${previousRow}`).value = {
-    formula: `Q${jumlahHarga}`,
-  };
-  formatWorksheetRow(sutm, previousRow, {
-    top: { style: 'dotted' },
-    left: { style: 'thin' },
-    bottom: { style: 'thin' },
-    right: { style: 'thin' },
-  });
-
-  previousRow += 1;
-  previousRow += 1;
-  const date = new Date();
-  const months = [
-    'Januari',
-    'Februari',
-    'Maret',
-    'April',
-    'Mei',
-    'Juni',
-    'Juli',
-    'Agustus',
-    'September',
-    'Oktober',
-    'November',
-    'Desember',
+  const konduktorAsPrices: IMaterialPrice[] = [
+    {
+      material: konduktorPrices[0].data_konduktor,
+      total_kuantitas: konduktorPrices[0].total_kuantitas,
+      total_berat: konduktorPrices[0].total_berat,
+      total_harga_material: konduktorPrices[0].total_harga_material,
+      total_pasang: konduktorPrices[0].total_pasang,
+      total_bongkar: konduktorPrices[0].total_bongkar,
+    },
   ];
 
-  sutm.mergeCells(`O${previousRow}:Q${previousRow}`);
-  sutm.getCell(`O${previousRow}`).value = `Sidoarjo, ${date.getDate()} ${
-    months[date.getMonth()]
-  } ${date.getFullYear()}`;
-  sutm.getCell(`O${previousRow}`).alignment = { horizontal: 'center' };
+  currentRow = writeMaterialRows(
+    sutm,
+    currentRow,
+    konduktorAsPrices,
+    totalAkhirBeratRef,
+  );
 
-  previousRow += 1;
-  const ttd = [];
-  ttd.push(previousRow);
-  sutm.mergeCells(`O${previousRow}:Q${previousRow}`);
-  sutm.getCell(`O${previousRow}`).value = `ASMAN PERENCANAAN`;
-  sutm.getCell(`O${previousRow}`).alignment = { horizontal: 'center' };
+  currentRow++;
+  formatWorksheetRow(sutm, currentRow);
+  currentRow++;
+  formatWorksheetRow(sutm, currentRow);
 
-  previousRow += 4;
+  // PEKERJAAN PENDUKUNG section
+  currentRow++;
+  writeSectionHeader(sutm, currentRow, 'PEKERJAAN PENDUKUNG', 'main');
+  trackingArrays.rowTitle.push(currentRow);
 
-  sutm.mergeCells(`O${ttd[0] + 1}:Q${previousRow - 1}`);
+  const { lastRow: supportingLastRow, transportRow } =
+    await writeSupportingMaterials(
+      sutm,
+      currentRow,
+      totalAkhirBeratRef.value,
+      [541, 536, 534],
+    );
+  currentRow = supportingLastRow;
 
-  ttd.push(previousRow);
-  sutm.mergeCells(`O${previousRow}:Q${previousRow}`);
-  sutm.getCell(`O${previousRow}`).value = `M SYAIFUDIN`;
-  sutm.getCell(`O${previousRow}`).alignment = { horizontal: 'center' };
+  // Summary section
+  const summaryResult = writeSummarySection(sutm, currentRow, currentRow);
 
-  sutm.eachRow(row => {
-    row.eachCell(cell => {
-      cell.font = {
-        name: 'Arial',
-        size: 12,
-      };
-    });
+  // Signature section
+  const ttdRows = writeSignatureSection(sutm, summaryResult.lastRow);
+
+  // Apply all styling
+  applySheetStyling(sutm, {
+    ...trackingArrays,
+    ttdRows,
+    lastDataRow: currentRow,
+    totalStartRow: summaryResult.totalRows.material,
+    totalEndRow: summaryResult.totalRows.total,
+    transportRow,
   });
 
-  for (let rowIndex = 17; rowIndex <= lastRow; rowIndex++) {
-    sutm.getCell(`B${rowIndex}`).font = {
-      name: 'Arial',
-      size: 12,
-      color: { argb: 'FF0000' },
-    };
-  }
-
-  for (const row of rowTipePekerjaan) {
-    sutm.getCell(`C${row}`).font = {
-      name: 'Arial',
-      size: 12,
-      color: { argb: 'FF0000' },
-    };
-  }
-
-  for (const row of ttd) {
-    sutm.getCell(`Os${row}`).font = {
-      name: 'Arial',
-      size: 12,
-      bold: true,
-    };
-  }
-
-  for (const row of rowTitle) {
-    sutm.getCell(`C${row}`).font = {
-      name: 'Arial',
-      size: 12,
-      bold: true,
-    };
-
-    sutm.getCell(`C${row}`).fill = {
-      type: 'pattern',
-      pattern: 'solid',
-      fgColor: { argb: 'FDE9D9' },
-    };
-  }
-
-  for (const row of rowPoleSupport) {
-    sutm.getCell(`C${row}`).font = {
-      name: 'Arial',
-      size: 12,
-      bold: true,
-    };
-
-    sutm.getCell(`C${row}`).fill = {
-      type: 'pattern',
-      pattern: 'solid',
-      fgColor: { argb: 'F2F2F2' },
-    };
-  }
-
-  for (const row of rowKonstruksi) {
-    sutm.getCell(`C${row}`).font = {
-      name: 'Arial',
-      size: 12,
-      bold: true,
-    };
-
-    sutm.getCell(`C${row}`).fill = {
-      type: 'pattern',
-      pattern: 'solid',
-      fgColor: { argb: 'EBF1DE' },
-    };
-  }
-
-  for (const row of rowGrounding) {
-    sutm.getCell(`C${row}`).font = {
-      name: 'Arial',
-      size: 12,
-      bold: true,
-      color: { argb: 'C00000' },
-    };
-
-    sutm.getCell(`C${row}`).fill = {
-      type: 'pattern',
-      pattern: 'solid',
-      fgColor: { argb: 'FDE9D9' },
-    };
-  }
-
-  for (let rowIndex = 17; rowIndex <= lastRow; rowIndex++) {
-    for (let colIndex = 11; colIndex <= 17; colIndex++) {
-      // Columns K to Q
-      sutm.getCell(rowIndex, colIndex).font = {
-        name: 'Arial',
-        size: 12,
-        color: { argb: '00B0F0' },
-      };
-
-      sutm.getCell(rowIndex, colIndex).numFmt = '#,##0';
-    }
-  }
-
-  for (let rowIndex = 17; rowIndex <= lastRow; rowIndex++) {
-    sutm.getCell(`G${rowIndex}`).numFmt = '0.00';
-  }
-
-  sutm.getCell(`I${rowAngkutan}`).numFmt = '0.00';
-
-  for (let rowIndex = totalMaterial; rowIndex <= totalRow; rowIndex++) {
-    sutm.getCell(`C${rowIndex}`).font = {
-      name: 'Arial',
-      size: 12,
-      bold: true,
-      color: { argb: '002060' },
-    };
-  }
-
-  for (let rowIndex = totalMaterial; rowIndex <= totalRow; rowIndex++) {
-    for (let colIndex = 11; colIndex <= 17; colIndex++) {
-      sutm.getCell(rowIndex, colIndex).numFmt = '#,##0';
-    }
-  }
-
-  for (let colIndex = 2; colIndex <= 17; colIndex++) {
-    sutm.getCell(15, colIndex).fill = {
-      type: 'pattern',
-      pattern: 'solid',
-      fgColor: { argb: 'DAEEF3' },
-    };
-    sutm.getCell(16, colIndex).fill = {
-      type: 'pattern',
-      pattern: 'solid',
-      fgColor: { argb: 'DAEEF3' },
-    };
-  }
-
-  sutm.getCell('D15').font = { name: 'Arial', size: 12, bold: true };
-  sutm.getCell('B6').font = {
-    name: 'Arial',
-    size: 12,
-    bold: true,
-    underline: true,
-  };
-
-  return totalAkhirBerat;
+  return totalAkhirBeratRef.value;
 }
 
+// REFACTORED writeCubicleSheet function
 export async function writeCubicleSheet(
   cubicle: ExcelJS.Worksheet,
   survey: any,
@@ -1273,102 +902,13 @@ export async function writeCubicleSheet(
   cubicleGroundings: IMaterialPrice[] = null,
   workbook: ExcelJS.Workbook,
 ) {
-  let totalAkhirBerat = 0;
-  const rowTitle = [];
-  cubicle.columns = [
-    { width: 5 },
-    { width: 10 },
-    { width: 90 },
-    { width: 15 },
-    { width: 12 },
-    { width: 12 },
-    { width: 12 },
-    { width: 10 },
-    { width: 10 },
-    { width: 10 },
-    { width: 15 },
-    { width: 15 },
-    { width: 15 },
-    { width: 15 },
-    { width: 15 },
-    { width: 15 },
-    { width: 17 },
-  ];
+  const totalAkhirBeratRef = { value: 0 };
+  const trackingArrays = {
+    rowTitle: [] as number[],
+  };
 
-  // Merging cells for PLN Header
-  cubicle.mergeCells('C2:D2');
-  cubicle.getCell('C2').value = 'PT PLN (PERSERO)';
-
-  cubicle.mergeCells('C3:D3');
-  cubicle.getCell('C3').value = 'DISTRIBUSI JAWA TIMUR';
-
-  cubicle.mergeCells('C4:D4');
-  cubicle.getCell('C4').value = 'UP3 SURABAYA BARAT';
-
-  const imagePath = path.resolve(process.cwd(), 'storage/file/image.png');
-
-  // 📌 Read Image File (Ensure the path is correct)
-  const imageId = workbook.addImage({
-    filename: imagePath, // Replace with your image path
-    extension: 'png',
-  });
-
-  // 📌 Merge Cells in Column B (B2 to B4)
-  cubicle.mergeCells('B2:B4');
-
-  // 📌 Ensure Column B Has a Defined Width
-  const column = cubicle.getColumn(2);
-  if (!column.width) column.width = 10; // Set a default width if not defined
-
-  // 📌 Get Column Width in Pixels (Each unit ≈ 7.5 pixels)
-  const columnWidthPx = column.width * 7.5;
-
-  // 📌 Define Image Width in Pixels
-  const imageWidthPx = 44.6;
-
-  // 📌 Calculate Horizontal Offset (Centering)
-  const offsetX = (columnWidthPx - imageWidthPx) / 2;
-
-  // 📌 Position Image in the cubicle
-  cubicle.addImage(imageId, {
-    tl: {
-      col: 1, // Column B (zero-based index)
-      row: 1, // Row 2 (zero-based index)
-      nativeCol: 1,
-      nativeColOff: offsetX * 9525, // Convert pixels to Excel EMUs
-      nativeRow: 1,
-      nativeRowOff: 0, // Already centered vertically
-    },
-    ext: { width: 44.6, height: 61.63 }, // Set image size in pixels
-  });
-
-  // Merge for Title
-  cubicle.mergeCells('B6:Q6');
-  cubicle.getCell('B6').value = 'RENCANA ANGGARAN BIAYA ESTETIKA';
-  cubicle.getCell('B6').alignment = { horizontal: 'center' };
-
-  // Merging cells and filling job description details
-  cubicle.mergeCells('E8:G8');
-  cubicle.getCell('E8').value = 'URAIAN PEKERJAAN';
-  cubicle.getCell('H8').value = ':';
-  cubicle.getCell('H8').alignment = { horizontal: 'center' };
-  cubicle.getCell('I8').value = `${survey.nama_survey}`;
-
-  cubicle.mergeCells('E9:G9');
-  cubicle.getCell('E9').value = 'JENIS';
-  cubicle.getCell('H9').value = ':';
-  cubicle.getCell('H9').alignment = { horizontal: 'center' };
-  cubicle.getCell('I9').value = `${survey.nama_pekerjaan}`;
-
-  cubicle.mergeCells('E10:G10');
-  cubicle.getCell('E10').value = 'LOKASI';
-  cubicle.getCell('H10').value = ':';
-  cubicle.getCell('H10').alignment = { horizontal: 'center' };
-  cubicle.getCell('I10').value = '-';
-
-  cubicle.getCell('H11').value = ':';
-  cubicle.getCell('H11').alignment = { horizontal: 'center' };
-  cubicle.getCell('I11').value = `${survey.lokasi}`;
+  // Setup header and basic info
+  setupCommonHeader(cubicle, workbook, survey, 'RENCANA ANGGARAN BIAYA');
 
   cubicle.mergeCells('E12:G12');
   cubicle.getCell('E12').value = 'VOLUME';
@@ -1379,496 +919,78 @@ export async function writeCubicleSheet(
   cubicle.getCell('J12').value = 'MS';
   cubicle.getCell('J12').alignment = { horizontal: 'center' };
 
-  // Table Headers
-  const headers = [
-    '',
-    'NO. MAT',
-    'PEKERJAAN',
-    'JENIS MDU',
-    'Berat',
-    'Sat',
-    'Berat Total',
-    'Volume',
-    '',
-    '',
-    'Harga Satuan',
-    '',
-    '',
-    'Jumlah Harga',
-    '',
-    '',
-    'JUMLAH',
-  ];
-
-  cubicle.getRow(15).values = headers;
-  cubicle.getRow(16).values = [
-    '',
-    '',
-    '',
-    '',
-    '',
-    '',
-    '',
-    'Material',
-    'Pasang',
-    'Bongkar',
-    'Material',
-    'Pasang',
-    'Bongkar',
-    'Material',
-    'Pasang',
-    'Bongkar',
-    '',
-  ];
-
-  cubicle.mergeCells('B15:B16');
-  cubicle.mergeCells('C15:C16');
-  cubicle.mergeCells('D15:D16');
-  cubicle.mergeCells('E15:E16');
-  cubicle.mergeCells('F15:F16');
-  cubicle.mergeCells('G15:G16');
-  cubicle.mergeCells('H15:J15');
-  cubicle.mergeCells('K15:M15');
-  cubicle.mergeCells('N15:P15');
-  cubicle.mergeCells('Q15:Q16');
-
-  cubicle.getRow(15).height = 30;
-  cubicle.getRow(16).height = 40;
-
-  // Formatting header row
-  for (const rowNumber of [15, 16]) {
-    const row = cubicle.getRow(rowNumber);
-    row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
-      if (colNumber > 1 && colNumber < 18) {
-        // Skip column A
-        cell.alignment = { horizontal: 'center', vertical: 'middle' };
-        cell.border = {
-          top: { style: 'thin' },
-          left: { style: 'thin' },
-          bottom: { style: 'thin' },
-          right: { style: 'thin' },
-        };
-      }
-    });
-  }
-
+  setupTableHeader(cubicle);
   formatWorksheetRow(cubicle, 17);
 
-  let previousRow = 17;
+  let currentRow = 17;
 
-  previousRow += 1;
-  cubicle.getCell(`C${previousRow}`).value = '   CT TM';
-  rowTitle.push(previousRow);
-  formatWorksheetRow(cubicle, previousRow);
+  // CT TM section - Process all cubicle materials
+  const allCubicleMaterials: IMaterialPrice[] = cubiclePrices.flatMap(
+    price => price.materials,
+  );
+  currentRow = writeGroupedMaterialsWithHeaders(
+    cubicle,
+    currentRow,
+    allCubicleMaterials,
+    totalAkhirBeratRef,
+    'CT TM',
+    'main',
+    { rowTitle: trackingArrays.rowTitle },
+  );
 
-  for (const price of cubiclePrices) {
-    for (const material of price.materials) {
-      previousRow += 1;
-      cubicle.getCell(`B${previousRow}`).value =
-        material.material.nomor_material;
-      cubicle.getCell(`C${previousRow}`).value =
-        material.material.nama_material;
-      cubicle.getCell(`D${previousRow}`).value =
-        material.material.jenis_material;
-      cubicle.getCell(`D${previousRow}`).alignment = {
-        horizontal: 'center',
-        vertical: 'middle',
-      };
-      cubicle.getCell(`E${previousRow}`).value = Number(
-        material.material.berat_material,
-      );
-      cubicle.getCell(`E${previousRow}`).alignment = {
-        horizontal: 'center',
-        vertical: 'middle',
-      };
-      cubicle.getCell(`F${previousRow}`).value =
-        material.material.satuan_material;
-      cubicle.getCell(`F${previousRow}`).alignment = {
-        horizontal: 'center',
-        vertical: 'middle',
-      };
-      cubicle.getCell(`G${previousRow}`).value = material.total_berat;
-      totalAkhirBerat += material.total_berat;
-      cubicle.getCell(`G${previousRow}`).alignment = {
-        horizontal: 'center',
-        vertical: 'middle',
-      };
-      cubicle.getCell(`H${previousRow}`).value = material.total_kuantitas;
-      cubicle.getCell(`H${previousRow}`).alignment = {
-        horizontal: 'center',
-        vertical: 'middle',
-      };
-      cubicle.getCell(`I${previousRow}`).value = material.total_kuantitas;
-      cubicle.getCell(`I${previousRow}`).alignment = {
-        horizontal: 'center',
-        vertical: 'middle',
-      };
-      cubicle.getCell(`J${previousRow}`).value = {
-        formula: '0',
-        result: 0,
-      };
-      cubicle.getCell(`J${previousRow}`).alignment = {
-        horizontal: 'center',
-        vertical: 'middle',
-      };
-      cubicle.getCell(`K${previousRow}`).value =
-        material.material.harga_material;
-      cubicle.getCell(`L${previousRow}`).value = material.material.pasang_rab;
-      cubicle.getCell(`N${previousRow}`).value = material.total_harga_material;
-      cubicle.getCell(`O${previousRow}`).value = material.total_pasang;
-      cubicle.getCell(`Q${previousRow}`).value =
-        material.total_harga_material + material.total_pasang;
+  // GROUNDING section (if exists)
+  if (cubicleGroundings && cubicleGroundings.length > 0) {
+    currentRow++;
+    formatWorksheetRow(cubicle, currentRow);
 
-      formatWorksheetRow(cubicle, previousRow);
-    }
+    currentRow = writeGroupedMaterialsWithHeaders(
+      cubicle,
+      currentRow,
+      cubicleGroundings,
+      totalAkhirBeratRef,
+      'GROUNDING',
+      'main',
+      { rowTitle: trackingArrays.rowTitle },
+    );
   }
 
-  if (cubicleGroundings || cubicleGroundings[0]) {
-    previousRow += 1;
-    formatWorksheetRow(cubicle, previousRow);
+  // PEKERJAAN PENDUKUNG section
+  currentRow++;
+  formatWorksheetRow(cubicle, currentRow);
 
-    previousRow += 1;
-    cubicle.getCell(`C${previousRow}`).value = '   GROUNDING';
-    rowTitle.push(previousRow);
-    formatWorksheetRow(cubicle, previousRow);
+  currentRow++;
+  writeSectionHeader(cubicle, currentRow, 'PEKERJAAN PENDUKUNG', 'main');
+  trackingArrays.rowTitle.push(currentRow);
 
-    for (const material of cubicleGroundings) {
-      previousRow += 1;
-      cubicle.getCell(`B${previousRow}`).value =
-        material.material.nomor_material;
-      cubicle.getCell(`C${previousRow}`).value =
-        material.material.nama_material;
-      cubicle.getCell(`D${previousRow}`).value =
-        material.material.jenis_material;
-      cubicle.getCell(`D${previousRow}`).alignment = {
-        horizontal: 'center',
-        vertical: 'middle',
-      };
-      cubicle.getCell(`E${previousRow}`).value = Number(
-        material.material.berat_material,
-      );
-      cubicle.getCell(`E${previousRow}`).alignment = {
-        horizontal: 'center',
-        vertical: 'middle',
-      };
-      cubicle.getCell(`F${previousRow}`).value =
-        material.material.satuan_material;
-      cubicle.getCell(`F${previousRow}`).alignment = {
-        horizontal: 'center',
-        vertical: 'middle',
-      };
-      cubicle.getCell(`G${previousRow}`).value = material.total_berat;
-      totalAkhirBerat += material.total_berat;
-      cubicle.getCell(`G${previousRow}`).alignment = {
-        horizontal: 'center',
-        vertical: 'middle',
-      };
-      cubicle.getCell(`H${previousRow}`).value = material.total_kuantitas;
-      cubicle.getCell(`H${previousRow}`).alignment = {
-        horizontal: 'center',
-        vertical: 'middle',
-      };
-      cubicle.getCell(`I${previousRow}`).value = material.total_kuantitas;
-      cubicle.getCell(`I${previousRow}`).alignment = {
-        horizontal: 'center',
-        vertical: 'middle',
-      };
-      cubicle.getCell(`J${previousRow}`).value = {
-        formula: '0',
-        result: 0,
-      };
-      cubicle.getCell(`J${previousRow}`).alignment = {
-        horizontal: 'center',
-        vertical: 'middle',
-      };
-      cubicle.getCell(`K${previousRow}`).value =
-        material.material.harga_material;
-      cubicle.getCell(`L${previousRow}`).value = material.material.pasang_rab;
-      cubicle.getCell(`N${previousRow}`).value = material.total_harga_material;
-      cubicle.getCell(`O${previousRow}`).value = material.total_pasang;
-      cubicle.getCell(`Q${previousRow}`).value =
-        material.total_harga_material + material.total_pasang;
+  const { lastRow: supportingLastRow, transportRow } =
+    await writeSupportingMaterials(
+      cubicle,
+      currentRow,
+      totalAkhirBeratRef.value,
+      [534, 541], // Different materials for cubicle sheet
+    );
+  currentRow = supportingLastRow;
 
-      formatWorksheetRow(cubicle, previousRow);
-    }
-  }
+  // Summary section
+  const summaryResult = writeSummarySection(cubicle, currentRow, currentRow);
 
-  previousRow += 1;
-  formatWorksheetRow(cubicle, previousRow);
+  // Signature section
+  const ttdRows = writeSignatureSection(cubicle, summaryResult.lastRow);
 
-  previousRow += 1;
-  cubicle.getCell(`C${previousRow}`).value = '   PEKERJAAN PENDUKUNG :';
-  rowTitle.push(previousRow);
-  formatWorksheetRow(cubicle, previousRow);
-
-  // rowTitle.push(previousRow);
-
-  const pekerjaanPendukung = await Material.findManyByIds([534, 541]);
-
-  // let rowAngkutan;
-
-  for (const material of pekerjaanPendukung) {
-    previousRow += 1;
-
-    let value = 1;
-
-    if (material.nomor_material === 534) {
-      // rowAngkutan = previousRow;
-      value = Math.ceil(totalAkhirBerat * 100) / 100;
-    }
-
-    const rowData = [
-      {
-        col: 'B',
-        value: material.nomor_material,
-      },
-      {
-        col: 'C',
-        value: material.nama_material,
-      },
-      {
-        col: 'D',
-        value: material.jenis_material,
-        isAlign: true,
-      },
-      {
-        col: 'E',
-        value: { formula: '0', result: 0 },
-        isAlign: true,
-      },
-      {
-        col: 'F',
-        value: material.satuan_material,
-        isAlign: true,
-      },
-      {
-        col: 'G',
-        value:
-          material.nomor_material === 534
-            ? totalAkhirBerat
-            : { formula: '0', result: 0 },
-        isAlign: true,
-      },
-      {
-        col: 'I',
-        value: value,
-        isAlign: true,
-      },
-      {
-        col: 'L',
-        value: material.pasang_rab,
-      },
-      {
-        col: 'O',
-        value: Math.ceil(material.pasang_rab * value),
-      },
-      {
-        col: 'Q',
-        value: Math.ceil(material.pasang_rab * value),
-      },
-    ];
-
-    // Apply values and alignments
-    for (const { col, value, isAlign } of rowData) {
-      cubicle.getCell(`${col}${previousRow}`).value = value;
-
-      if (isAlign) {
-        cubicle.getCell(`${col}${previousRow}`).alignment = {
-          horizontal: 'center',
-          vertical: 'middle',
-        };
-      }
-    }
-
-    formatWorksheetRow(cubicle, previousRow);
-  }
-
-  const lastRow = previousRow;
-
-  previousRow += 1;
-  formatWorksheetRow(cubicle, previousRow);
-
-  previousRow += 1;
-  formatWorksheetRow(cubicle, previousRow);
-
-  previousRow += 1;
-  formatWorksheetRow(cubicle, previousRow);
-
-  previousRow += 1;
-  const totalMaterial = previousRow;
-  cubicle.getCell(`C${previousRow}`).value = '   Jumlah Harga Material';
-  cubicle.getCell(`N${previousRow}`).value = {
-    formula: `SUM(N17:N${lastRow})`,
-  };
-  formatWorksheetRow(cubicle, previousRow);
-
-  previousRow += 1;
-  const totalJasa = previousRow;
-  cubicle.getCell(`C${previousRow}`).value = '   Jumlah Harga Jasa';
-  cubicle.getCell(`O${previousRow}`).value = {
-    formula: `SUM(O17:O${lastRow})`,
-  };
-  cubicle.getCell(`P${previousRow}`).value = {
-    formula: `SUM(P17:P${lastRow})`,
-  };
-  formatWorksheetRow(cubicle, previousRow);
-
-  previousRow += 1;
-  const jumlahHarga = previousRow;
-  cubicle.getCell(`C${previousRow}`).value = '   Jumlah Harga';
-  cubicle.getCell(`Q${previousRow}`).value = {
-    formula: `N${totalMaterial} + O${totalJasa} + P${totalJasa}`,
-  };
-  formatWorksheetRow(cubicle, previousRow);
-
-  previousRow += 1;
-  cubicle.getCell(`C${previousRow}`).value = '   Perkiraan Kerja Tambah';
-  formatWorksheetRow(cubicle, previousRow);
-
-  previousRow += 1;
-  const totalRow = previousRow;
-  cubicle.getCell(`C${previousRow}`).value = '   T O T A L';
-  cubicle.getCell(`Q${previousRow}`).value = {
-    formula: `Q${jumlahHarga}`,
-  };
-  formatWorksheetRow(cubicle, previousRow, {
-    top: { style: 'dotted' },
-    left: { style: 'thin' },
-    bottom: { style: 'thin' },
-    right: { style: 'thin' },
+  // Apply styling (simpler than SUTM since no pole/konstruksi sections)
+  applySheetStyling(cubicle, {
+    rowTitle: trackingArrays.rowTitle,
+    ttdRows,
+    lastDataRow: currentRow,
+    totalStartRow: summaryResult.totalRows.material,
+    totalEndRow: summaryResult.totalRows.total,
+    transportRow,
+    // No pole/konstruksi/grounding arrays needed for cubicle sheet
+    rowPoleSupport: [],
+    rowKonstruksi: [],
+    rowGrounding: [],
+    rowTipePekerjaan: [],
   });
 
-  previousRow += 1;
-  previousRow += 1;
-  const date = new Date();
-  const months = [
-    'Januari',
-    'Februari',
-    'Maret',
-    'April',
-    'Mei',
-    'Juni',
-    'Juli',
-    'Agustus',
-    'September',
-    'Oktober',
-    'November',
-    'Desember',
-  ];
-
-  cubicle.mergeCells(`O${previousRow}:Q${previousRow}`);
-  cubicle.getCell(`O${previousRow}`).value = `Sidoarjo, ${date.getDate()} ${
-    months[date.getMonth()]
-  } ${date.getFullYear()}`;
-  cubicle.getCell(`O${previousRow}`).alignment = { horizontal: 'center' };
-
-  previousRow += 1;
-  const ttd = [];
-  ttd.push(previousRow);
-  cubicle.mergeCells(`O${previousRow}:Q${previousRow}`);
-  cubicle.getCell(`O${previousRow}`).value = `ASMAN PERENCANAAN`;
-  cubicle.getCell(`O${previousRow}`).alignment = { horizontal: 'center' };
-
-  previousRow += 4;
-
-  cubicle.mergeCells(`O${ttd[0] + 1}:Q${previousRow - 1}`);
-
-  ttd.push(previousRow);
-  cubicle.mergeCells(`O${previousRow}:Q${previousRow}`);
-  cubicle.getCell(`O${previousRow}`).value = `M SYAIFUDIN`;
-  cubicle.getCell(`O${previousRow}`).alignment = { horizontal: 'center' };
-
-  cubicle.eachRow(row => {
-    row.eachCell(cell => {
-      cell.font = {
-        name: 'Arial',
-        size: 12,
-      };
-    });
-  });
-
-  for (let rowIndex = 17; rowIndex <= lastRow; rowIndex++) {
-    cubicle.getCell(`B${rowIndex}`).font = {
-      name: 'Arial',
-      size: 12,
-      color: { argb: 'FF0000' },
-    };
-  }
-
-  for (const row of ttd) {
-    cubicle.getCell(`Os${row}`).font = {
-      name: 'Arial',
-      size: 12,
-      bold: true,
-    };
-  }
-
-  for (let rowIndex = 17; rowIndex <= lastRow; rowIndex++) {
-    for (let colIndex = 11; colIndex <= 17; colIndex++) {
-      // Columns K to Q
-      cubicle.getCell(rowIndex, colIndex).font = {
-        name: 'Arial',
-        size: 12,
-        color: { argb: '00B0F0' },
-      };
-
-      cubicle.getCell(rowIndex, colIndex).numFmt = '#,##0';
-    }
-  }
-
-  for (let rowIndex = 17; rowIndex <= lastRow; rowIndex++) {
-    cubicle.getCell(`G${rowIndex}`).numFmt = '0.00';
-  }
-
-  for (let rowIndex = totalMaterial; rowIndex <= totalRow; rowIndex++) {
-    cubicle.getCell(`C${rowIndex}`).font = {
-      name: 'Arial',
-      size: 12,
-      bold: true,
-      color: { argb: '002060' },
-    };
-  }
-
-  for (let rowIndex = totalMaterial; rowIndex <= totalRow; rowIndex++) {
-    for (let colIndex = 11; colIndex <= 17; colIndex++) {
-      cubicle.getCell(rowIndex, colIndex).numFmt = '#,##0';
-    }
-  }
-
-  for (let colIndex = 2; colIndex <= 17; colIndex++) {
-    cubicle.getCell(15, colIndex).fill = {
-      type: 'pattern',
-      pattern: 'solid',
-      fgColor: { argb: 'DAEEF3' },
-    };
-    cubicle.getCell(16, colIndex).fill = {
-      type: 'pattern',
-      pattern: 'solid',
-      fgColor: { argb: 'DAEEF3' },
-    };
-  }
-
-  cubicle.getCell('D15').font = { name: 'Arial', size: 12, bold: true };
-  cubicle.getCell('B6').font = {
-    name: 'Arial',
-    size: 12,
-    bold: true,
-    underline: true,
-  };
-
-  for (const row of rowTitle) {
-    cubicle.getCell(`C${row}`).font = {
-      name: 'Arial',
-      size: 12,
-      bold: true,
-    };
-
-    cubicle.getCell(`C${row}`).fill = {
-      type: 'pattern',
-      pattern: 'solid',
-      fgColor: { argb: 'FDE9D9' },
-    };
-  }
-
-  return totalAkhirBerat;
+  return totalAkhirBeratRef.value;
 }

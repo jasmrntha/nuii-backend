@@ -15,7 +15,12 @@ import {
   type ITiangPrice,
 } from '../middleware';
 import { type UploadExcelRequest } from '../models';
-import { ExcelArchive, Material, SurveyHeader } from '../repositories';
+import {
+  CubicleRepository,
+  ExcelArchive,
+  Material,
+  SurveyHeader,
+} from '../repositories';
 
 interface ISutmCounts {
   konstruksi: Record<number, any>;
@@ -242,139 +247,92 @@ export const ExcelService = {
       const isSutm = survey.sutm_surveys.length > 0 ? true : false;
       const isSktm = survey.sktm_surveys.length > 0 ? true : false;
 
-      const sutmCounts: ISutmCounts = isSutm ? countSutm(survey) : null;
-
-      const totalPrices: IKonstruksiPrice[] = Object.values(
-        sutmCounts.konstruksi,
-      ).map((konstruksi: any) => ({
-        ...konstruksi,
-        materials: konstruksi.konstruksi_materials.map((material: any) =>
-          calculateMaterialPrices(
-            material.material,
-            Number(material.kuantitas),
-            konstruksi.count,
-          ),
-        ),
-      }));
-
-      const tiangPrices: ITiangPrice[] = Object.values(sutmCounts.tiang).map(
-        (tiang: any) => calculateMaterialPrices(tiang, 1, tiang.count),
-      );
-
-      const konduktorPrices: IKonduktorPrice[] = Object.values(
-        sutmCounts.konduktor,
-      ).map((konduktor: any) => {
-        let multiplier = konduktor.nomor_material === 5 ? 3.045 : 3.06;
-
-        if (konduktor.nomor_material === 77) {
-          multiplier = 1;
-        }
-
-        const totalConductor = (konduktor.totalPanjang * multiplier) / 1;
-        const totalHargaMaterial = konduktor.harga_material * totalConductor;
-        const totalPasang = konduktor.pasang_rab * totalConductor;
-        const totalBongkar = konduktor.bongkar * totalConductor;
-        const totalBerat =
-          (Number(konduktor.berat_material) * totalConductor) / 1000;
-
-        return {
-          data_konduktor: { ...konduktor },
-          total_kuantitas: totalConductor,
-          total_berat: totalBerat,
-          total_harga_material: totalHargaMaterial,
-          total_pasang: totalPasang,
-          total_bongkar: totalBongkar,
-        };
-      });
-
-      const polePrices: IPolePrice[] = Object.values(sutmCounts.pole).map(
-        (pole: any) => ({
-          ...pole,
-          materials: pole.pole_materials.map((material: any) =>
-            calculateMaterialPrices(
-              material.material,
-              Number(material.kuantitas),
-              pole.count,
-            ),
-          ),
-        }),
-      );
-
-      const groundingPrices: IGroundingPrice[] = Object.values(
-        sutmCounts.grounding,
-      ).flatMap((grounding: any) => {
-        const materials = grounding.GroundingMaterial.map((material: any) =>
-          calculateMaterialPrices(
-            material.material,
-            Number(grounding.count),
-            grounding.count,
-          ),
-        );
-
-        return Object.keys(grounding.konstruksi).map(konstruksiId => ({
-          ...grounding,
-          idKonstruksi: Number(konstruksiId),
-          materials,
-        }));
-      });
-
-      const flattenedGroundingPrices = groundingPrices.flat();
-
-      const cubiclePrices = isCubicle
-        ? await countCubicle(survey.cubicle_surveys)
-        : null;
-
-      let totalCubicleGrounding = 0;
-
-      for (const cube of cubiclePrices) {
-        totalCubicleGrounding += cube.grounding;
-      }
-
-      console.log(totalCubicleGrounding);
-
-      // Define order and kuantitas
-      const cubicleGroundingConfig = [
-        { id: 73, kuantitas: 2 },
-        { id: 17, kuantitas: 10 },
-        { id: 229, kuantitas: 4 },
-      ];
-
-      // Fetch all materials
-      const cubicleGroundingMaterials = await Material.findManyByIds(
-        cubicleGroundingConfig.map(cfg => cfg.id),
-      );
-
-      // Map by ID for quick lookup
-      const materialMap = new Map(
-        cubicleGroundingMaterials.map(mat => [mat.id, mat]),
-      );
-
-      // Build result in fixed order
-      const cubicleGroundingPrices = cubicleGroundingConfig.map(
-        ({ id, kuantitas }) =>
-          calculateMaterialPrices(
-            materialMap.get(id),
-            kuantitas,
-            totalCubicleGrounding, // count from your countCubicle function
-          ),
-      );
-
-      console.log(cubicleGroundingPrices);
-
-      // console.log(sutmCounts.grounding);
-
-      // Step 3: Get all materials required and the amount for each unique konstruksi and tiang
-
-      // Step 4: Calculate the total price of each material for each unique konstruksi
-
       const workbook = new ExcelJS.Workbook();
       workbook.addWorksheet('REKAP');
       const cubicle = isCubicle ? workbook.addWorksheet('CUBICLE') : null;
       const sutm = isSutm ? workbook.addWorksheet('SUTM') : null;
-      isSktm ? workbook.addWorksheet('SKTM') : null;
-      isCubicle ? workbook.addWorksheet('APP TM') : null;
+      const sktm = isSktm ? workbook.addWorksheet('SKTM') : null;
+      const appTm = isCubicle ? workbook.addWorksheet('APP TM') : null;
 
       if (sutm) {
+        const sutmCounts: ISutmCounts = isSutm ? countSutm(survey) : null;
+
+        const totalPrices: IKonstruksiPrice[] = Object.values(
+          sutmCounts.konstruksi,
+        ).map((konstruksi: any) => ({
+          ...konstruksi,
+          materials: konstruksi.konstruksi_materials.map((material: any) =>
+            calculateMaterialPrices(
+              material.material,
+              Number(material.kuantitas),
+              konstruksi.count,
+            ),
+          ),
+        }));
+
+        const tiangPrices: ITiangPrice[] = Object.values(sutmCounts.tiang).map(
+          (tiang: any) => calculateMaterialPrices(tiang, 1, tiang.count),
+        );
+
+        const konduktorPrices: IKonduktorPrice[] = Object.values(
+          sutmCounts.konduktor,
+        ).map((konduktor: any) => {
+          let multiplier = konduktor.nomor_material === 5 ? 3.045 : 3.06;
+
+          if (konduktor.nomor_material === 77) {
+            multiplier = 1;
+          }
+
+          const totalConductor = (konduktor.totalPanjang * multiplier) / 1;
+          const totalHargaMaterial = konduktor.harga_material * totalConductor;
+          const totalPasang = konduktor.pasang_rab * totalConductor;
+          const totalBongkar = konduktor.bongkar * totalConductor;
+          const totalBerat =
+            (Number(konduktor.berat_material) * totalConductor) / 1000;
+
+          return {
+            data_konduktor: { ...konduktor },
+            total_kuantitas: totalConductor,
+            total_berat: totalBerat,
+            total_harga_material: totalHargaMaterial,
+            total_pasang: totalPasang,
+            total_bongkar: totalBongkar,
+          };
+        });
+
+        const polePrices: IPolePrice[] = Object.values(sutmCounts.pole).map(
+          (pole: any) => ({
+            ...pole,
+            materials: pole.pole_materials.map((material: any) =>
+              calculateMaterialPrices(
+                material.material,
+                Number(material.kuantitas),
+                pole.count,
+              ),
+            ),
+          }),
+        );
+
+        const groundingPrices: IGroundingPrice[] = Object.values(
+          sutmCounts.grounding,
+        ).flatMap((grounding: any) => {
+          const materials = grounding.GroundingMaterial.map((material: any) =>
+            calculateMaterialPrices(
+              material.material,
+              Number(grounding.count),
+              grounding.count,
+            ),
+          );
+
+          return Object.keys(grounding.konstruksi).map(konstruksiId => ({
+            ...grounding,
+            idKonstruksi: Number(konstruksiId),
+            materials,
+          }));
+        });
+
+        const flattenedGroundingPrices = groundingPrices.flat();
+
         await writeSutmSheet(
           sutm,
           survey,
@@ -388,6 +346,38 @@ export const ExcelService = {
       }
 
       if (cubicle) {
+        const cubiclePrices = await countCubicle(survey.cubicle_surveys);
+
+        let totalCubicleGrounding = 0;
+
+        for (const cube of cubiclePrices) {
+          totalCubicleGrounding += cube.grounding;
+        }
+
+        // Define order and kuantitas
+        const cubicleGroundingConfig =
+          await CubicleRepository.getCubicleGrounding();
+
+        // Fetch all materials
+        const cubicleGroundingMaterials = await Material.findManyByIds(
+          cubicleGroundingConfig.map(cfg => cfg.id_material),
+        );
+
+        // Map by ID for quick lookup
+        const materialMap = new Map(
+          cubicleGroundingMaterials.map(mat => [mat.id, mat]),
+        );
+
+        // Build result in fixed order
+        const cubicleGroundingPrices = cubicleGroundingConfig.map(
+          ({ id_material, kuantitas }) =>
+            calculateMaterialPrices(
+              materialMap.get(id_material),
+              Number(kuantitas),
+              totalCubicleGrounding, // count from your countCubicle function
+            ),
+        );
+
         await writeCubicleSheet(
           cubicle,
           survey,

@@ -12,10 +12,13 @@ export const GroundingRepository = {
     });
   },
 
-  async getGroundingById(id: number) {
+  async getGroundingById(id: number, deep: boolean = false) {
     return await prisma.groundingTermination.findUnique({
       where: {
         id,
+      },
+      include: {
+        GroundingMaterial: { include: { material: deep } },
       },
     });
   },
