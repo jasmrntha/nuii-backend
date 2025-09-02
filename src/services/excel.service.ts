@@ -7,7 +7,7 @@ import {
   CustomError,
   writeCubicleSheet,
   writeSutmSheet,
-  type ICubiclePrice,
+  // type ICubiclePrice,
   type IGroundingPrice,
   type IKonduktorPrice,
   type IKonstruksiPrice,
@@ -16,7 +16,6 @@ import {
 } from '../middleware';
 import { type UploadExcelRequest } from '../models';
 import { ExcelArchive, Material, SurveyHeader } from '../repositories';
-import { warn } from 'node:console';
 
 interface ISutmCounts {
   konstruksi: Record<number, any>;
@@ -389,7 +388,13 @@ export const ExcelService = {
       }
 
       if (cubicle) {
-        writeCubicleSheet(cubicle, survey, cubiclePrices, workbook);
+        await writeCubicleSheet(
+          cubicle,
+          survey,
+          cubiclePrices,
+          cubicleGroundingPrices,
+          workbook,
+        );
       }
 
       const excelBuffer = await workbook.xlsx.writeBuffer();

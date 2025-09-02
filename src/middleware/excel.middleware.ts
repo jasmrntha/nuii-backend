@@ -1266,13 +1266,15 @@ export async function writeSutmSheet(
   return totalAkhirBerat;
 }
 
-export function writeCubicleSheet(
+export async function writeCubicleSheet(
   cubicle: ExcelJS.Worksheet,
   survey: any,
   cubiclePrices: ICubiclePrice[],
+  cubicleGroundings: IMaterialPrice[] = null,
   workbook: ExcelJS.Workbook,
 ) {
   let totalAkhirBerat = 0;
+  const rowTitle = [];
   cubicle.columns = [
     { width: 5 },
     { width: 10 },
@@ -1454,12 +1456,83 @@ export function writeCubicleSheet(
 
   let previousRow = 17;
 
+  previousRow += 1;
+  cubicle.getCell(`C${previousRow}`).value = '   CT TM';
+  rowTitle.push(previousRow);
+  formatWorksheetRow(cubicle, previousRow);
+
   for (const price of cubiclePrices) {
+    for (const material of price.materials) {
+      previousRow += 1;
+      cubicle.getCell(`B${previousRow}`).value =
+        material.material.nomor_material;
+      cubicle.getCell(`C${previousRow}`).value =
+        material.material.nama_material;
+      cubicle.getCell(`D${previousRow}`).value =
+        material.material.jenis_material;
+      cubicle.getCell(`D${previousRow}`).alignment = {
+        horizontal: 'center',
+        vertical: 'middle',
+      };
+      cubicle.getCell(`E${previousRow}`).value = Number(
+        material.material.berat_material,
+      );
+      cubicle.getCell(`E${previousRow}`).alignment = {
+        horizontal: 'center',
+        vertical: 'middle',
+      };
+      cubicle.getCell(`F${previousRow}`).value =
+        material.material.satuan_material;
+      cubicle.getCell(`F${previousRow}`).alignment = {
+        horizontal: 'center',
+        vertical: 'middle',
+      };
+      cubicle.getCell(`G${previousRow}`).value = material.total_berat;
+      totalAkhirBerat += material.total_berat;
+      cubicle.getCell(`G${previousRow}`).alignment = {
+        horizontal: 'center',
+        vertical: 'middle',
+      };
+      cubicle.getCell(`H${previousRow}`).value = material.total_kuantitas;
+      cubicle.getCell(`H${previousRow}`).alignment = {
+        horizontal: 'center',
+        vertical: 'middle',
+      };
+      cubicle.getCell(`I${previousRow}`).value = material.total_kuantitas;
+      cubicle.getCell(`I${previousRow}`).alignment = {
+        horizontal: 'center',
+        vertical: 'middle',
+      };
+      cubicle.getCell(`J${previousRow}`).value = {
+        formula: '0',
+        result: 0,
+      };
+      cubicle.getCell(`J${previousRow}`).alignment = {
+        horizontal: 'center',
+        vertical: 'middle',
+      };
+      cubicle.getCell(`K${previousRow}`).value =
+        material.material.harga_material;
+      cubicle.getCell(`L${previousRow}`).value = material.material.pasang_rab;
+      cubicle.getCell(`N${previousRow}`).value = material.total_harga_material;
+      cubicle.getCell(`O${previousRow}`).value = material.total_pasang;
+      cubicle.getCell(`Q${previousRow}`).value =
+        material.total_harga_material + material.total_pasang;
+
+      formatWorksheetRow(cubicle, previousRow);
+    }
+  }
+
+  if (cubicleGroundings || cubicleGroundings[0]) {
     previousRow += 1;
-    cubicle.getCell(`C${previousRow}`).value = '   CT TM';
     formatWorksheetRow(cubicle, previousRow);
 
-    for (const material of price.materials) {
+    previousRow += 1;
+    cubicle.getCell(`C${previousRow}`).value = '   GROUNDING';
+    rowTitle.push(previousRow);
+    formatWorksheetRow(cubicle, previousRow);
+
+    for (const material of cubicleGroundings) {
       previousRow += 1;
       cubicle.getCell(`B${previousRow}`).value =
         material.material.nomor_material;
@@ -1524,8 +1597,91 @@ export function writeCubicleSheet(
   formatWorksheetRow(cubicle, previousRow);
 
   previousRow += 1;
-  cubicle.getCell(`C${previousRow}`).value = '   GROUNDING';
+  cubicle.getCell(`C${previousRow}`).value = '   PEKERJAAN PENDUKUNG :';
+  rowTitle.push(previousRow);
   formatWorksheetRow(cubicle, previousRow);
+
+  // rowTitle.push(previousRow);
+
+  const pekerjaanPendukung = await Material.findManyByIds([534, 541]);
+
+  // let rowAngkutan;
+
+  for (const material of pekerjaanPendukung) {
+    previousRow += 1;
+
+    let value = 1;
+
+    if (material.nomor_material === 534) {
+      // rowAngkutan = previousRow;
+      value = Math.ceil(totalAkhirBerat * 100) / 100;
+    }
+
+    const rowData = [
+      {
+        col: 'B',
+        value: material.nomor_material,
+      },
+      {
+        col: 'C',
+        value: material.nama_material,
+      },
+      {
+        col: 'D',
+        value: material.jenis_material,
+        isAlign: true,
+      },
+      {
+        col: 'E',
+        value: { formula: '0', result: 0 },
+        isAlign: true,
+      },
+      {
+        col: 'F',
+        value: material.satuan_material,
+        isAlign: true,
+      },
+      {
+        col: 'G',
+        value:
+          material.nomor_material === 534
+            ? totalAkhirBerat
+            : { formula: '0', result: 0 },
+        isAlign: true,
+      },
+      {
+        col: 'I',
+        value: value,
+        isAlign: true,
+      },
+      {
+        col: 'L',
+        value: material.pasang_rab,
+      },
+      {
+        col: 'O',
+        value: Math.ceil(material.pasang_rab * value),
+      },
+      {
+        col: 'Q',
+        value: Math.ceil(material.pasang_rab * value),
+      },
+    ];
+
+    // Apply values and alignments
+    for (const { col, value, isAlign } of rowData) {
+      cubicle.getCell(`${col}${previousRow}`).value = value;
+
+      if (isAlign) {
+        cubicle.getCell(`${col}${previousRow}`).alignment = {
+          horizontal: 'center',
+          vertical: 'middle',
+        };
+      }
+    }
+
+    formatWorksheetRow(cubicle, previousRow);
+  }
 
   const lastRow = previousRow;
 
@@ -1699,6 +1855,20 @@ export function writeCubicleSheet(
     bold: true,
     underline: true,
   };
+
+  for (const row of rowTitle) {
+    cubicle.getCell(`C${row}`).font = {
+      name: 'Arial',
+      size: 12,
+      bold: true,
+    };
+
+    cubicle.getCell(`C${row}`).fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FDE9D9' },
+    };
+  }
 
   return totalAkhirBerat;
 }
