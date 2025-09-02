@@ -7,6 +7,8 @@ import {
   CustomError,
   writeCubicleSheet,
   writeSutmSheet,
+  writeAppTmSheet,
+  writeSktmSheet,
   // type ICubiclePrice,
   type IGroundingPrice,
   type IKonduktorPrice,
@@ -254,7 +256,7 @@ export const ExcelService = {
       const sktm = isSktm ? workbook.addWorksheet('SKTM') : null;
       const appTm = isCubicle ? workbook.addWorksheet('APP TM') : null;
 
-      if (sutm) {
+      if (isSutm) {
         const sutmCounts: ISutmCounts = isSutm ? countSutm(survey) : null;
 
         const totalPrices: IKonstruksiPrice[] = Object.values(
@@ -345,7 +347,7 @@ export const ExcelService = {
         );
       }
 
-      if (cubicle) {
+      if (isCubicle) {
         const cubiclePrices = await countCubicle(survey.cubicle_surveys);
 
         let totalCubicleGrounding = 0;
@@ -383,6 +385,21 @@ export const ExcelService = {
           survey,
           cubiclePrices,
           cubicleGroundingPrices,
+          workbook,
+        );
+
+        await writeAppTmSheet(appTm, survey, workbook);
+      }
+
+      if (isSktm) {
+        const sktmPrices: any = null;
+        const groundingPrices: any = null;
+
+        await writeSktmSheet(
+          sktm,
+          survey,
+          sktmPrices,
+          groundingPrices,
           workbook,
         );
       }

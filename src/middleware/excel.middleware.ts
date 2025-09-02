@@ -261,12 +261,12 @@ export function writeMaterialRows(
   materials: IMaterialPrice[],
   totalBeratRef: { value: number },
   options: {
-    includeFormula?: boolean;
+    shouldIncludeFormula?: boolean;
     multiplier?: number;
   } = {},
 ): number {
   let currentRow = startRow;
-  const { includeFormula = true, multiplier = 1 } = options;
+  const { shouldIncludeFormula = true, multiplier = 1 } = options;
 
   for (const material of materials) {
     currentRow++;
@@ -287,7 +287,7 @@ export function writeMaterialRows(
       { col: 'I', value: material.total_kuantitas * multiplier, isAlign: true },
       {
         col: 'J',
-        value: includeFormula ? { formula: '0', result: 0 } : 0,
+        value: shouldIncludeFormula ? { formula: '0', result: 0 } : 0,
         isAlign: true,
       },
       { col: 'K', value: material.material.harga_material },
@@ -317,8 +317,6 @@ export function writeSectionHeader(
   const displayTitle = ['main', 'sub'].includes(level)
     ? title.toUpperCase()
     : `${title} :`;
-
-  console.log(displayTitle);
 
   sheet.getCell(`C${row}`).value = `${prefix}${displayTitle}`;
   formatWorksheetRow(sheet, row);
@@ -387,7 +385,7 @@ export function writeSummarySection(
   let row = startRow;
 
   // Empty rows
-  for (let i = 0; i < 3; i++) {
+  for (let index = 0; index < 3; index++) {
     row++;
     formatWorksheetRow(sheet, row);
   }
@@ -575,34 +573,34 @@ export function applySheetStyling(
   }
 
   // Work type sections in red
-  config.rowTipePekerjaan?.forEach(row => {
+  for (const row of config.rowTipePekerjaan ?? []) {
     sheet.getCell(`C${row}`).font = {
       name: 'Arial',
       size: 12,
       color: { argb: 'FF0000' },
     };
-  });
+  }
 
   // Apply specific section styling
   const sectionStyles = [
-    { rows: config.rowTitle, color: 'FDE9D9', bold: true },
-    { rows: config.rowPoleSupport, color: 'F2F2F2', bold: true },
-    { rows: config.rowKonstruksi, color: 'EBF1DE', bold: true },
+    { rows: config.rowTitle, color: 'FDE9D9', isBold: true },
+    { rows: config.rowPoleSupport, color: 'F2F2F2', isBold: true },
+    { rows: config.rowKonstruksi, color: 'EBF1DE', isBold: true },
     {
       rows: config.rowGrounding,
       color: 'FDE9D9',
-      bold: true,
+      isBold: true,
       textColor: 'C00000',
     },
   ];
 
-  sectionStyles.forEach(({ rows, color, bold, textColor }) => {
-    rows?.forEach(row => {
+  for (const { rows, color, isBold, textColor } of sectionStyles) {
+    for (const row of rows ?? []) {
       const cell = sheet.getCell(`C${row}`);
       cell.font = {
         name: 'Arial',
         size: 12,
-        bold,
+        bold: isBold,
         ...(textColor && { color: { argb: textColor } }),
       };
       cell.fill = {
@@ -610,8 +608,8 @@ export function applySheetStyling(
         pattern: 'solid',
         fgColor: { argb: color },
       };
-    });
-  });
+    }
+  }
 
   // Price columns styling and formatting
   for (let rowIndex = 17; rowIndex <= config.lastDataRow; rowIndex++) {
@@ -650,13 +648,13 @@ export function applySheetStyling(
 
   // Header styling
   for (let colIndex = 2; colIndex <= 17; colIndex++) {
-    [15, 16].forEach(rowIndex => {
+    for (const rowIndex of [15, 16]) {
       sheet.getCell(rowIndex, colIndex).fill = {
         type: 'pattern',
         pattern: 'solid',
         fgColor: { argb: 'DAEEF3' },
       };
-    });
+    }
   }
 
   // Special header cells
@@ -669,9 +667,9 @@ export function applySheetStyling(
   };
 
   // Signature styling
-  config.ttdRows?.forEach(row => {
+  for (const row of config.ttdRows ?? []) {
     sheet.getCell(`O${row}`).font = { name: 'Arial', size: 12, bold: true };
-  });
+  }
 }
 
 // REFACTORED writeSutmSheet function
@@ -986,6 +984,177 @@ export async function writeCubicleSheet(
     totalEndRow: summaryResult.totalRows.total,
     transportRow,
     // No pole/konstruksi/grounding arrays needed for cubicle sheet
+    rowPoleSupport: [],
+    rowKonstruksi: [],
+    rowGrounding: [],
+    rowTipePekerjaan: [],
+  });
+
+  return totalAkhirBeratRef.value;
+}
+
+export async function writeSktmSheet(
+  sktm: ExcelJS.Worksheet,
+  survey: any,
+  sktmPrices: IMaterialPrice[],
+  groundingPrices: IMaterialPrice[] = [],
+  workbook: ExcelJS.Workbook,
+) {
+  const totalAkhirBeratRef = { value: 0 };
+  const trackingArrays = {
+    rowTitle: [] as number[],
+  };
+
+  // Header
+  setupCommonHeader(sktm, workbook, survey, 'RENCANA ANGGARAN BIAYA');
+
+  // Volume info (adjust as needed)
+  sktm.mergeCells('E12:G12');
+  sktm.getCell('E12').value = 'VOLUME';
+  sktm.getCell('H12').value = ':';
+  sktm.getCell('H12').alignment = { horizontal: 'center' };
+  sktm.getCell('I12').value = '-';
+  sktm.getCell('I12').alignment = { horizontal: 'center' };
+  sktm.getCell('J12').value = 'MS';
+  sktm.getCell('J12').alignment = { horizontal: 'center' };
+
+  // Table header
+  setupTableHeader(sktm);
+  formatWorksheetRow(sktm, 17);
+
+  let currentRow = 17;
+
+  // SKTM section
+  currentRow = writeGroupedMaterialsWithHeaders(
+    sktm,
+    currentRow,
+    sktmPrices,
+    totalAkhirBeratRef,
+    'SKTM',
+    'main',
+    { rowTitle: trackingArrays.rowTitle },
+  );
+
+  // GROUNDING section (if exists)
+  if (groundingPrices.length > 0) {
+    currentRow++;
+    formatWorksheetRow(sktm, currentRow);
+
+    currentRow = writeGroupedMaterialsWithHeaders(
+      sktm,
+      currentRow,
+      groundingPrices,
+      totalAkhirBeratRef,
+      'GROUNDING',
+      'main',
+      { rowTitle: trackingArrays.rowTitle },
+    );
+  }
+
+  // Supporting materials
+  currentRow++;
+  formatWorksheetRow(sktm, currentRow);
+
+  currentRow++;
+  writeSectionHeader(sktm, currentRow, 'PEKERJAAN PENDUKUNG', 'main');
+  trackingArrays.rowTitle.push(currentRow);
+
+  const { lastRow: supportingLastRow, transportRow } =
+    await writeSupportingMaterials(sktm, currentRow, totalAkhirBeratRef.value);
+  currentRow = supportingLastRow;
+
+  // Summary
+  const summaryResult = writeSummarySection(sktm, currentRow, currentRow);
+
+  // Signature
+  const ttdRows = writeSignatureSection(sktm, summaryResult.lastRow);
+
+  // Styling
+  applySheetStyling(sktm, {
+    rowTitle: trackingArrays.rowTitle,
+    ttdRows,
+    lastDataRow: currentRow,
+    totalStartRow: summaryResult.totalRows.material,
+    totalEndRow: summaryResult.totalRows.total,
+    transportRow,
+    rowPoleSupport: [],
+    rowKonstruksi: [],
+    rowGrounding: [],
+    rowTipePekerjaan: [],
+  });
+
+  return totalAkhirBeratRef.value;
+}
+
+export async function writeAppTmSheet(
+  apptm: ExcelJS.Worksheet,
+  survey: any,
+  workbook: ExcelJS.Workbook,
+  appTmPrices?: IMaterialPrice[],
+) {
+  const totalAkhirBeratRef = { value: 0 };
+  const trackingArrays = {
+    rowTitle: [] as number[],
+  };
+
+  // Header
+  setupCommonHeader(apptm, workbook, survey, 'RENCANA ANGGARAN BIAYA');
+
+  // Volume info (adjust as needed)
+  apptm.mergeCells('E12:G12');
+  apptm.getCell('E12').value = 'VOLUME';
+  apptm.getCell('H12').value = ':';
+  apptm.getCell('H12').alignment = { horizontal: 'center' };
+  apptm.getCell('I12').value = '-';
+  apptm.getCell('I12').alignment = { horizontal: 'center' };
+  apptm.getCell('J12').value = 'MS';
+  apptm.getCell('J12').alignment = { horizontal: 'center' };
+
+  // Table header
+  setupTableHeader(apptm);
+  formatWorksheetRow(apptm, 17);
+
+  let currentRow = 17;
+
+  const prices = appTmPrices || [];
+
+  // APP TM section
+  currentRow = writeGroupedMaterialsWithHeaders(
+    apptm,
+    currentRow,
+    prices,
+    totalAkhirBeratRef,
+    'APP TM',
+    'main',
+    { rowTitle: trackingArrays.rowTitle },
+  );
+
+  // Supporting materials
+  currentRow++;
+  formatWorksheetRow(apptm, currentRow);
+
+  currentRow++;
+  writeSectionHeader(apptm, currentRow, 'PEKERJAAN PENDUKUNG', 'main');
+  trackingArrays.rowTitle.push(currentRow);
+
+  const { lastRow: supportingLastRow, transportRow } =
+    await writeSupportingMaterials(apptm, currentRow, totalAkhirBeratRef.value);
+  currentRow = supportingLastRow;
+
+  // Summary
+  const summaryResult = writeSummarySection(apptm, currentRow, currentRow);
+
+  // Signature
+  const ttdRows = writeSignatureSection(apptm, summaryResult.lastRow);
+
+  // Styling
+  applySheetStyling(apptm, {
+    rowTitle: trackingArrays.rowTitle,
+    ttdRows,
+    lastDataRow: currentRow,
+    totalStartRow: summaryResult.totalRows.material,
+    totalEndRow: summaryResult.totalRows.total,
+    transportRow,
     rowPoleSupport: [],
     rowKonstruksi: [],
     rowGrounding: [],
