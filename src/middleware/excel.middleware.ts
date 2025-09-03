@@ -94,6 +94,13 @@ export interface IAppTmPrice {
   materials: IMaterialPrice[]; // calculated prices for all materials in this cubicle
 }
 
+export interface ISktmGroundingPrice {
+  id: number;
+  nama_grounding: string;
+  count: number;
+  materials: IMaterialPrice[];
+}
+
 function setupCommonHeader(
   sheet: ExcelJS.Worksheet,
   workbook: ExcelJS.Workbook,
@@ -1003,13 +1010,18 @@ export async function writeCubicleSheet(
 export async function writeSktmSheet(
   sktm: ExcelJS.Worksheet,
   survey: any,
-  sktmPrices: IMaterialPrice[],
-  groundingPrices: IMaterialPrice[] = [],
+  cablePrices: IMaterialPrice[],
+  terminationPrices: IMaterialPrice[],
+  arresterPrices: IMaterialPrice[],
+  accessoryPrices: IMaterialPrice[],
+  groundingPrices: ISktmGroundingPrice[],
   workbook: ExcelJS.Workbook,
 ) {
   const totalAkhirBeratRef = { value: 0 };
   const trackingArrays = {
     rowTitle: [] as number[],
+    rowCable: [] as number[],
+    rowSpelling: [] as number[],
   };
 
   // Header
@@ -1031,13 +1043,96 @@ export async function writeSktmSheet(
 
   let currentRow = 17;
 
-  // SKTM section
+  // Cable section
+  for (const cable of cablePrices) {
+    const title =
+      cable.material.id == 138
+        ? 'KONSTRUKSI UGC XLPE 150 mm'
+        : 'KONSTRUKSI UGC XLPE 240 mm';
+
+    currentRow++;
+    writeSectionHeader(sktm, currentRow, title, 'main');
+    trackingArrays.rowTitle.push(currentRow);
+    trackingArrays.rowCable.push(currentRow);
+
+    sktm.getCell(`H${currentRow}`).value = cable.total_kuantitas;
+    sktm.getCell(`I${currentRow}`).value = cable.total_kuantitas;
+    sktm.getCell(`J${currentRow}`).value = { formula: '0', result: 0 };
+  }
+
+  currentRow++;
+  writeSectionHeader(sktm, currentRow, 'Kabel ditanam', 'sub');
+  // trackingArrays.rowTitle.push(currentRow);
+
+  // const rowPlanted = currentRow;
+
+  sktm.getCell(`H${currentRow}`).value = {
+    formula: `(${trackingArrays.rowCable.map(r => `H${r}`).join('+')})-16`,
+    result: 0,
+  };
+  sktm.getCell(`I${currentRow}`).value = {
+    formula: `H${currentRow}`,
+    result: 0,
+  };
+  sktm.getCell(`J${currentRow}`).value = { formula: '0', result: 0 };
+
+  currentRow++;
+  writeSectionHeader(sktm, currentRow, 'Spelling Kabel yang ditanam', 'sub');
+  trackingArrays.rowSpelling.push(currentRow);
+
+  currentRow++;
+  writeSectionHeader(sktm, currentRow, 'Spelling Kabel Termination', 'sub');
+  trackingArrays.rowSpelling.push(currentRow);
+
+  currentRow = writeMaterialRows(
+    sktm,
+    currentRow,
+    cablePrices,
+    totalAkhirBeratRef,
+  );
+
+  currentRow++;
+  formatWorksheetRow(sktm, currentRow);
+
+  // Termination section
   currentRow = writeGroupedMaterialsWithHeaders(
     sktm,
     currentRow,
-    sktmPrices,
+    terminationPrices,
     totalAkhirBeratRef,
-    'SKTM',
+    'TERMINATION',
+    'main',
+    { rowTitle: trackingArrays.rowTitle },
+  );
+
+  currentRow++;
+  writeSectionHeader(sktm, currentRow, 'ARRESTER & ACCESSORIES', 'main');
+  trackingArrays.rowTitle.push(currentRow);
+
+  currentRow++;
+  formatWorksheetRow(sktm, currentRow);
+
+  // Arrester section
+  currentRow = writeGroupedMaterialsWithHeaders(
+    sktm,
+    currentRow,
+    arresterPrices,
+    totalAkhirBeratRef,
+    'ARRESTER',
+    'main',
+    { rowTitle: trackingArrays.rowTitle },
+  );
+
+  currentRow++;
+  formatWorksheetRow(sktm, currentRow);
+
+  // Accessory section
+  currentRow = writeGroupedMaterialsWithHeaders(
+    sktm,
+    currentRow,
+    accessoryPrices,
+    totalAkhirBeratRef,
+    'ACCESSORIES',
     'main',
     { rowTitle: trackingArrays.rowTitle },
   );
@@ -1047,15 +1142,21 @@ export async function writeSktmSheet(
     currentRow++;
     formatWorksheetRow(sktm, currentRow);
 
-    currentRow = writeGroupedMaterialsWithHeaders(
-      sktm,
-      currentRow,
-      groundingPrices,
-      totalAkhirBeratRef,
-      'GROUNDING',
-      'main',
-      { rowTitle: trackingArrays.rowTitle },
-    );
+    currentRow++;
+    writeSectionHeader(sktm, currentRow, 'GROUNDING ARRESTER :', 'main');
+    trackingArrays.rowTitle.push(currentRow);
+
+    for (const grounding of groundingPrices) {
+      currentRow = writeGroupedMaterialsWithHeaders(
+        sktm,
+        currentRow,
+        grounding.materials,
+        totalAkhirBeratRef,
+        grounding.nama_grounding,
+        'main',
+        { rowTitle: trackingArrays.rowTitle },
+      );
+    }
   }
 
   // Supporting materials
@@ -1143,7 +1244,12 @@ export async function writeAppTmSheet(
   trackingArrays.rowTitle.push(currentRow);
 
   const { lastRow: supportingLastRow, transportRow } =
-    await writeSupportingMaterials(apptm, currentRow, totalAkhirBeratRef.value);
+    await writeSupportingMaterials(
+      apptm,
+      currentRow,
+      totalAkhirBeratRef.value,
+      [534, 535, 541],
+    );
   currentRow = supportingLastRow;
 
   // Summary

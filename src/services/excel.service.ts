@@ -20,6 +20,7 @@ import { type UploadExcelRequest } from '../models';
 import {
   CubicleRepository,
   ExcelArchive,
+  GroundingRepository,
   Material,
   SurveyHeader,
 } from '../repositories';
@@ -239,6 +240,170 @@ function countAppTm(surveys: any[]) {
   return results;
 }
 
+async function countSktm(surveys: any[]): Promise<{
+  cablePrices: any[];
+  terminationPrices: any[];
+  arresterPrices: any[];
+  accessoryPrices: any[];
+  groundingPrices: any[];
+} | null> {
+  if (!Array.isArray(surveys) || surveys.length === 0) return null;
+
+  // Count occurrences without reduce()
+  const cableCounts: Record<number, number> = {};
+  const terminationCounts: Record<number, number> = {};
+  const arresterCounts: Record<number, number> = {};
+  const groundingCounts: Record<number, number> = {};
+  const materials: Record<number, any> = {};
+
+  for (const survey of surveys) {
+    for (const component of survey.sktm_components) {
+      const type = component.tipe_material;
+      const id = component.id_material;
+
+      switch (type) {
+        case 'CABLE': {
+          if (!cableCounts[id]) {
+            cableCounts[id] = 0;
+          }
+
+          cableCounts[id] += component.kuantitas;
+        }
+
+        case 'TERMINATION': {
+          if (!terminationCounts[id]) {
+            terminationCounts[id] = 0;
+          }
+
+          terminationCounts[id] += component.kuantitas;
+        }
+
+        case 'JOINTING': {
+          if (!terminationCounts[id]) {
+            terminationCounts[id] = 0;
+          }
+
+          terminationCounts[id] += component.kuantitas;
+        }
+
+        case 'ARRESTER': {
+          if (!arresterCounts[id]) {
+            arresterCounts[id] = 0;
+          }
+
+          arresterCounts[id] += component.kuantitas;
+        }
+      }
+
+      if (!materials[id]) {
+        materials[id] = component.material;
+      }
+    }
+  }
+
+  const cablePrices: any[] = [];
+  const terminationPrices: any[] = [];
+  const arresterPrices: any[] = [];
+  const accessoryPrices: any[] = [];
+  const groundingPrices: any[] = [];
+
+  for (const [idString, count] of Object.entries(cableCounts)) {
+    const id = Number(idString);
+    const material = materials[id];
+    const calc = calculateMaterialPrices(material, 1, count);
+
+    cablePrices.push(calc);
+  }
+
+  for (const [idString, count] of Object.entries(terminationCounts)) {
+    const id = Number(idString);
+    const material = materials[id];
+    const calc = calculateMaterialPrices(material, 1, count);
+
+    terminationPrices.push(calc);
+
+    if (id == 233 || id == 234) {
+      if (!groundingCounts[5]) {
+        groundingCounts[5] = 0;
+      }
+
+      groundingCounts[5] += count;
+    } else if (id == 231 || id == 232) {
+      if (!groundingCounts[4]) {
+        groundingCounts[4] = 0;
+      }
+
+      groundingCounts[4] += count;
+    }
+  }
+
+  const accessoryConfig = new Map<number, number>([
+    [142, 0.75],
+    [219, 2],
+    [23, 1],
+    [177, 1],
+    [18, 3],
+    [19, 9],
+  ]);
+
+  const ids = [...accessoryConfig.keys()];
+  const accessories = await Material.findManyByIds(ids);
+
+  for (const [idString, count] of Object.entries(arresterCounts)) {
+    const id = Number(idString);
+    const material = materials[id];
+    const calc = calculateMaterialPrices(material, 1, count);
+
+    for (const accessoryMaterial of accessories) {
+      const quantity = accessoryConfig.get(accessoryMaterial.id);
+      const accessoryCalc = calculateMaterialPrices(
+        accessoryMaterial,
+        quantity,
+        count,
+      );
+
+      accessoryPrices.push(accessoryCalc);
+    }
+
+    arresterPrices.push(calc);
+  }
+
+  for (const [idString, count] of Object.entries(groundingCounts)) {
+    const id = Number(idString);
+    const groundingMaterials = await GroundingRepository.getGroundingById(
+      id,
+      true,
+    );
+    const materialPrices = [];
+
+    for (const groundingMaterial of groundingMaterials.GroundingMaterial) {
+      const calc = calculateMaterialPrices(
+        groundingMaterial.material,
+        Number(groundingMaterial.kuantitas),
+        count,
+      );
+
+      materialPrices.push(calc);
+    }
+
+    const price = {
+      id,
+      nama_grouding: groundingMaterials.nama_grounding,
+      materials: materialPrices,
+    };
+
+    groundingPrices.push(price);
+  }
+
+  return {
+    cablePrices,
+    terminationPrices,
+    arresterPrices,
+    accessoryPrices,
+    groundingPrices,
+  };
+}
+
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export const ExcelService = {
   async uploadExcel(request: UploadExcelRequest) {
@@ -442,13 +607,21 @@ export const ExcelService = {
       }
 
       if (isSktm) {
-        const sktmPrices: any = null;
-        const groundingPrices: any = null;
+        const {
+          cablePrices,
+          terminationPrices,
+          arresterPrices,
+          accessoryPrices,
+          groundingPrices,
+        } = await countSktm(survey.sktm_surveys);
 
         await writeSktmSheet(
           sktm,
           survey,
-          sktmPrices,
+          cablePrices,
+          terminationPrices,
+          arresterPrices,
+          accessoryPrices,
           groundingPrices,
           workbook,
         );
