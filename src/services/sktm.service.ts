@@ -1,3 +1,4 @@
+import { type SurveyType } from '@prisma/client';
 import { StatusCodes } from 'http-status-codes';
 
 import prisma from '../config/prisma';
@@ -12,6 +13,7 @@ import {
   SKTMJoint,
   SKTMSurvey,
   SurveyHeader,
+  SurveySequance,
 } from '../repositories';
 
 function toRad(deg: number) {
@@ -247,14 +249,64 @@ export const SKTMService = {
       }
 
       const { sktm } = await prisma.$transaction(async tx => {
-        const sktm = isEmpty
-          ? await SKTMSurvey.createSurvey({ id_survey_header: header.id }, tx)
-          : survey;
+        let sktm;
+
+        if (isEmpty) {
+          sktm = await SKTMSurvey.createSurvey(
+            { id_survey_header: header.id },
+            tx,
+          );
+
+          const checkSequence = await SurveySequance.getAllSequanceByHeader(
+            header.id,
+          );
+
+          const sequenceData = {
+            survey_header_id: header.id,
+            survey_detail_id: sktm.id,
+            urutan: checkSequence.length + 1,
+            keterangan: 'SKTM',
+          };
+
+          await SurveySequance.createSequance(
+            'SKTM' as SurveyType,
+            {
+              ...sequenceData,
+              created_at: new Date(),
+            },
+            tx,
+          );
+        }
 
         const details = await SKTMDetail.createDetail(
           { id_sktm_survey: sktm.id, ...cleanDetail },
           tx,
         );
+
+        if (cleanDetail.has_arrester) {
+          const arresterCheck = await SKTMComponent.getByTipe(
+            'ARRESTER',
+            sktm.id,
+          );
+
+          !arresterCheck || arresterCheck.length <= 0
+            ? await SKTMComponent.createComponent(
+                {
+                  id_sktm_survey: sktm.id,
+                  id_material: 420,
+                  tipe_material: 'ARRESTER',
+                  kuantitas: 1,
+                },
+                tx,
+              )
+            : await SKTMComponent.updateComponents(
+                arresterCheck[0].id,
+                {
+                  kuantitas: Number(arresterCheck[0].kuantitas) + 1,
+                },
+                tx,
+              );
+        }
 
         if (idTerminationMasuk && idKabel) {
           await Promise.all([
