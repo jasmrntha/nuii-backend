@@ -268,6 +268,7 @@ async function countSktm(surveys: any[]): Promise<{
           }
 
           cableCounts[id] += component.kuantitas;
+          break;
         }
 
         case 'TERMINATION': {
@@ -276,6 +277,7 @@ async function countSktm(surveys: any[]): Promise<{
           }
 
           terminationCounts[id] += component.kuantitas;
+          break;
         }
 
         case 'JOINTING': {
@@ -284,6 +286,7 @@ async function countSktm(surveys: any[]): Promise<{
           }
 
           terminationCounts[id] += component.kuantitas;
+          break;
         }
 
         case 'ARRESTER': {
@@ -292,6 +295,7 @@ async function countSktm(surveys: any[]): Promise<{
           }
 
           arresterCounts[id] += component.kuantitas;
+          break;
         }
       }
 
@@ -388,7 +392,7 @@ async function countSktm(surveys: any[]): Promise<{
 
     const price = {
       id,
-      nama_grouding: groundingMaterials.nama_grounding,
+      nama_grounding: groundingMaterials.nama_grounding,
       materials: materialPrices,
     };
 
@@ -614,6 +618,14 @@ export const ExcelService = {
           accessoryPrices,
           groundingPrices,
         } = await countSktm(survey.sktm_surveys);
+
+        console.log(
+          cablePrices,
+          terminationPrices,
+          // arresterPrices,
+          // accessoryPrices,
+          // groundingPrices,
+        );
 
         await writeSktmSheet(
           sktm,

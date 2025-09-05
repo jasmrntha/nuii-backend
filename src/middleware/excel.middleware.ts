@@ -1022,6 +1022,8 @@ export async function writeSktmSheet(
     rowTitle: [] as number[],
     rowCable: [] as number[],
     rowSpelling: [] as number[],
+    rowTermination: [] as number[],
+    rowJoint: [] as number[],
   };
 
   // Header
@@ -1062,27 +1064,27 @@ export async function writeSktmSheet(
 
   currentRow++;
   writeSectionHeader(sktm, currentRow, 'Kabel ditanam', 'sub');
-  // trackingArrays.rowTitle.push(currentRow);
+  trackingArrays.rowTitle.push(currentRow);
 
   // const rowPlanted = currentRow;
 
   sktm.getCell(`H${currentRow}`).value = {
-    formula: `(${trackingArrays.rowCable.map(r => `H${r}`).join('+')})-16`,
-    result: 0,
+    formula: `${trackingArrays.rowCable.map(r => `H${r}`).join('+')}-16`,
   };
   sktm.getCell(`I${currentRow}`).value = {
     formula: `H${currentRow}`,
-    result: 0,
   };
   sktm.getCell(`J${currentRow}`).value = { formula: '0', result: 0 };
 
   currentRow++;
   writeSectionHeader(sktm, currentRow, 'Spelling Kabel yang ditanam', 'sub');
   trackingArrays.rowSpelling.push(currentRow);
+  trackingArrays.rowTitle.push(currentRow);
 
   currentRow++;
   writeSectionHeader(sktm, currentRow, 'Spelling Kabel Termination', 'sub');
   trackingArrays.rowSpelling.push(currentRow);
+  trackingArrays.rowTitle.push(currentRow);
 
   currentRow = writeMaterialRows(
     sktm,
@@ -1095,15 +1097,72 @@ export async function writeSktmSheet(
   formatWorksheetRow(sktm, currentRow);
 
   // Termination section
-  currentRow = writeGroupedMaterialsWithHeaders(
-    sktm,
-    currentRow,
-    terminationPrices,
-    totalAkhirBeratRef,
-    'TERMINATION',
-    'main',
-    { rowTitle: trackingArrays.rowTitle },
-  );
+  currentRow++;
+  writeSectionHeader(sktm, currentRow, 'TERMINATION', 'main');
+  trackingArrays.rowTitle.push(currentRow);
+
+  for (const termination of terminationPrices) {
+    const id = termination.material.id;
+
+    currentRow++;
+
+    if ([231, 232, 233, 234].includes(id)) {
+      trackingArrays.rowTermination.push(currentRow);
+    } else {
+      trackingArrays.rowJoint.push(currentRow);
+    }
+
+    totalAkhirBeratRef.value += termination.total_berat;
+
+    const rowData = [
+      { col: 'B', value: termination.material.nomor_material },
+      { col: 'C', value: termination.material.nama_material },
+      { col: 'D', value: termination.material.jenis_material, isAlign: true },
+      {
+        col: 'E',
+        value: Number(termination.material.berat_material),
+        isAlign: true,
+      },
+      { col: 'F', value: termination.material.satuan_material, isAlign: true },
+      { col: 'G', value: termination.total_berat, isAlign: true },
+      {
+        col: 'H',
+        value: termination.total_kuantitas,
+        isAlign: true,
+      },
+      {
+        col: 'I',
+        value: termination.total_kuantitas,
+        isAlign: true,
+      },
+      {
+        col: 'J',
+        value: { formula: '0', result: 0 },
+        isAlign: true,
+      },
+      { col: 'K', value: termination.material.harga_material },
+      { col: 'L', value: termination.material.pasang_rab },
+      { col: 'N', value: termination.total_harga_material },
+      { col: 'O', value: termination.total_pasang },
+      {
+        col: 'Q',
+        value: termination.total_harga_material + termination.total_pasang,
+      },
+    ];
+
+    writeMaterialRow(sktm, currentRow, rowData);
+  }
+
+  for (const spelling of trackingArrays.rowSpelling) {
+    const spellingFormula = `3*(${trackingArrays.rowTermination.map(r => `H${r}`).join('+')})`;
+    sktm.getCell(`H${spelling}`).value = {
+      formula: spellingFormula,
+    };
+    sktm.getCell(`I${spelling}`).value = {
+      formula: `H${spelling}`,
+    };
+    sktm.getCell(`J${spelling}`).value = { formula: '0', result: 0 };
+  }
 
   currentRow++;
   writeSectionHeader(sktm, currentRow, 'ARRESTER & ACCESSORIES', 'main');

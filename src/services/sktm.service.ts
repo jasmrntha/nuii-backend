@@ -140,6 +140,8 @@ async function insertJointsEveryDistanceInterpolated(
         tx,
       );
 
+      // console.log('Joint added at:', currentLat, currentLon);
+
       // Update for remaining distance in this segment
       currentLat = point.lat;
       currentLon = point.lon;
@@ -248,7 +250,7 @@ export const SKTMService = {
         );
       }
 
-      const { sktm } = await prisma.$transaction(async tx => {
+      const { idSktm } = await prisma.$transaction(async tx => {
         let sktm;
 
         if (isEmpty) {
@@ -276,6 +278,8 @@ export const SKTMService = {
             },
             tx,
           );
+        } else {
+          sktm = await SKTMSurvey.getById(idSKTMSurvey);
         }
 
         const details = await SKTMDetail.createDetail(
@@ -383,10 +387,10 @@ export const SKTMService = {
           );
         }
 
-        const newSktm = await SKTMSurvey.getById(details.id_sktm_survey, true);
-
-        return { sktm: newSktm };
+        return { idSktm: details.id_sktm_survey };
       });
+
+      const sktm = await SKTMSurvey.getById(idSktm, true);
 
       const resp = {
         ...sktm,
