@@ -42,7 +42,7 @@ export function formatWorksheetRow(
 
 export interface IMaterialPrice {
   material: any;
-  total_kuantitas: number;
+  total_kuantitas: number | { formula: string };
   total_berat: number;
   total_harga_material: number;
   total_pasang: number;
@@ -73,7 +73,7 @@ export interface IGroundingPrice {
 
 export interface IKonduktorPrice {
   data_konduktor: any;
-  total_kuantitas: number;
+  total_kuantitas: number | { formula: string };
   total_berat: number;
   total_harga_material: number;
   total_pasang: number;
@@ -292,21 +292,51 @@ export function writeMaterialRows(
       { col: 'D', value: material.material.jenis_material, isAlign: true },
       {
         col: 'E',
-        value: Number(material.material.berat_material),
+        value: Number(material.material.berat_material) || {
+          formula: '0',
+          result: 0,
+        },
         isAlign: true,
       },
       { col: 'F', value: material.material.satuan_material, isAlign: true },
-      { col: 'G', value: material.total_berat * multiplier, isAlign: true },
-      { col: 'H', value: material.total_kuantitas * multiplier, isAlign: true },
-      { col: 'I', value: material.total_kuantitas * multiplier, isAlign: true },
+      {
+        col: 'G',
+        value: material.total_berat * multiplier || { formula: '0', result: 0 },
+        isAlign: true,
+      },
+      {
+        col: 'H',
+        value:
+          typeof material.total_kuantitas === 'number'
+            ? material.total_kuantitas * multiplier
+            : material.total_kuantitas,
+        isAlign: true,
+      },
+      {
+        col: 'I',
+        value:
+          typeof material.total_kuantitas === 'number'
+            ? material.total_kuantitas * multiplier
+            : material.total_kuantitas,
+        isAlign: true,
+      },
       {
         col: 'J',
         value: shouldIncludeFormula ? { formula: '0', result: 0 } : 0,
         isAlign: true,
       },
-      { col: 'K', value: material.material.harga_material },
+      {
+        col: 'K',
+        value: material.material.harga_material || { formula: '0', result: 0 },
+      },
       { col: 'L', value: material.material.pasang_rab },
-      { col: 'N', value: material.total_harga_material * multiplier },
+      {
+        col: 'N',
+        value: material.total_harga_material * multiplier || {
+          formula: '0',
+          result: 0,
+        },
+      },
       { col: 'O', value: material.total_pasang * multiplier },
       {
         col: 'Q',
@@ -713,7 +743,7 @@ export async function writeSutmSheet(
   sutm.getCell('E12').value = 'VOLUME';
   sutm.getCell('H12').value = ':';
   sutm.getCell('H12').alignment = { horizontal: 'center' };
-  sutm.getCell('I12').value = `${konduktorPrices[0].total_kuantitas}`;
+  sutm.getCell('I12').value = `${Number(konduktorPrices[0].total_kuantitas)}`;
   sutm.getCell('I12').alignment = { horizontal: 'center' };
   sutm.getCell('J12').value = 'MS';
   sutm.getCell('J12').alignment = { horizontal: 'center' };
@@ -731,7 +761,7 @@ export async function writeSutmSheet(
   let totalTiang = 0;
 
   for (const tiang of tiangPrices) {
-    totalTiang += tiang.total_kuantitas;
+    totalTiang += Number(tiang.total_kuantitas);
   }
 
   currentRow = writeMaterialRows(
@@ -1060,11 +1090,27 @@ export async function writeSktmSheet(
     sktm.getCell(`H${currentRow}`).value = cable.total_kuantitas;
     sktm.getCell(`I${currentRow}`).value = cable.total_kuantitas;
     sktm.getCell(`J${currentRow}`).value = { formula: '0', result: 0 };
+
+    sktm.getCell(`H${currentRow}`).alignment = {
+      horizontal: 'center',
+      vertical: 'middle',
+    };
+    sktm.getCell(`I${currentRow}`).alignment = {
+      horizontal: 'center',
+      vertical: 'middle',
+    };
+
+    sktm.getCell(`J${currentRow}`).alignment = {
+      horizontal: 'center',
+      vertical: 'middle',
+    };
   }
 
   currentRow++;
   writeSectionHeader(sktm, currentRow, 'Kabel ditanam', 'sub');
   trackingArrays.rowTitle.push(currentRow);
+
+  const plantedCable = currentRow;
 
   // const rowPlanted = currentRow;
 
@@ -1075,6 +1121,19 @@ export async function writeSktmSheet(
     formula: `H${currentRow}`,
   };
   sktm.getCell(`J${currentRow}`).value = { formula: '0', result: 0 };
+  sktm.getCell(`H${currentRow}`).alignment = {
+    horizontal: 'center',
+    vertical: 'middle',
+  };
+  sktm.getCell(`I${currentRow}`).alignment = {
+    horizontal: 'center',
+    vertical: 'middle',
+  };
+
+  sktm.getCell(`J${currentRow}`).alignment = {
+    horizontal: 'center',
+    vertical: 'middle',
+  };
 
   currentRow++;
   writeSectionHeader(sktm, currentRow, 'Spelling Kabel yang ditanam', 'sub');
@@ -1153,6 +1212,9 @@ export async function writeSktmSheet(
     writeMaterialRow(sktm, currentRow, rowData);
   }
 
+  currentRow++;
+  formatWorksheetRow(sktm, currentRow);
+
   for (const spelling of trackingArrays.rowSpelling) {
     const spellingFormula = `3*(${trackingArrays.rowTermination.map(r => `H${r}`).join('+')})`;
     sktm.getCell(`H${spelling}`).value = {
@@ -1162,14 +1224,103 @@ export async function writeSktmSheet(
       formula: `H${spelling}`,
     };
     sktm.getCell(`J${spelling}`).value = { formula: '0', result: 0 };
+    sktm.getCell(`H${spelling}`).alignment = {
+      horizontal: 'center',
+      vertical: 'middle',
+    };
+    sktm.getCell(`I${spelling}`).alignment = {
+      horizontal: 'center',
+      vertical: 'middle',
+    };
+
+    sktm.getCell(`J${spelling}`).alignment = {
+      horizontal: 'center',
+      vertical: 'middle',
+    };
   }
+
+  currentRow++;
+  writeSectionHeader(sktm, currentRow, 'PELAKSANAAN PENGGELARAN KABEL', 'main');
+  trackingArrays.rowTitle.push(currentRow);
+
+  currentRow++;
+  writeSectionHeader(
+    sktm,
+    currentRow,
+    'IDENTIFIKASI & PENGGALIAN KABEL',
+    'main',
+  );
+  trackingArrays.rowTitle.push(currentRow);
+
+  const identifikasiMaterial = await Material.findManyByIds([126, 158]);
+  const identifikasiPrices: IMaterialPrice[] = identifikasiMaterial.map(
+    item => ({
+      material: item,
+      total_kuantitas: 1,
+      total_berat: (Number(item.berat_material) * 1) / 1000,
+      total_harga_material: item.harga_material * 1,
+      total_pasang: item.pasang_rab * 1,
+      total_bongkar: 0,
+    }),
+  );
+
+  currentRow = writeMaterialRows(
+    sktm,
+    currentRow,
+    identifikasiPrices,
+    totalAkhirBeratRef,
+  );
+  currentRow++;
+  formatWorksheetRow(sktm, currentRow);
+
+  currentRow++;
+  writeSectionHeader(sktm, currentRow, 'PENGGALIAN KABEL', 'main');
+  trackingArrays.rowTitle.push(currentRow);
+
+  const penggalianMaterial = await Material.findManyByIds([157, 439, 39]);
+  const penggalianPrices: IMaterialPrice[] = penggalianMaterial.map(item => ({
+    material: item,
+    total_kuantitas: (() => {
+      switch (item.id) {
+        case 157: {
+          return { formula: `H${plantedCable} * 0.2 * 0.4` };
+        }
+
+        case 439: {
+          return { formula: `ROUND(H${plantedCable} * 0.5 * 1.2, 0)` };
+        }
+
+        case 39: {
+          return { formula: `TRUNC((H${plantedCable} / 0.5) / 1) * 1` };
+        }
+
+        default: {
+          return Math.ceil((totalAkhirBeratRef.value * 100) / 100);
+        }
+      }
+    })(),
+    total_berat:
+      (Number(item.berat_material) *
+        Math.ceil((totalAkhirBeratRef.value * 100) / 100)) /
+      1000,
+    total_harga_material:
+      item.harga_material * Math.ceil((totalAkhirBeratRef.value * 100) / 100),
+    total_pasang:
+      item.pasang_rab * Math.ceil((totalAkhirBeratRef.value * 100) / 100),
+    total_bongkar: 0,
+  }));
+  currentRow = writeMaterialRows(
+    sktm,
+    currentRow,
+    penggalianPrices,
+    totalAkhirBeratRef,
+  );
+  currentRow++;
+  formatWorksheetRow(sktm, currentRow);
 
   currentRow++;
   writeSectionHeader(sktm, currentRow, 'ARRESTER & ACCESSORIES', 'main');
   trackingArrays.rowTitle.push(currentRow);
-
-  currentRow++;
-  formatWorksheetRow(sktm, currentRow);
 
   // Arrester section
   currentRow = writeGroupedMaterialsWithHeaders(
@@ -1181,9 +1332,6 @@ export async function writeSktmSheet(
     'main',
     { rowTitle: trackingArrays.rowTitle },
   );
-
-  currentRow++;
-  formatWorksheetRow(sktm, currentRow);
 
   // Accessory section
   currentRow = writeGroupedMaterialsWithHeaders(
@@ -1198,9 +1346,6 @@ export async function writeSktmSheet(
 
   // GROUNDING section (if exists)
   if (groundingPrices.length > 0) {
-    currentRow++;
-    formatWorksheetRow(sktm, currentRow);
-
     currentRow++;
     writeSectionHeader(sktm, currentRow, 'GROUNDING ARRESTER :', 'main');
     trackingArrays.rowTitle.push(currentRow);
@@ -1218,16 +1363,17 @@ export async function writeSktmSheet(
     }
   }
 
-  // Supporting materials
-  currentRow++;
-  formatWorksheetRow(sktm, currentRow);
-
   currentRow++;
   writeSectionHeader(sktm, currentRow, 'PEKERJAAN PENDUKUNG', 'main');
   trackingArrays.rowTitle.push(currentRow);
 
   const { lastRow: supportingLastRow, transportRow } =
-    await writeSupportingMaterials(sktm, currentRow, totalAkhirBeratRef.value);
+    await writeSupportingMaterials(
+      sktm,
+      currentRow,
+      totalAkhirBeratRef.value,
+      [537, 534, 535, 541],
+    );
   currentRow = supportingLastRow;
 
   // Summary

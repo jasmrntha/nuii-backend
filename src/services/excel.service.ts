@@ -619,13 +619,13 @@ export const ExcelService = {
           groundingPrices,
         } = await countSktm(survey.sktm_surveys);
 
-        console.log(
-          cablePrices,
-          terminationPrices,
-          // arresterPrices,
-          // accessoryPrices,
-          // groundingPrices,
-        );
+        // console.log(
+        //   cablePrices,
+        //   terminationPrices,
+        //   // arresterPrices,
+        //   // accessoryPrices,
+        //   // groundingPrices,
+        // );
 
         await writeSktmSheet(
           sktm,

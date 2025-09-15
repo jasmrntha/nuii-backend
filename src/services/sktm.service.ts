@@ -140,6 +140,36 @@ async function insertJointsEveryDistanceInterpolated(
         tx,
       );
 
+      // Upsert component in SKTMComponent table
+      const existingComponent = await SKTMComponent.getByTipe(
+        'JOINTING',
+        surveyId,
+      );
+
+      if (existingComponent && existingComponent.length > 0) {
+        // Update existing component
+        const component = existingComponent[0];
+        await SKTMComponent.updateComponents(
+          component.id,
+          {
+            kuantitas: Number(component.kuantitas) + 1,
+          },
+          tx,
+        );
+      } else {
+        // Create new component
+        await SKTMComponent.createComponent(
+          {
+            id_sktm_survey: surveyId,
+            id_material: jointMaterialId,
+            tipe_material: 'JOINTING',
+            kuantitas: 1,
+            keterangan: 'Auto-generated joint',
+          },
+          tx,
+        );
+      }
+
       // console.log('Joint added at:', currentLat, currentLon);
 
       // Update for remaining distance in this segment
@@ -380,7 +410,7 @@ export const SKTMService = {
 
           await insertJointsEveryDistanceInterpolated(
             details.id_sktm_survey,
-            20,
+            10,
             jointMaterialId,
             cableComponent[0].id_material,
             tx,
