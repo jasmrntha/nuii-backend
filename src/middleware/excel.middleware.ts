@@ -40,6 +40,146 @@ export function formatWorksheetRow(
   });
 }
 
+export function formatSummaryHeader(worksheet: ExcelJS.Worksheet) {
+  const column = ['B', 'C', 'D', 'F', 'G', 'H', 'I', 'J', 'K'];
+
+  for (let row = 12; row <= 14; row++) {
+    for (const col of column) {
+      const cell = worksheet.getCell(`${col}${row}`);
+
+      if (row === 12) {
+        switch (col) {
+          case 'B': {
+            cell.border = {
+              top: { style: 'double' },
+              left: { style: 'double' },
+              right: { style: 'thin' },
+            };
+
+            break;
+          }
+
+          case 'K': {
+            cell.border = {
+              top: { style: 'double' },
+              left: { style: 'thin' },
+              right: { style: 'double' },
+            };
+
+            break;
+          }
+
+          case 'C': {
+            cell.border = {
+              top: { style: 'double' },
+              left: { style: 'thin' },
+            };
+
+            break;
+          }
+
+          case 'D': {
+            cell.border = {
+              top: { style: 'double' },
+              right: { style: 'thin' },
+            };
+
+            break;
+          }
+
+          default: {
+            cell.border = {
+              top: { style: 'double' },
+              left: { style: 'thin' },
+              right: { style: 'thin' },
+            };
+
+            break;
+          }
+        }
+      } else if (row === 13) {
+        switch (col) {
+          case 'C': {
+            cell.border = {
+              left: { style: 'thin' },
+            };
+
+            break;
+          }
+
+          case 'D': {
+            cell.border = {
+              right: { style: 'thin' },
+            };
+
+            break;
+          }
+
+          default: {
+            cell.border = {
+              left: { style: 'thin' },
+              right: { style: 'thin' },
+            };
+
+            break;
+          }
+        }
+      } else {
+        switch (col) {
+          case 'B': {
+            cell.border = {
+              left: { style: 'double' },
+              bottom: { style: 'double' },
+              right: { style: 'thin' },
+            };
+
+            break;
+          }
+
+          case 'K': {
+            cell.border = {
+              left: { style: 'thin' },
+              bottom: { style: 'double' },
+              right: { style: 'double' },
+            };
+
+            break;
+          }
+
+          case 'C': {
+            cell.border = {
+              left: { style: 'thin' },
+              bottom: { style: 'double' },
+            };
+
+            break;
+          }
+
+          case 'D': {
+            cell.border = {
+              bottom: { style: 'double' },
+              right: { style: 'thin' },
+            };
+
+            break;
+          }
+
+          default: {
+            cell.border = {
+              bottom: { style: 'double' },
+              left: { style: 'thin' },
+              right: { style: 'thin' },
+            };
+
+            break;
+          }
+        }
+      }
+      // Test
+    }
+  }
+}
+
 export interface IMaterialPrice {
   material: any;
   total_kuantitas: number | { formula: string };
@@ -178,6 +318,67 @@ function setupCommonHeader(
   sheet.getCell('I11').value = `${survey.lokasi}`;
 }
 
+function setupRekapHeader(
+  sheet: ExcelJS.Worksheet,
+  workbook: ExcelJS.Workbook,
+  survey: any,
+) {
+  // Column widths
+  sheet.columns = [
+    { width: 8 },
+    { width: 5 },
+    { width: 55.7 },
+    { width: 2 },
+    { width: 0 },
+    { width: 8.5 },
+    { width: 13.5 },
+    { width: 19.5 },
+    { width: 17 },
+    { width: 8 },
+    { width: 23 },
+    { width: 19.5 },
+  ];
+
+  // PLN header
+  sheet.getCell('C1').value = 'PT PLN (PERSERO)';
+  sheet.getCell('C2').value = 'DISTRIBUSI JAWA TIMUR';
+  sheet.getCell('C3').value = 'UP3 SURABAYA BARAT';
+
+  // Image
+  const imagePath = path.resolve(process.cwd(), 'storage/file/image.png');
+  const imageId = workbook.addImage({ filename: imagePath, extension: 'png' });
+  sheet.mergeCells('B1:B3');
+  const column = sheet.getColumn(2);
+  if (!column.width) column.width = 10;
+  const columnWidthPx = column.width * 7.5;
+  const imageWidthPx = 44.6;
+  const offsetX = (columnWidthPx - imageWidthPx) / 2;
+  sheet.addImage(imageId, {
+    tl: { col: 1, row: 1, nativeCol: 1, nativeColOff: offsetX * 9525 },
+    ext: { width: 44.6, height: 61.63 },
+  });
+
+  // Title
+  sheet.mergeCells('B5:K5');
+  sheet.getCell('B5').value = 'REKAPITULASI RAB';
+  sheet.getCell('B5').alignment = { horizontal: 'center' };
+
+  // Job description section
+  sheet.getCell('C7').value = 'JENIS / MACAM PEKERJAAN';
+  sheet.getCell('D7').value = ':';
+  sheet.getCell('D7').alignment = { horizontal: 'center' };
+
+  sheet.mergeCells('F7:K7');
+  sheet.getCell('F7').value = `${survey.nama_survey}`;
+
+  sheet.getCell('C8').value = 'LOKASI PEKERJAAN';
+  sheet.getCell('D8').value = ':';
+  sheet.getCell('D8').alignment = { horizontal: 'center' };
+
+  sheet.mergeCells('F8:K8');
+  sheet.getCell('F8').value = `${survey.lokasi}`;
+}
+
 function setupTableHeader(sheet: ExcelJS.Worksheet) {
   const headers = [
     '',
@@ -233,6 +434,45 @@ function setupTableHeader(sheet: ExcelJS.Worksheet) {
 
   sheet.getRow(15).height = 30;
   sheet.getRow(16).height = 40;
+
+  for (const rowNumber of [15, 16]) {
+    const row = sheet.getRow(rowNumber);
+    row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
+      if (colNumber > 1 && colNumber < 18) {
+        cell.alignment = { horizontal: 'center', vertical: 'middle' };
+        cell.border = {
+          top: { style: 'thin' },
+          left: { style: 'thin' },
+          bottom: { style: 'thin' },
+          right: { style: 'thin' },
+        };
+      }
+    });
+  }
+}
+
+function setupSummaryHeader(sheet: ExcelJS.Worksheet) {
+  const headers = [
+    '',
+    'No',
+    'URAIAN',
+    '',
+    '',
+    'SAT',
+    'VOLUME',
+    'MDU',
+    'NON MDU',
+    'JASA',
+    'NILAI RAB',
+  ];
+
+  sheet.getRow(13).values = headers;
+  sheet.getRow(14).values = ['', '', '', '', '', '', '', '', '', '', '(Rp)'];
+
+  sheet.mergeCells('C13:C13');
+
+  // sheet.getRow(15).height = 30;
+  // sheet.getRow(16).height = 40;
 
   for (const rowNumber of [15, 16]) {
     const row = sheet.getRow(rowNumber);
@@ -425,13 +665,33 @@ export function writeSummarySection(
 ): {
   lastRow: number;
   totalRows: { material: number; jasa: number; jumlah: number; total: number };
+  materialPrices: { nonMdu: number; mdu: number; jasa: number };
 } {
   let row = startRow;
+  const materialPrices = {
+    nonMdu: 0,
+    mdu: 0,
+    jasa: 0,
+  };
 
   // Empty rows
   for (let index = 0; index < 3; index++) {
     row++;
     formatWorksheetRow(sheet, row);
+  }
+
+  for (let index = 17; index < lastDataRow + 1; index++) {
+    const type = sheet.getCell(`D${index}`).value;
+    const price = sheet.getCell(`N${index}`).value;
+    const jasa = sheet.getCell(`O${index}`).value;
+
+    if (type == 'NON MDU') {
+      materialPrices.nonMdu += Number(price.valueOf());
+    } else {
+      materialPrices.mdu += Number(price.valueOf());
+    }
+
+    materialPrices.jasa += Number(jasa.valueOf());
   }
 
   // Total Material
@@ -483,6 +743,7 @@ export function writeSummarySection(
       jumlah: jumlahHargaRow,
       total: totalRow,
     },
+    materialPrices,
   };
 }
 
@@ -933,7 +1194,12 @@ export async function writeSutmSheet(
     transportRow,
   });
 
-  return totalAkhirBeratRef.value;
+  const result = {
+    totalAkhirBerat: totalAkhirBeratRef.value,
+    materialPrices: summaryResult.materialPrices,
+  };
+
+  return result;
 }
 
 // REFACTORED writeCubicleSheet function
@@ -1034,7 +1300,12 @@ export async function writeCubicleSheet(
     rowTipePekerjaan: [],
   });
 
-  return totalAkhirBeratRef.value;
+  const result = {
+    totalAkhirBerat: totalAkhirBeratRef.value,
+    materialPrices: summaryResult.materialPrices,
+  };
+
+  return result;
 }
 
 export async function writeSktmSheet(
@@ -1396,7 +1667,12 @@ export async function writeSktmSheet(
     rowTipePekerjaan: [],
   });
 
-  return totalAkhirBeratRef.value;
+  const result = {
+    totalAkhirBerat: totalAkhirBeratRef.value,
+    materialPrices: summaryResult.materialPrices,
+  };
+
+  return result;
 }
 
 export async function writeAppTmSheet(
@@ -1477,5 +1753,86 @@ export async function writeAppTmSheet(
     rowTipePekerjaan: [],
   });
 
-  return totalAkhirBeratRef.value;
+  const result = {
+    totalAkhirBerat: totalAkhirBeratRef.value,
+    materialPrices: summaryResult.materialPrices,
+  };
+
+  return result;
+}
+
+export async function writeSummarySheet(
+  summary: ExcelJS.Worksheet,
+  survey: any,
+  workbook: ExcelJS.Workbook,
+  appTmPrices: IMaterialPrice[],
+) {
+  const totalAkhirBeratRef = { value: 0 };
+  const trackingArrays = {
+    rowTitle: [] as number[],
+  };
+
+  // Header
+  setupRekapHeader(summary, workbook, survey);
+
+  // Table header
+  setupSummaryHeader(summary);
+  formatWorksheetRow(summary, 17);
+
+  let currentRow = 17;
+
+  // APP TM section
+  currentRow = writeGroupedMaterialsWithHeaders(
+    summary,
+    currentRow,
+    appTmPrices,
+    totalAkhirBeratRef,
+    'APP & METER',
+    'main',
+    { rowTitle: trackingArrays.rowTitle },
+  );
+
+  // Supporting materials
+  currentRow++;
+  formatWorksheetRow(summary, currentRow);
+
+  currentRow++;
+  writeSectionHeader(summary, currentRow, 'PEKERJAAN PENDUKUNG', 'main');
+  trackingArrays.rowTitle.push(currentRow);
+
+  const { lastRow: supportingLastRow, transportRow } =
+    await writeSupportingMaterials(
+      summary,
+      currentRow,
+      totalAkhirBeratRef.value,
+      [534, 535, 541],
+    );
+  currentRow = supportingLastRow;
+
+  // Summary
+  const summaryResult = writeSummarySection(summary, currentRow, currentRow);
+
+  // Signature
+  const ttdRows = writeSignatureSection(summary, summaryResult.lastRow);
+
+  // Styling
+  applySheetStyling(summary, {
+    rowTitle: trackingArrays.rowTitle,
+    ttdRows,
+    lastDataRow: currentRow,
+    totalStartRow: summaryResult.totalRows.material,
+    totalEndRow: summaryResult.totalRows.total,
+    transportRow,
+    rowPoleSupport: [],
+    rowKonstruksi: [],
+    rowGrounding: [],
+    rowTipePekerjaan: [],
+  });
+
+  const result = {
+    totalAkhirBerat: totalAkhirBeratRef.value,
+    materialPrices: summaryResult.materialPrices,
+  };
+
+  return result;
 }

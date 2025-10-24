@@ -451,6 +451,7 @@ export const ExcelService = {
     try {
       // Step 1: Get the survey header and its details
       const survey = await SurveyHeader.getDeep(id, null, true);
+      const results = [];
 
       if (!survey) {
         throw new CustomError(StatusCodes.NOT_FOUND, 'Survey Not Found');
@@ -461,7 +462,7 @@ export const ExcelService = {
       const isSktm = survey.sktm_surveys.length > 0 ? true : false;
 
       const workbook = new ExcelJS.Workbook();
-      workbook.addWorksheet('REKAP');
+      // const rekap = workbook.addWorksheet('REKAP');
       const cubicle = isCubicle ? workbook.addWorksheet('CUBICLE') : null;
       const sutm = isSutm ? workbook.addWorksheet('SUTM') : null;
       const sktm = isSktm ? workbook.addWorksheet('SKTM') : null;
@@ -546,15 +547,17 @@ export const ExcelService = {
 
         const flattenedGroundingPrices = groundingPrices.flat();
 
-        await writeSutmSheet(
-          sutm,
-          survey,
-          tiangPrices,
-          polePrices,
-          totalPrices,
-          flattenedGroundingPrices,
-          konduktorPrices,
-          workbook,
+        results.push(
+          await writeSutmSheet(
+            sutm,
+            survey,
+            tiangPrices,
+            polePrices,
+            totalPrices,
+            flattenedGroundingPrices,
+            konduktorPrices,
+            workbook,
+          ),
         );
       }
 
@@ -591,12 +594,14 @@ export const ExcelService = {
             ),
         );
 
-        await writeCubicleSheet(
-          cubicle,
-          survey,
-          cubiclePrices,
-          cubicleGroundingPrices,
-          workbook,
+        results.push(
+          await writeCubicleSheet(
+            cubicle,
+            survey,
+            cubiclePrices,
+            cubicleGroundingPrices,
+            workbook,
+          ),
         );
 
         const appTmPrice = countAppTm(survey.app_tm_surveys);
@@ -607,7 +612,9 @@ export const ExcelService = {
         // console.dir(appTmPrice, { depth: 2, colors: true });
         // console.log(appTmMaterials);
 
-        await writeAppTmSheet(appTm, survey, workbook, appTmMaterials);
+        results.push(
+          await writeAppTmSheet(appTm, survey, workbook, appTmMaterials),
+        );
       }
 
       if (isSktm) {
@@ -622,21 +629,37 @@ export const ExcelService = {
         // console.log(
         //   cablePrices,
         //   terminationPrices,
-        //   // arresterPrices,
-        //   // accessoryPrices,
-        //   // groundingPrices,
+        //   arresterPrices,
+        //   accessoryPrices,
+        //   groundingPrices,
         // );
 
-        await writeSktmSheet(
-          sktm,
-          survey,
-          cablePrices,
-          terminationPrices,
-          arresterPrices,
-          accessoryPrices,
-          groundingPrices,
-          workbook,
+        results.push(
+          await writeSktmSheet(
+            sktm,
+            survey,
+            cablePrices,
+            terminationPrices,
+            arresterPrices,
+            accessoryPrices,
+            groundingPrices,
+            workbook,
+          ),
         );
+      }
+
+      const total = {
+        total_mdu: 0,
+        total_non_mdu: 0,
+        total_jasa: 0,
+        total_berat: 0,
+      };
+
+      for (const result of results) {
+        total.total_mdu += result.materialPrices.mdu;
+        total.total_non_mdu += result.materialPrices.nonMdu;
+        total.total_jasa += result.materialPrices.jasa;
+        total.total_berat += result.totalAkhirBerat;
       }
 
       const excelBuffer = await workbook.xlsx.writeBuffer();
