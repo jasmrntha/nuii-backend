@@ -584,20 +584,20 @@ async function terminasi_mat() {
 }
 
 const main = async () => {
-  // // await users();
-  // await tipe_material();
-  // // await kategori_material();
-  // await tipe_pekerjaan();
-  // await konstruksi();
-  // await material();
-  // await material_konstruksi();
-  // // await survey();
-  // await grounding();
-  // await pole();
-  // await grounding_mat();
-  // await pole_mat();
-  // await jointing_mat();
-  // await kabel_mat();
+  // await users();
+  await tipe_material();
+  // await kategori_material();
+  await tipe_pekerjaan();
+  await konstruksi();
+  await material();
+  await material_konstruksi();
+  // await survey();
+  await grounding();
+  await pole();
+  await grounding_mat();
+  await pole_mat();
+  await jointing_mat();
+  await kabel_mat();
   // await accessory_mat();
   await terminasi_mat();
 };
