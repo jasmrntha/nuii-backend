@@ -106,6 +106,8 @@ model Material {
   sktmJointsAsKabelMaterial SktmJoint[] @relation("KabelMaterial")
 
   AppTmComponent AppTmComponent[]
+
+  CubicleMaterial CubicleMaterial[]
 }
 
 model TipeMaterial {
@@ -366,6 +368,19 @@ model GroundingMaterial {
 }
 
 model AccessoryMaterial {
+  id            Int        @id @default(autoincrement())
+  id_material   Int
+  nama_material String
+  kuantitas     Decimal?
+  tipe_survey   SurveyType
+  created_at    DateTime   @default(now())
+  updated_at    DateTime   @default(now())
+  deleted_at    DateTime?
+
+  material Material @relation(fields: [id_material], references: [id])
+}
+
+model CubicleMaterial {
   id            Int        @id @default(autoincrement())
   id_material   Int
   nama_material String

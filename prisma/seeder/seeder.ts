@@ -583,6 +583,36 @@ async function terminasi_mat() {
   }
 }
 
+async function cubicle_mat() {
+  try {
+    const dataCubicleMat = await csv().fromFile(
+      __dirname + '/data/cubicle_material.csv',
+    );
+
+    let cubicleMats = dataCubicleMat.map(data => ({
+      nomor_material: parseInt(data.id_material),
+      nama_material: data.nama_material,
+      kuantitas: data.kuantitas,
+      tipe_survey: data.tipe_survey,
+    }));
+
+    for (const cubicleMat of cubicleMats) {
+      await prisma.cubicleMaterial.create({
+        data: {
+          id_material: cubicleMat.nomor_material,
+          nama_material: cubicleMat.nama_material,
+          kuantitas: cubicleMat.kuantitas,
+          tipe_survey: cubicleMat.tipe_survey,
+        },
+      });
+    }
+
+    console.log('Cubicle Material data inserted successfully!');
+  } catch (error) {
+    console.error('Error inserting cubicle material data, ', error);
+  }
+}
+
 const main = async () => {
   // await users();
   await tipe_material();
@@ -598,8 +628,9 @@ const main = async () => {
   await pole_mat();
   await jointing_mat();
   await kabel_mat();
-  // await accessory_mat();
+  await accessory_mat();
   await terminasi_mat();
+  await cubicle_mat();
 };
 
 main()
