@@ -14,6 +14,7 @@ enum MaterialTables {
   ACCESSORY = 'accessoryMaterial',
   TERMINATION = 'terminasiMaterial',
   JOINTING = 'jointingMaterial',
+  CUBICLE = 'cubicleMaterial',
 }
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -195,6 +196,7 @@ export const MaterialService = {
   },
 
   async getSurveyMaterials(table: string, tipe_survey: string) {
+    // console.log(table, tipe_survey);
     if (!Object.values(MaterialTables).includes(table as MaterialTables)) {
       throw new CustomError(
         StatusCodes.BAD_REQUEST,

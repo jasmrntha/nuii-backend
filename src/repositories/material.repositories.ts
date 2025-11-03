@@ -13,6 +13,7 @@ enum MaterialTables {
   ACCESSORY = 'accessoryMaterial',
   TERMINATION = 'terminasiMaterial',
   JOINTING = 'jointingMaterial',
+  CUBICLE = 'cubicleMaterial',
 }
 
 export const Material = {

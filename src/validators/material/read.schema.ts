@@ -8,6 +8,7 @@ export const GetSurveyMaterialSchema = Joi.object({
       'accessoryMaterial',
       'terminasiMaterial',
       'jointingMaterial',
+      'cubicleMaterial',
     )
     .required(),
 
