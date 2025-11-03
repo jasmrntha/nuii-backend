@@ -1,0 +1,9 @@
+id_material,nama_material,kuantitas,tipe_survey
+60, Cubicle Pelanggan lengkap dengan Pintu Tunggal 0.4 kV, 1, CUBICLE
+67, "Cubicle Single Incoming , 630 A , 20kV, 16kA Lengkap dengan Incoming Cubicle, LBS , manualMetering Cubicle , VT, manualOutgoing Cubicle , CB Drawout , CT, PT, OCR , motorized (Type DM1W)", 1, CUBICLE
+68, "manualOutgoing Cubicle , CB Drawout , CT, PT, OCR , motorized (Type DM1W)", 1, CUBICLE
+426, "Cubicle Pelanggan (LBS Non Motorized )", 1, CUBICLE
+427, Cubicle Pelanggan ( CBOM ), 1, CUBICLE
+661, Cubicle Full Insulated Lengkap(Inc+Out+Met), 1, CUBICLE
+662, Cubicle 20 kV;630 A;16 kA (Incoming+Metering+Ougoing), 1, CUBICLE
+663, Cubicle Incoming, 1, CUBICLE
