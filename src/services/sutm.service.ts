@@ -29,6 +29,13 @@ export const SUTMService = {
       }
 
       if (!request.id_sutm_survey) {
+        if (!request.id_material_konduktor || !request.id_survey_header) {
+          throw new CustomError(
+            StatusCodes.BAD_REQUEST,
+            'id_material_konduktor and id_survey_header are required to create SUTM header',
+          );
+        }
+
         const sutmHeader = await SUTMRepository.createSutmHeader({
           id_survey_header: request.id_survey_header,
           id_material_konduktor: request.id_material_konduktor,
