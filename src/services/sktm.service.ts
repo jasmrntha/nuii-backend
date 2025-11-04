@@ -266,6 +266,13 @@ export const SKTMService = {
         );
       }
 
+      if (survey?.sktm_details.length <= 0 && !idTerminationMasuk && !idKabel) {
+        throw new CustomError(
+          StatusCodes.BAD_REQUEST,
+          'SKTM Detail need to have a starting point first (require id_termination_masuk and id_kabel)',
+        );
+      }
+
       if (idTerminationKeluar && survey?.sktm_details.length <= 0 && !isEmpty) {
         throw new CustomError(
           StatusCodes.BAD_REQUEST,
