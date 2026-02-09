@@ -22,8 +22,8 @@ router.post(
   SurveyController.createSurveyHeader,
 );
 router.get('/', SurveyController.getAllSurveys);
-router.get('/:id', SurveyController.getSurveyDetails);
 router.get('/reports', SurveyController.getAllReports);
+router.get('/:id', SurveyController.getSurveyDetails);
 // router.post(
 //   '/create',
 //   validate(CreateSurveySchema),

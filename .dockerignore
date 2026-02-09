@@ -1,0 +1,44 @@
+# Dependencies
+node_modules
+npm-debug.log
+yarn-error.log
+yarn-debug.log
+
+# Build output
+dist
+
+# Git
+.git
+.gitignore
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# Docker
+docker
+Dockerfile*
+docker-compose*
+.dockerignore
+
+# Environment files (use docker-compose env instead)
+.env*
+!.env.sample
+
+# Misc
+*.md
+LICENSE
+.husky
+.eslintrc*
+.prettierrc*
+*.log
+coverage
+.nyc_output
+
+# Storage volumes (will be mounted)
+storage/file/*
+storage/excel/*
+storage/images/*
+!storage/.gitkeep

@@ -39,8 +39,5 @@ router.use('/sutm', SUTMRoutes);
 router.use('/cubicle', CubicleRoutes);
 router.use('/app-tm', ApptmRoutes);
 
-router.use('/upload-file', UploadFileRoutes);
-router.use('/upload-image', UploadImageRoutes);
-
 // eslint-disable-next-line import/no-default-export
 export default router;

@@ -10,15 +10,15 @@ export const UploadFileService = async (
   response: Response,
   // eslint-disable-next-line @typescript-eslint/require-await
 ) => {
-  try {
-    const file = request.file;
+  const file = request.file;
 
-    const result = filePath(file);
-
-    return result;
-  } catch (error) {
-    throw error;
+  if (!file) {
+    throw new Error('No file provided');
   }
+
+  const result = filePath(file);
+
+  return result;
 };
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -27,13 +27,13 @@ export const UploadExcelService = async (
   response: Response,
   // eslint-disable-next-line @typescript-eslint/require-await
 ) => {
-  try {
-    const file = request.file;
+  const file = request.file;
 
-    const result = filePath(file);
-
-    return result;
-  } catch (error) {
-    throw error;
+  if (!file) {
+    throw new Error('No file provided');
   }
+
+  const result = filePath(file);
+
+  return result;
 };
