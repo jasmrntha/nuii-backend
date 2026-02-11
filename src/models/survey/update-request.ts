@@ -27,7 +27,7 @@ interface SurveyDetail {
 }
 
 export interface UpdateSurveyHeaderRequest {
-  id_header: number;
+  idHeader: number;
   header: SurveyHeader;
 }
 

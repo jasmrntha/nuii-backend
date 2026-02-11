@@ -8,9 +8,9 @@ import {
   type CreateSurveyHeaderRequest,
   // type CreateSurveyRequest,
   // type CreateNewSurveyRequest,
-  // type UpdateSurveyHeaderRequest,
+  type UpdateSurveyHeaderRequest,
   // type UpdateSurveyDetailRequest,
-  // type CreateNewSurveyBatchRequest,
+  type CreateNewSurveyBatchRequest,
 } from '../models';
 import { SurveyService } from '../services';
 // import { tokenDecode } from '../utils/JwtToken';
@@ -70,27 +70,27 @@ export const SurveyController = {
   //     next(error);
   //   }
   // },
-  // async updateSurveyHeader(
-  //   request: Request,
-  //   response: Response,
-  //   next: NextFunction,
-  // ) {
-  //   try {
-  //     const requestBody = request.body as UpdateSurveyHeaderRequest;
-  //
-  //     const result = await SurveyService.updateSurveyHeader(requestBody);
-  //
-  //     const resp = new CustomResponse(
-  //       StatusCodes.OK,
-  //       'Survey Header updated',
-  //       result,
-  //     );
-  //
-  //     return response.json(resp.toJSON());
-  //   } catch (error: any) {
-  //     next(error);
-  //   }
-  // },
+  async updateSurveyHeader(
+    request: Request,
+    response: Response,
+    next: NextFunction,
+  ) {
+    try {
+      const requestBody = request.body as UpdateSurveyHeaderRequest;
+
+      const result = await SurveyService.updateSurveyHeader(requestBody);
+
+      const resp = new CustomResponse(
+        StatusCodes.OK,
+        'Survey Header updated',
+        result,
+      );
+
+      return response.json(resp.toJSON());
+    } catch (error: any) {
+      next(error);
+    }
+  },
   // async updateSurveyDetail(
   //   request: Request,
   //   response: Response,
@@ -129,19 +129,19 @@ export const SurveyController = {
   //     next(error);
   //   }
   // },
-  // async deleteSurvey(request: Request, response: Response, next: NextFunction) {
-  //   try {
-  //     const { id } = request.params;
-  //
-  //     const result = await SurveyService.deleteSurvey(Number(id));
-  //
-  //     const resp = new CustomResponse(StatusCodes.OK, 'Survey deleted', result);
-  //
-  //     return response.json(resp.toJSON());
-  //   } catch (error: any) {
-  //     next(error);
-  //   }
-  // },
+  async deleteSurvey(request: Request, response: Response, next: NextFunction) {
+    try {
+      const { id } = request.params;
+
+      const result = await SurveyService.deleteSurvey(Number(id));
+
+      const resp = new CustomResponse(StatusCodes.OK, 'Survey deleted', result);
+
+      return response.json(resp.toJSON());
+    } catch (error: any) {
+      next(error);
+    }
+  },
   // async deleteSurveyDetail(
   //   request: Request,
   //   response: Response,
@@ -226,6 +226,23 @@ export const SurveyController = {
         'Report Header List',
         result,
       );
+
+      return response.json(resp.toJSON());
+    } catch (error: any) {
+      next(error);
+    }
+  },
+  async createNewSurveyBatch(
+    request: Request,
+    response: Response,
+    next: NextFunction,
+  ) {
+    try {
+      const requestBody = request.body as CreateNewSurveyBatchRequest;
+
+      const result = await SurveyService.createSurveyBatch(requestBody);
+
+      const resp = new CustomResponse(StatusCodes.OK, 'Survey created', result);
 
       return response.json(resp.toJSON());
     } catch (error: any) {

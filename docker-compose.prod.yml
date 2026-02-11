@@ -1,0 +1,86 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: nuii_postgres
+    hostname: postgres
+    restart: unless-stopped
+    ports:
+      - '${DATABASE_PORT:-5432}:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: ${DATABASE_USER:-postgres}
+      POSTGRES_PASSWORD: ${DATABASE_PASS:-postgres}
+      POSTGRES_DB: ${DATABASE_NAME:-nuii_v2_feb}
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          'pg_isready -U ${DATABASE_USER:-postgres} -d ${DATABASE_NAME:-nuii_v2_feb}',
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - nuii_network
+
+  redis:
+    image: redis:7-alpine
+    container_name: nuii_redis
+    hostname: redis
+    restart: unless-stopped
+    ports:
+      - '${CACHE_PORT:-6379}:6379'
+    command: redis-server --requirepass ${CACHE_PASS:-cache_password}
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', '-a', '${CACHE_PASS:-cache_password}', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - nuii_network
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nuii_backend
+    restart: unless-stopped
+    ports:
+      - '${PORT:-4000}:4000'
+    volumes:
+      - ./storage:/app/storage
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: 4000
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_USER: ${DATABASE_USER:-postgres}
+      DATABASE_PASS: ${DATABASE_PASS:-postgres}
+      DATABASE_NAME: ${DATABASE_NAME:-nuii_v2_feb}
+      DATABASE_URL: postgresql://${DATABASE_USER:-postgres}:${DATABASE_PASS:-postgres}@postgres:5432/${DATABASE_NAME:-nuii_v2_feb}
+      CACHE_HOST: redis
+      CACHE_PORT: 6379
+      CACHE_PASS: ${CACHE_PASS:-cache_password}
+      CACHE_URL: redis://:${CACHE_PASS:-cache_password}@redis:6379
+      CLERK_PUBLISHABLE_KEY: ${CLERK_PUBLISHABLE_KEY}
+      CLERK_SECRET_KEY: ${CLERK_SECRET_KEY}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - nuii_network
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  nuii_network:
+    driver: bridge

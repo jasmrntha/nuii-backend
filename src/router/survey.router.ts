@@ -9,9 +9,9 @@ import {
   CreateSurveyHeaderSchema,
   // CreateSurveySchema,
   // CreateNewSurveySchema,
-  // UpdateSurveyHeaderSchema,
+  UpdateSurveyHeaderSchema,
   // UpdateSurveyDetailSchema,
-  // CreateBatchSurveySchema,
+  CreateBatchSurveySchema,
 } from '../validators';
 
 const router = express.Router();
@@ -39,6 +39,11 @@ router.get('/:id', SurveyController.getSurveyDetails);
 //   validate(UpdateSurveyHeaderSchema),
 //   SurveyController.updateSurveyHeader,
 // );
+router.put(
+  '/update-header',
+  validate(UpdateSurveyHeaderSchema),
+  SurveyController.updateSurveyHeader,
+);
 // router.put(
 //   '/update-detail',
 //   validate(UpdateSurveyDetailSchema),
@@ -46,14 +51,14 @@ router.get('/:id', SurveyController.getSurveyDetails);
 // );
 // router.get('/export/:id', SurveyController.exportSurvey);
 // router.delete('/detail/delete/:id', SurveyController.deleteSurveyDetail);
-// router.delete('/delete/:id', SurveyController.deleteSurvey);
+router.delete('/:id', SurveyController.deleteSurvey);
 // router.get('/name-list', SurveyController.getSurveyNameList);
 // router.get('/report/detail/:id', SurveyController.getReportDetail);
 // router.get('/export/excel/:id', SurveyController.exportSurveyToExcel);
-// router.post(
-//   '/create-batch',
-//   validate(CreateBatchSurveySchema),
-//   SurveyController.createNewSurveyBatch,
-// );
+router.post(
+  '/create-batch',
+  validate(CreateBatchSurveySchema),
+  SurveyController.createNewSurveyBatch,
+);
 
 export default router;

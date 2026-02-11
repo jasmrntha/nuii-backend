@@ -1,13 +1,17 @@
 // import path from 'node:path';
 //
 // eslint-disable-next-line import/no-extraneous-dependencies
-import { type SurveyStatus } from '@prisma/client';
+import { type SurveyStatus, type SurveyType } from '@prisma/client';
 // import ExcelJS from 'exceljs';
-// import { StatusCodes } from 'http-status-codes';
+import { StatusCodes } from 'http-status-codes';
 
-// import prisma from '../config/prisma';
-// import { CustomError } from '../middleware';
-import { type CreateSurveyHeaderRequest } from '../models';
+import prisma from '../config/prisma';
+import { CustomError } from '../middleware';
+import {
+  type CreateNewSurveyBatchRequest,
+  type CreateSurveyHeaderRequest,
+  type UpdateSurveyHeaderRequest,
+} from '../models';
 // import {
 //   type CreateNewSurveyRequest,
 //   type CreateSurveyRequest,
@@ -17,9 +21,10 @@ import { type CreateSurveyHeaderRequest } from '../models';
 // } from '../models';
 import {
   SurveyHeader,
-  // SurveyDetail,
-  // Material,
-  // Konstruksi,
+  Material,
+  Konstruksi,
+  SurveySequance,
+  SUTMRepository,
   // KonstruksiMaterial,
   // TipePekerjaan,
   // PoleRepository,
@@ -39,16 +44,27 @@ export const SurveyService = {
       throw error;
     }
   },
+
+  async updateSurveyHeader(payload: UpdateSurveyHeaderRequest) {
+    try {
+      const { idHeader, header } = payload;
+      const updatedHeader = await SurveyHeader.updateHeader(idHeader, header);
+
+      return updatedHeader;
+    } catch (error) {
+      throw error;
+    }
+  },
   async getAll(status: SurveyStatus) {
     try {
-      return await SurveyHeader.getAll(status, false);
+      return await SurveyHeader.getAll(status, true);
     } catch (error) {
       throw error;
     }
   },
   async getById(id: number) {
     try {
-      return await SurveyHeader.getById(id, null, true);
+      return await SurveyHeader.getDeep(id, null, true);
     } catch (error) {
       throw error;
     }
@@ -56,6 +72,93 @@ export const SurveyService = {
   async deleteSurvey(id: number) {
     try {
       return await SurveyHeader.deleteSurvey(id);
+    } catch (error) {
+      throw error;
+    }
+  },
+  async createSurveyBatch(request: CreateNewSurveyBatchRequest) {
+    try {
+      const firstDetail = request.details[0];
+
+      const konstruksi = await Konstruksi.findKonstruksiById(
+        firstDetail.id_konstruksi,
+      );
+
+      if (!konstruksi) {
+        throw new CustomError(StatusCodes.NOT_FOUND, 'Konstruksi Not Found');
+      }
+
+      const tiang = await Material.findMaterialById(
+        firstDetail.id_material_tiang,
+      );
+
+      if (!tiang) {
+        throw new CustomError(StatusCodes.NOT_FOUND, 'Material Not Found');
+      }
+
+      return await prisma.$transaction(async trx => {
+        const header = await SurveyHeader.createHeaderEstimasi(
+          {
+            nama_survey: request.header.nama_survey,
+            nama_pekerjaan: request.header.nama_pekerjaan,
+            lokasi: request.header.lokasi,
+            user_id: request.header.user_id,
+          },
+          trx,
+        );
+
+        const sutmHeader = await SUTMRepository.createSutmHeader(
+          {
+            id_survey_header: header.id,
+            id_material_konduktor: request.header.id_material_konduktor,
+          },
+          trx,
+        );
+
+        const existingSequence = await SurveySequance.getAllSequanceByHeader(
+          header.id,
+        );
+
+        await SurveySequance.createSequance(
+          'SUTM' as SurveyType,
+          {
+            survey_header_id: header.id,
+            survey_detail_id: sutmHeader.id,
+            urutan: existingSequence.length + 1,
+            keterangan: 'SUTM',
+            created_at: new Date(),
+          },
+          trx,
+        );
+
+        const detailsData = request.details.map(detail => ({
+          id_sutm_survey: sutmHeader.id,
+          id_material_tiang: detail.id_material_tiang,
+          id_konstruksi: detail.id_konstruksi,
+          id_pole_supporter: detail.id_pole_supporter
+            ? Number(detail.id_pole_supporter)
+            : null,
+          id_grounding_termination: detail.id_grounding_termination
+            ? Number(detail.id_grounding_termination)
+            : null,
+          penyulang: detail.penyulang,
+          panjang_jaringan: detail.panjang_jaringan,
+          long: detail.long,
+          lat: detail.lat,
+          foto:
+            detail.foto && detail.foto.trim() !== ''
+              ? detail.foto
+              : 'Belum ada foto',
+          keterangan: detail.keterangan ?? '',
+          petugas_survey: detail.petugas_survey,
+        }));
+
+        await trx.sutmDetail.createMany({
+          data: detailsData,
+        });
+
+        return { header, sutmHeader, details: detailsData };
+      });
     } catch (error) {
       throw error;
     }

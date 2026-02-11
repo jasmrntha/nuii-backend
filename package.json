@@ -4,7 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "start": "dotenv -e .env.production -- node ./dist/src/index.js",
+    "start": "node ./dist/index.js",
     "start:dev": "dotenv -e .env.development -- nodemon --files ./src/index.ts",
     "build": "npx prisma generate && tsc -p .",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --max-warnings=0",
@@ -18,6 +18,8 @@
     "docker:up": "dotenv -e .env.docker -- docker compose up -d",
     "docker:down": "dotenv -e .env.docker -- docker compose down",
     "docker:build": "dotenv -e .env.docker -- docker compose up -d --build",
+    "docker:dev": "docker compose --env-file .env.development -f docker-compose.dev.yml up -d --build",
+    "docker:prod": "docker compose --env-file .env.production -f docker-compose.prod.yml up -d --build",
     "docker:logs": "docker compose logs -f",
     "docker:restart": "dotenv -e .env.docker -- docker compose restart",
     "docker:ps": "docker compose ps",

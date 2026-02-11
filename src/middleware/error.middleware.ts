@@ -9,12 +9,25 @@ export const ErrorHandler = (
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _next: NextFunction,
 ) => {
-  const errorStatus = error.code || 500;
-  const errorMessage = error.message || 'Internal server error';
+  const rawStatus = error?.status || error?.statusCode || error?.code;
+
+  let errorStatus: number;
+
+  if (Number.isInteger(rawStatus)) {
+    errorStatus = rawStatus;
+  } else if (Number.isInteger(Number(rawStatus))) {
+    errorStatus = Number(rawStatus);
+  } else {
+    errorStatus = 500;
+  }
+
+  const errorMessage = error?.message || 'Internal server error';
+  const errorCode = typeof error?.code === 'string' ? error.code : undefined;
 
   response.status(errorStatus).json({
     status: false,
     code: errorStatus,
+    errorCode,
     message: errorMessage,
     stack: process.env.NODE_ENV === 'development' ? error.stack : {},
   });

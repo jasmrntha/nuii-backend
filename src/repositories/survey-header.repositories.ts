@@ -170,7 +170,6 @@ export const SurveyHeader = {
       nama_pekerjaan: string;
       lokasi: string;
       user_id: string;
-      id_material_konduktor: number;
     },
     tx?: Omit<
       PrismaClient<Prisma.PrismaClientOptions, never, DefaultArgs>,
@@ -179,9 +178,14 @@ export const SurveyHeader = {
   ) {
     const client = tx || prisma;
 
+    // SurveyHeader model does not contain material konduktor field.
+    // Material konduktor is stored on the specific SUTM survey record.
     return await client.surveyHeader.create({
       data: {
-        ...data,
+        nama_survey: data.nama_survey,
+        nama_pekerjaan: data.nama_pekerjaan,
+        lokasi: data.lokasi,
+        user_id: data.user_id,
         status_survey: SurveyStatus.Belum_Disetujui,
       },
     });

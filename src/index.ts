@@ -31,6 +31,11 @@ app.get('/health', (request, response) => {
   response.status(200).send('Server is up and running');
 });
 
+// Public root endpoint
+app.get('/', (request, response) => {
+  response.status(200).send('NUII backend is running');
+});
+
 app.use('/', routes);
 app.use(ErrorHandler);
 

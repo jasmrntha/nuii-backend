@@ -1,0 +1,76 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: nuii_postgres
+    hostname: postgres
+    restart: unless-stopped
+    ports:
+      - '${DATABASE_PORT:-5432}:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: ${DATABASE_USER:-postgres}
+      POSTGRES_PASSWORD: ${DATABASE_PASS:-postgres}
+      POSTGRES_DB: ${DATABASE_NAME:-nuii_v2_feb}
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          'pg_isready -U ${DATABASE_USER:-postgres} -d ${DATABASE_NAME:-nuii_v2_feb}',
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - nuii_network
+
+  redis:
+    image: redis:7-alpine
+    container_name: nuii_redis
+    hostname: redis
+    restart: unless-stopped
+    ports:
+      - '${CACHE_PORT:-6379}:6379'
+    command: redis-server --requirepass ${CACHE_PASS:-cache_password}
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', '-a', '${CACHE_PASS:-cache_password}', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - nuii_network
+
+  backend:
+    build:
+      target: builder
+    command: npm run start:dev
+    ports:
+      - '${PORT:-4000}:4000'
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      NODE_ENV: development
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      CACHE_HOST: redis
+      CACHE_PORT: 6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - nuii_network
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  nuii_network:
+    driver: bridge
