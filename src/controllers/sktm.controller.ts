@@ -46,7 +46,24 @@ export const SKTMController = {
 
   async createDetail(request: Request, response: Response, next: NextFunction) {
     try {
-      const payload = (await request.body) as CreateSKTMDetailRequest;
+      const rawBody = request.body;
+      const payload: CreateSKTMDetailRequest = {
+        ...rawBody,
+        id_survey_header: Number(rawBody.id_survey_header),
+        id_sktm_survey: rawBody.id_sktm_survey
+          ? Number(rawBody.id_sktm_survey)
+          : undefined,
+        id_termination_masuk: rawBody.id_termination_masuk
+          ? Number(rawBody.id_termination_masuk)
+          : undefined,
+        id_termination_keluar: rawBody.id_termination_keluar
+          ? Number(rawBody.id_termination_keluar)
+          : undefined,
+        id_kabel: rawBody.id_kabel ? Number(rawBody.id_kabel) : undefined,
+        panjang_jaringan: Number(rawBody.panjang_jaringan),
+        diameter_kabel: Number(rawBody.diameter_kabel),
+        has_arrester: Boolean(rawBody.has_arrester),
+      };
 
       const result = await SKTMService.createDetail(payload);
 

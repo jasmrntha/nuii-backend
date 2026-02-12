@@ -14,7 +14,24 @@ import { SUTMService } from '../services';
 export const SUTMController = {
   async createSutm(request: Request, response: Response, next: NextFunction) {
     try {
-      const body = request.body as CreateSUTMDetailRRequest;
+      const rawBody = request.body;
+      const body: CreateSUTMDetailRRequest = {
+        ...rawBody,
+        id_survey_header: rawBody.id_survey_header
+          ? Number(rawBody.id_survey_header)
+          : undefined,
+        id_material_konduktor: rawBody.id_material_konduktor
+          ? Number(rawBody.id_material_konduktor)
+          : undefined,
+        id_sutm_survey: rawBody.id_sutm_survey
+          ? Number(rawBody.id_sutm_survey)
+          : undefined,
+        id_material_tiang: Number(rawBody.id_material_tiang),
+        id_konstruksi: Number(rawBody.id_konstruksi),
+        id_pole_supporter: Number(rawBody.id_pole_supporter),
+        id_grounding_termination: Number(rawBody.id_grounding_termination),
+        panjang_jaringan: Number(rawBody.panjang_jaringan),
+      };
       const result = await SUTMService.createSutm(body);
 
       const responseData = {
