@@ -1,7 +1,9 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
 import { clerkMiddleware } from '@clerk/express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import express from 'express';
 
 import { ErrorHandler } from './middleware';
@@ -21,7 +23,6 @@ app.use(
 
 app.use(clerkMiddleware());
 
-dotenv.config();
 app.use(express.json({ limit: '12mb' }));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ limit: '12mb', extended: true }));
