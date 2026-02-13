@@ -162,4 +162,20 @@ export const MaterialController = {
       next(error);
     }
   },
+
+  async getAllTipeMaterial(_: Request, response: Response, next: NextFunction) {
+    try {
+      const result = await MaterialService.getAllTipeMaterial();
+
+      const resp = new CustomResponse(
+        StatusCodes.OK,
+        'Tipe Material list fetched successfully',
+        result,
+      );
+
+      return response.json(resp.toJSON());
+    } catch (error: any) {
+      next(error);
+    }
+  },
 };

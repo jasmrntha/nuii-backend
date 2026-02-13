@@ -222,4 +222,12 @@ export const MaterialService = {
 
     return material;
   },
+
+  async getAllTipeMaterial() {
+    try {
+      return await TipeMaterial.getAllTipeMaterial();
+    } catch (error) {
+      throw error;
+    }
+  },
 };

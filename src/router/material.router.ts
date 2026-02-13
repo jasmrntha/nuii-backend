@@ -22,6 +22,7 @@ router.put(
 router.delete('/delete/:id', MaterialController.deleteMaterial);
 router.get('/list/tiang', MaterialController.getTiang);
 router.get('/list/konduktor', MaterialController.getKonduktor);
+router.get('/list/tipe', MaterialController.getAllTipeMaterial);
 router.get('/list', MaterialController.getAllMaterial);
 router.get('/survey', MaterialController.getSurveyMaterial);
 

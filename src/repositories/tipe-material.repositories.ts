@@ -12,4 +12,8 @@ export const TipeMaterial = {
       },
     });
   },
+
+  async getAllTipeMaterial() {
+    return await prisma.tipeMaterial.findMany();
+  },
 };
