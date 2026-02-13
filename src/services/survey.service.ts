@@ -47,8 +47,8 @@ export const SurveyService = {
 
   async updateSurveyHeader(payload: UpdateSurveyHeaderRequest) {
     try {
-      const { idHeader, header } = payload;
-      const updatedHeader = await SurveyHeader.updateHeader(idHeader, header);
+      const { id_header, header } = payload;
+      const updatedHeader = await SurveyHeader.updateHeader(id_header, header);
 
       return updatedHeader;
     } catch (error) {

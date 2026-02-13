@@ -44,12 +44,16 @@ export const SurveyHeader = {
   ) {
     const client = tx || prisma;
 
+    // Destructure id_material_konduktor to exclude it from the update data
+    // eslint-disable-next-line @typescript-eslint/naming-convention, @typescript-eslint/no-unused-vars
+    const { id_material_konduktor, ...updateData } = data;
+
     return await client.surveyHeader.update({
       where: {
         id,
       },
       data: {
-        ...data,
+        ...updateData,
       },
     });
   },
@@ -70,7 +74,11 @@ export const SurveyHeader = {
     });
   },
 
-  async getDeep(id: number, status?: SurveyStatus, include: boolean = false) {
+  async getDeep(
+    id: number,
+    status?: SurveyStatus | null,
+    include: boolean = false,
+  ) {
     return await prisma.surveyHeader.findUnique({
       where: {
         id,

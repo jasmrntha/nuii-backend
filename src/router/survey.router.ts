@@ -3,7 +3,7 @@
 /* eslint-disable import/no-default-export */
 import express from 'express';
 
-import { SurveyController } from '../controllers';
+import { ExcelController, SurveyController } from '../controllers';
 import { validate } from '../middleware';
 import {
   CreateSurveyHeaderSchema,
@@ -23,6 +23,16 @@ router.post(
 );
 router.get('/', SurveyController.getAllSurveys);
 router.get('/reports', SurveyController.getAllReports);
+// Route for Excel Export
+router.get('/export/excel/:id', ExcelController.exportSurveyToExcel);
+
+// Placeholder for JSON Export (Detail View) - preventing fallthrough to /:id
+router.get('/export/:id', (req, res) => {
+  res.status(501).json({
+    message: 'JSON Report Detail view not implemented for new schema',
+  });
+});
+
 router.get('/:id', SurveyController.getSurveyDetails);
 // router.post(
 //   '/create',
