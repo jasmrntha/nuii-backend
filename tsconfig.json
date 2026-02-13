@@ -10,6 +10,7 @@
     "sourceMap": true,
     "noEmit": false,
     "outDir": "./dist",
+    "rootDir": "./src",
     "baseUrl": "./src",
     "skipLibCheck": true,
     "strict": true,
