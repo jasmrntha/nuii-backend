@@ -35,7 +35,7 @@ export const SurveyHeader = {
       lokasi: string;
       user_id: string;
       status_survey: SurveyStatus;
-      id_material_konduktor: number;
+      id_material_konduktor?: number;
     },
     tx?: Omit<
       PrismaClient<Prisma.PrismaClientOptions, never, DefaultArgs>,

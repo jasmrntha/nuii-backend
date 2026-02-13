@@ -10,7 +10,7 @@ const SurveyHeaderSchema = Joi.object({
   status_survey: Joi.string()
     .valid(...Object.values(SurveyStatus))
     .required(),
-  id_material_konduktor: Joi.number().integer().positive().required(),
+  id_material_konduktor: Joi.number().integer().positive().optional(),
 });
 
 export const UpdateSurveyHeaderSchema = Joi.object({
