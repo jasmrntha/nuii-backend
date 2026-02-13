@@ -59,9 +59,10 @@ export const SurveyHeader = {
   },
 
   async getById(id: number, status?: SurveyStatus, include: boolean = false) {
-    return await prisma.surveyHeader.findUnique({
+    return await prisma.surveyHeader.findFirst({
       where: {
         id,
+        deleted_at: null,
         ...(status ? { status_survey: status } : {}),
       },
       include: {
@@ -79,9 +80,10 @@ export const SurveyHeader = {
     status?: SurveyStatus | null,
     include: boolean = false,
   ) {
-    return await prisma.surveyHeader.findUnique({
+    return await prisma.surveyHeader.findFirst({
       where: {
         id,
+        deleted_at: null,
         ...(status ? { status_survey: status } : {}),
       },
       include: {
@@ -137,6 +139,7 @@ export const SurveyHeader = {
   async getSurveyNameList() {
     return await prisma.surveyHeader.findMany({
       where: {
+        deleted_at: null,
         status_survey: SurveyStatus.Belum_Disetujui,
       },
       select: {
@@ -149,6 +152,7 @@ export const SurveyHeader = {
   async getAll(status?: SurveyStatus, include: boolean = false) {
     return await prisma.surveyHeader.findMany({
       where: {
+        deleted_at: null,
         ...(status ? { status_survey: status } : {}),
       },
       include: {
@@ -164,6 +168,7 @@ export const SurveyHeader = {
   async getAllReportWithExcel() {
     return await prisma.surveyHeader.findMany({
       where: {
+        deleted_at: null,
         status_survey: SurveyStatus.Disetujui,
       },
       include: {
@@ -217,8 +222,11 @@ export const SurveyHeader = {
   },
 
   async checkIfHeaderExist(id: number) {
-    return await prisma.surveyHeader.findUnique({
-      where: { id },
+    return await prisma.surveyHeader.findFirst({
+      where: {
+        id,
+        deleted_at: null,
+      },
     });
   },
 };
